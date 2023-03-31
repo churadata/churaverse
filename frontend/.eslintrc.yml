@@ -1,0 +1,26 @@
+env:
+  es2021: true
+extends:
+  - plugin:react/recommended
+  - standard-with-typescript
+  - prettier
+ignorePatterns:
+  - vite.config.ts
+parserOptions:
+  ecmaVersion: latest
+  sourceType: module
+  project: './tsconfig.json'
+plugins:
+  - react
+  - filename-rules
+rules:
+  react/jsx-filename-extension: ['warn', extensions: [.jsx, .tsx]]
+  react/react-in-jsx-scope: 'off'
+  filename-rules/match: ['error', { .tsx: PascalCase, .ts: camelCase }]
+overrides:
+  - files: '*.d.ts'
+    rules:
+      filename-rules/match: ['error', 'kebab-case']
+settings:
+  react:
+    version: 'detect'

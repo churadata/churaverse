@@ -1,0 +1,30 @@
+# main TCP port for RoomService and RTC endpoint
+# for production setups, this port should be placed behind a load balancer with TLS
+port: 7880
+
+# WebRTC configuration
+rtc:
+    # when set, LiveKit enable WebRTC ICE over TCP when UDP isn't available
+    # this port *cannot* be behind load balancer or TLS, and must be exposed on the node
+    # WebRTC transports are encrypted and do not require additional encryption
+    # only 80/443 on public IP are allowed if less than 1024
+    tcp_port: 7881
+    # UDP ports to use for client traffic.
+    # this port range should be open for inbound traffic on the firewall
+    port_range_start: 50000
+    port_range_end: 60000
+    # when set to true, attempts to discover the host's public IP via STUN
+    # this is useful for cloud environments such as AWS & Google where hosts have an internal IP
+    # that maps to an external one
+    use_external_ip: false
+
+# API key / secret pairs.
+# Keys are used for JWT authentication, server APIs would require a keypair in order to generate access tokens
+# and make calls to the server
+keys:
+    your_api_key: <api_secret>
+
+# Logging config
+logging:
+    json: false
+    level: debug

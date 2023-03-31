@@ -1,0 +1,75 @@
+version: "3"
+
+services:
+  frontend:
+    image: node:18.14.0
+    container_name: frontend
+    tty: true
+    volumes:
+      - ./frontend:/usr/src/app/frontend
+    ports:
+      - 3000:3000
+    working_dir: /usr/src/app/frontend
+    init: true
+    command: bash -c "npm i && npm start"
+
+  backend:
+    image: node:18.14.0
+    container_name: backend
+    tty: true
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend:/usr/src/app/backend
+    ports:
+      - 12100:12100
+      - 9229:9229
+    working_dir: /usr/src/app/backend
+    env_file:
+      - ./backend/local.env
+    init: true
+    command: bash -c "npm i && npm run start:development"
+
+  backend_livekit:
+    image: node:18.14.0
+    container_name: backend_livekit
+    tty: true
+    ports:
+      - 12150:12150
+    env_file:
+      - ./backend_livekit/local.env
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend_livekit/:/usr/src/app/backend_livekit/
+    working_dir: /usr/src/app/backend_livekit/
+    init: true
+    command: bash -c "npm i && npm start"
+
+  livekit:
+    image: livekit/livekit-server:v1.2.3
+    container_name: livekit
+    ports:
+      - 7880:7880
+      - 7881:7881
+      - 7882:7882/udp
+    volumes:
+      - ./livekit/livekit.local.yaml:/etc/livekit.local.yaml
+    command: --config /etc/livekit.local.yaml --node-ip 127.0.0.1
+
+  nginx:
+    image: nginx:1.22.0
+    container_name: nginx
+    tty: true
+    ports:
+      - 8080:80
+      # - 8443:443
+    env_file:
+      - ./nginx/local.env
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/default.http.conf.template:/etc/nginx/templates/default.conf.template:ro
+      # https時
+      # - ./nginx/default.https.conf.template:/etc/nginx/templates/default.conf.template:ro
+      # - ./nginx/ssl/server.crt:/etc/nginx/ssl/server.crt:ro
+      # - ./nginx/ssl/server.key:/etc/nginx/ssl/server.key:ro

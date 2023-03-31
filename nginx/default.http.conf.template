@@ -1,0 +1,33 @@
+server {
+    listen      80;
+    listen      [::]:80;
+    server_name ${NGINX_HOST};
+
+    location / {
+        proxy_pass          http://${NGINX_PROXY_PASS_HOST}:3000/;
+        proxy_http_version  1.1;
+        proxy_set_header    Upgrade $http_upgrade;
+        proxy_set_header    Connection $connection_upgrade;
+        proxy_set_header    Host $host;
+    }
+
+    location /backend/ {
+        proxy_pass          http://${NGINX_PROXY_PASS_HOST}:12100/;
+        proxy_http_version  1.1;
+        proxy_set_header    Upgrade $http_upgrade;
+        proxy_set_header    Connection $connection_upgrade;
+        proxy_set_header    Host $host;
+    }
+
+    location /backend_livekit/ {
+        proxy_pass          http://${NGINX_PROXY_PASS_HOST}:12150/;
+    }
+
+    location /livekit/ {
+        proxy_pass          http://${NGINX_PROXY_PASS_HOST}:7880/;
+        proxy_http_version  1.1;
+        proxy_set_header    Upgrade $http_upgrade;
+        proxy_set_header    Connection $connection_upgrade;
+        proxy_set_header    Host $host;
+    }
+}

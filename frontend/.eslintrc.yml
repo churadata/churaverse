@@ -14,13 +14,34 @@ plugins:
   - react
   - filename-rules
 rules:
-  react/jsx-filename-extension: ['warn', extensions: [.jsx, .tsx]]
+  react/jsx-filename-extension: [
+    'warn',
+    extensions: [.jsx, .tsx]
+  ]
   react/react-in-jsx-scope: 'off'
-  filename-rules/match: ['error', { .tsx: PascalCase, .ts: camelCase }]
+  filename-rules/match: [
+    'error',
+    {
+      .tsx: PascalCase,
+      .ts: camelCase 
+    }
+  ]
+  "@typescript-eslint/naming-convention": [
+    'error',
+    {
+      "selector": ["method","function"],
+      "format": ["camelCase"]
+    }
+  ]
+  "@typescript-eslint/explicit-member-accessibility": 'warn'
 overrides:
   - files: '*.d.ts'
     rules:
       filename-rules/match: ['error', 'kebab-case']
+  # インタフェースは'IHogehoge.ts'なので例外
+  - files: 'I*.ts'
+    rules:
+      filename-rules/match: ['error', 'PascalCase']
 settings:
   react:
     version: 'detect'

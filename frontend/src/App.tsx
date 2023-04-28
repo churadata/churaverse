@@ -1,7 +1,7 @@
 import { CSSProperties, useEffect } from 'react'
 import 'phaser'
-import TitleScene from './game/scene/title'
-import MainScene from './game/scene/main'
+import { MainScene } from './game/scene/main'
+import { TitleScene } from './game/scene/title'
 import { Plugin as NineSlicePlugin } from 'phaser3-nineslice'
 import PropTypes from 'prop-types'
 
@@ -36,12 +36,11 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: 'arcade',
     arcade: {
-      debug: true,
+      debug: false,
       tileBias: 40,
     },
   },
   // ここで読み込むシーンを取得する
-  // 今回は軽いテストなので、MainSceneのみ
   scene: [TitleScene, MainScene],
 }
 
@@ -49,7 +48,7 @@ const config: Phaser.Types.Core.GameConfig = {
  * ゲームを描写するDivコンポーネント
  */
 const App: React.FC<{ className?: string }> = ({ className }) => {
-  // お手軽にCSSの設定（フルスクリーンで、Canvasを中央寄せにする）
+  // フルスクリーンで、Canvasを中央寄せにする
   const style: CSSProperties = {
     width: '100vw',
     height: '100vh',
@@ -70,9 +69,7 @@ const App: React.FC<{ className?: string }> = ({ className }) => {
   }, [])
 
   // canvasをAppendするdivコンポーネント
-  return (
-    <div id="game" className={className} style={style}></div>
-  )
+  return <div id="game" className={className} style={style}></div>
 }
 
 export default App

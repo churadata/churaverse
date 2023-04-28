@@ -7,6 +7,7 @@
     "build": "npm run versionUpdate tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src",
+    "lint:fix": "eslint --fix src",
     "format": "prettier --write src",
     "versionUpdate": "VITE_DEPLOY_VERSION=$(date +%s):$(cat deploy_version.txt) VITE_FRONT_VERSION=$npm_package_version"
   },
@@ -32,6 +33,7 @@
     "eslint-plugin-react": "^7.31.10",
     "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^2.7.1",
+    "tiled-types": "^1.3.0",
     "typescript": "^4.6.3",
     "vite": "^4.0.1"
   },

@@ -16,17 +16,15 @@ const layerArray = [
   'Bomb',
   'PlayerName',
   'Damage',
+  'UIContainer',
   'WebRtcUI',
   'PlayerSettingForm',
   'ChatBoard',
-  'batch',
+  'badge',
 ] as const
 type LayerName = typeof layerArray[number]
 
-export function layerSetting(
-  settingElement: LayerbleElement,
-  layerName: LayerName
-): void {
+export function layerSetting(settingElement: LayerbleElement, layerName: LayerName): void {
   const layerOrder = layerArray.indexOf(layerName)
   settingElement.depth = layerOrder
 }

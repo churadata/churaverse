@@ -1,10 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 
 export const InputForm = (): JSX.Element => {
-
   const navigate = useNavigate()
   const onClick = (): void => navigate('/', { replace: true })
-  console.log(navigate)
 
   return (
     <div>

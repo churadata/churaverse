@@ -1,6 +1,6 @@
 import { TextChat } from '../model/textChat'
 
 export interface IChatBoardRender {
-  add: (textChat: TextChat) => void
+  add: (textChat: TextChat, textColor?: string) => void
   redraw: (allChat: TextChat[]) => void
 }

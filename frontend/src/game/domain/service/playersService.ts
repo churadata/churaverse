@@ -1,7 +1,7 @@
-import { Direction } from '../direction'
+import { Direction } from '../model/core/direction'
 import { PlayerColorName } from '../model/types'
 import { Player } from '../model/player'
-import { Position } from '../position'
+import { Position } from '../model/core/position'
 
 /**
  * Playerのインスタンスを格納する場所
@@ -30,6 +30,10 @@ export class PlayersService {
 
   public getPlayer(id: string): Player | undefined {
     return this.players.get(id)
+  }
+
+  public forEach(callback: (player: Player, id: string) => void): void {
+    this.players.forEach(callback)
   }
 
   public getDirection(id: string): Direction | undefined {

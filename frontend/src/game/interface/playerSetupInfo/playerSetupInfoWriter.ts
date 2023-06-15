@@ -1,7 +1,7 @@
 import { PlayerColorName } from '../../domain/model/types'
 import { IPersistStore } from '../../interactor/IPersistStore'
-import { IPlayerSetupInfoWriter } from '../../interactor/IPlayerSetupInfoWriter'
-import { PLAYER_SETUP_PROPERTY } from './playerSetupProperty'
+import { IPlayerSetupInfoWriter } from '../../interactor/playerSetupInfo/IPlayerSetupInfoWriter'
+import { PLAYER_SETUP_PROPERTY } from '../../interactor/playerSetupInfo/playerSetupInfo'
 // クッキーにプレイヤー情報を保存するクラス
 export class PlayerSetupInfoWriter implements IPlayerSetupInfoWriter {
   public constructor(private readonly CookieRepository: IPersistStore) {}

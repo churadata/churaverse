@@ -1,6 +1,8 @@
 env:
   es2021: true
 extends:
+  - plugin:import/recommended
+  - plugin:import/typescript
   - plugin:react/recommended
   - standard-with-typescript
   - prettier
@@ -14,26 +16,30 @@ plugins:
   - react
   - filename-rules
 rules:
-  react/jsx-filename-extension: [
-    'warn',
-    extensions: [.jsx, .tsx]
-  ]
+  react/jsx-filename-extension: ['warn', extensions: [.jsx, .tsx]]
   react/react-in-jsx-scope: 'off'
-  filename-rules/match: [
-    'error',
-    {
-      .tsx: PascalCase,
-      .ts: camelCase 
-    }
-  ]
-  "@typescript-eslint/naming-convention": [
-    'error',
-    {
-      "selector": ["method","function"],
-      "format": ["camelCase"]
-    }
-  ]
-  "@typescript-eslint/explicit-member-accessibility": 'warn'
+  import/no-restricted-paths:
+    - error
+    - zones:
+        - from:
+            - './src/game/interactor'
+            - './src/game/adapter'
+            - './src/game/interface'
+            - './src/game/ui'
+          target: './src/game/domain'
+        - from:
+            - './src/game/adapter'
+            - './src/game/interface'
+            - './src/game/ui'
+          target: './src/game/interactor'
+        - from:
+            - './src/game/interface'
+            - './src/game/ui'
+          target: './src/game/adapter'
+          except: ['./socket/eventTypes.ts', './socket/actionTypes.ts'] # 通信用の型は制限しない
+  filename-rules/match: ['error', { .tsx: PascalCase, .ts: camelCase }]
+  '@typescript-eslint/naming-convention': ['error', { 'selector': ['method', 'function'], 'format': ['camelCase'] }]
+  '@typescript-eslint/explicit-member-accessibility': 'warn'
 overrides:
   - files: '*.d.ts'
     rules:
@@ -45,3 +51,4 @@ overrides:
 settings:
   react:
     version: 'detect'
+    'import/resolver': { typescript: {} }

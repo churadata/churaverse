@@ -16,6 +16,12 @@ import { movePlayers } from '../domain/service/playerService'
 import { moveSharks, removeDieShark } from '../domain/service/sharkService'
 import { IMapManager } from './IMapManager'
 import { ISocketEmitter } from './IEmitter/ISocketEmitter'
+import { DamageCause } from '../domain/model/deathLog'
+import { IMegaphoneUserRepository } from '../domain/IRepository/IMegaphoneUserRepository'
+
+// acknowledgements対応のためimportを許可
+// eslint-disable-next-line import/no-restricted-paths
+import { PreloadedDataIngredients } from '../interface/socket/eventTypes'
 
 export class Interactor {
   public constructor(
@@ -23,6 +29,7 @@ export class Interactor {
     private readonly players: IPlayerRepository,
     private readonly sharks: ISharkRepository,
     private readonly bombs: IBombRepository,
+    private readonly megaphoneUsers: IMegaphoneUserRepository,
     private readonly emitter: ISocketEmitter
   ) {}
 
@@ -34,6 +41,7 @@ export class Interactor {
   public leavePlayer(id: string): void {
     if (this.players.get(id) !== undefined) {
       this.players.delete(id)
+      this.megaphoneUsers.delete(id)
       this.emitter.emitLeavePlayer(id)
     }
   }
@@ -70,7 +78,7 @@ export class Interactor {
     amount: number,
     attacker: string,
     target: string,
-    cause: string,
+    cause: DamageCause,
     damage: number
   ): void {
     const player = this.players.get(target)
@@ -120,18 +128,30 @@ export class Interactor {
     this.bombs.set(bombId, bomb)
   }
 
+  public toggleMegaphone(id: string, activate: boolean): void {
+    if (activate) {
+      this.megaphoneUsers.add(id)
+    } else {
+      this.megaphoneUsers.delete(id)
+    }
+  }
+
   /**
    * PreloadedDataの作成に必要な情報を返す
    */
-  public getPreloadedDataIngredients(): IPlayerRepository {
-    return this.players
+  public getPreloadedDataIngredients(): PreloadedDataIngredients {
+    const ingredients = {
+      players: this.players,
+      megaphoneUsers: this.megaphoneUsers,
+    }
+    return ingredients
   }
 
   /**
    * CheckConnectで送信するデータの作成に必要な情報を返す
    */
-  public getCheckConnectIngredients(): IPlayerRepository {
-    return this.players
+  public getCheckConnectIngredients(): string[] {
+    return this.players.getAllId()
   }
 
   /**

@@ -9,5 +9,5 @@ Group=ec2-user
 Type=oneshot
 
 WorkingDirectory=/home/ec2-user/churaverse
-ExecStart=/usr/local/bin/docker-compose -f docker-compose-develop.yml run --rm certbot renew 
-ExecStartPost=/usr/local/bin/docker-compose -f docker-compose-develop.yml exec nginx nginx -s reload 
+ExecStart=/usr/local/bin/docker-compose -f docker-compose-prod.yml run --rm certbot renew
+ExecStartPost=/usr/local/bin/docker-compose -f docker-compose-prod.yml exec nginx nginx -s reload

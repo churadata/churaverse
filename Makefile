@@ -1,17 +1,13 @@
-# サーバー上でのバージョン書き換え付き起動方法
-start:
+local_start:
 	sh deploy_version_rewrite.sh
 	docker-compose up -d
 
-stop:
+local_stop:
 	docker-compose down
 
-# サーバー上での自動リスタート付き起動方法
-# 7ではなく6なのはcertbotは落ちていても問題ないからです
-develop_start:
+prod_start:
 	sh deploy_version_rewrite.sh
-	sh restart.sh 6 &
+	/usr/local/bin/docker-compose -f docker-compose-prod.yml up > ./logs/`date +%Y-%m-%d-%H:%M`.log &
 
-develop_stop:
-	docker-compose -f docker-compose-develop.yml down
-	sh stop_restart.sh
+prod_stop:
+	/usr/local/bin/docker-compose -f docker-compose-prod.yml down

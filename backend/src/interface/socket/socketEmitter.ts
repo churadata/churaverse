@@ -11,6 +11,7 @@ import {
 } from './action/actionTypes'
 import { SocketEmitEventType, PlayerInfo } from './eventTypes'
 import { Socket } from './socket'
+import { DamageCause } from '../../domain/model/deathLog'
 
 export class SocketEmitter implements ISocketEmitter {
   public constructor(private readonly socket: Socket) {}
@@ -53,7 +54,7 @@ export class SocketEmitter implements ISocketEmitter {
   public emitDamage(
     attacker: string,
     target: string,
-    cause: string,
+    cause: DamageCause,
     damage: number
   ): void {
     const info: PlayerDamageInfo = {

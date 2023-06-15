@@ -1,5 +1,5 @@
 import { GRID_SIZE } from '../domain/worldConfig'
-import { Direction } from '../domain/direction'
+import { Direction } from '../domain/model/core/direction'
 import { IBadge } from '../domain/IRender/IBadge'
 import { IBombRender } from '../domain/IRender/IBombRender'
 import { IChatBoardRender } from '../domain/IRender/IChatBoardRender'
@@ -14,12 +14,12 @@ import { GRID_WALK_DURATION_MS, Player } from '../domain/model/player'
 import { Shark, SHARK_SPEED, SHARK_WALK_LIMIT_GRIDS } from '../domain/model/shark'
 import { TextChat } from '../domain/model/textChat'
 import { PlayerColorName } from '../domain/model/types'
-import { Position } from '../domain/position'
+import { Position } from '../domain/model/core/position'
 import { BombService } from '../domain/service/bombService'
 import { PlayersService } from '../domain/service/playersService'
 import { SharkService } from '../domain/service/sharkService'
 import { TextChatService } from '../domain/service/textChatService'
-import { IPlayerSetupInfoWriter } from './IPlayerSetupInfoWriter'
+import { IPlayerSetupInfoWriter } from './playerSetupInfo/IPlayerSetupInfoWriter'
 import { ISocketEmitter } from './ISocketEmitter'
 import { ITextFieldObserver } from './ITextFieldObserver'
 import { ILocalDevice } from './ILocalDeviceManager/ILocalDevice'
@@ -29,6 +29,15 @@ import { Speaker } from '../domain/model/localDevice/speaker'
 import { IMicSelector } from './ILocalDeviceSelector/IMicSelector'
 import { ISpeakerSelector } from './ILocalDeviceSelector/ISpeakerSelector'
 import { ICameraSelector } from './ILocalDeviceSelector/ICameraSelector'
+import { IVoiceChatSender } from './voiceChat/IVoiceChatSender'
+import { ISharedScreenRender } from '../domain/IRender/ISharedScreenRender'
+import { IScreenShareSender } from './screenShare/IScreenShareSender'
+import { IScreenShareButton } from './screenShare/IScreenShareButton'
+import { IFocusableRender } from '../domain/IRender/IFocusableRender'
+import { IVoiceChatVolumeController } from './voiceChat/IVoiceChatVolumeController'
+import { DeathLog } from '../domain/model/deathLog'
+import { DamageCause, IDeathLogRender } from '../domain/IRender/IDeathLogRender'
+import { DeathLogService } from '../domain/service/deathLogService'
 
 /**
  * Interactor
@@ -55,20 +64,26 @@ export class Interactor {
     private readonly micSelector: IMicSelector,
     private readonly speakerSelector: ISpeakerSelector,
     private readonly cameraSelector: ICameraSelector,
+    private readonly voiceChatSender: IVoiceChatSender,
+    private readonly voiceChatVolumeController: IVoiceChatVolumeController,
+    private readonly screenShareSender: IScreenShareSender,
+    private readonly screenShareButton: IScreenShareButton,
     private readonly playerSetupInfoWriter: IPlayerSetupInfoWriter,
+    private readonly deathLogRender: IDeathLogRender,
     player: Player,
     playerRender: IPlayerRender
   ) {
     // Playerに焦点を当てる
     playerRender.focus()
+    this.focusedRender = playerRender
     this.players.join(this.ownPlayerId, player)
     this.playerRenders.set(this.ownPlayerId, playerRender)
 
     // serverにjoinの通知
     emitter.join(player, this.ownPlayerId)
     // serverに既存プレイヤーの要求
-    void emitter.requestPreloadedData().then((list) => {
-      list.forEach(([id, player, playerRender]) => {
+    void emitter.requestPreloadedData().then((data) => {
+      data.existPlayers.forEach(([id, player, playerRender]) => {
         if (this.ownPlayerId === id) {
           // 自分のspriteだった場合だけ,
           // 捨てる
@@ -78,7 +93,13 @@ export class Interactor {
           this.playerRenders.set(id, playerRender)
         }
       })
+
+      data.megaphoneUsers.forEach((id) => {
+        this.toggleMegaphone(id, true)
+      })
     })
+
+    this.startVoiceChatVolumeControl(300)
   }
 
   public players = new PlayersService()
@@ -87,11 +108,15 @@ export class Interactor {
   public sharkRenders = new Map<string, ISharkRender>()
   public bombs = new BombService()
   public bombRenders = new Map<string, IBombRender>()
+  public sharedScreenRenders = new Map<string, ISharedScreenRender>()
 
   public textChat = new TextChatService()
+  public deathLog = new DeathLogService()
+  private focusedRender: IFocusableRender | undefined
   public joinPlayer(id: string, player: Player, render: IPlayerRender): void {
     this.players.join(id, player)
     this.playerRenders.set(id, render)
+    this.players.changePlayerName(id, player.name ?? 'name')
   }
 
   public leavePlayer(id: string): void {
@@ -192,9 +217,18 @@ export class Interactor {
     this.playerRenders.get(id)?.stop()
   }
 
-  public damagePlayer(id: string, amount: number): void {
-    this.players.damage(id, amount)
-    this.playerRenders.get(id)?.damage(amount)
+  public damagePlayer(targetId: string, attackerId: string, cause: DamageCause, amount: number): void {
+    this.players.damage(targetId, amount)
+    this.playerRenders.get(targetId)?.damage(amount)
+    if (this.isPlayerDead(targetId)) {
+      this.diePlayer(targetId)
+      const killer = this.players.getPlayer(attackerId)
+      const victim = this.players.getPlayer(targetId)
+      if (killer === undefined || victim === undefined || cause === undefined) {
+        return
+      }
+      this.addDeathLog(victim, killer, cause)
+    }
   }
 
   public changePlayerName(id: string, name: string): void {
@@ -325,10 +359,10 @@ export class Interactor {
     }, bomb.timeLimit)
   }
 
-  public addTextChat(name: string, message: string): void {
+  public addTextChat(name: string, message: string, textColor?: string): void {
     const textChat = new TextChat(name, message)
     this.textChat.addChat(textChat)
-    this.chatBoardRender.add(textChat)
+    this.chatBoardRender.add(textChat, textColor)
     if (!this.chatDialog.isOpen) {
       this.chatBadge.activate()
     }
@@ -379,29 +413,159 @@ export class Interactor {
    * 接続するマイクを変更する
    */
   public switchMicrophone(mic: Microphone): void {
-    this.localDevice.microphoneManager.switchMicrophone(mic)
+    this.localDevice.microphoneManager.switchDevice(mic)
   }
 
   /**
    * 接続するカメラを変更する
    */
   public switchCamera(camera: Camera): void {
-    this.localDevice.cameraManager.switchCamera(camera)
+    this.localDevice.cameraManager.switchDevice(camera)
   }
 
   /**
    * 接続するスピーカーを変更する
    */
   public switchSpeaker(speaker: Speaker): void {
-    this.localDevice.speakerManager.switchSpeaker(speaker)
+    this.localDevice.speakerManager.switchDevice(speaker)
   }
 
   /**
    * 接続機器に変更があった場合に実行する処理
    */
   public async deviceChange(): Promise<void> {
-    this.micSelector.updateLocalMicrophones(await this.localDevice.microphoneManager.getMicrophones())
-    this.speakerSelector.updateLocalSpeakers(await this.localDevice.speakerManager.getSpeakers())
-    this.cameraSelector.updateLocalCameras(await this.localDevice.cameraManager.getCameras())
+    this.micSelector.updateLocalMicrophones(await this.localDevice.microphoneManager.getDevices())
+    this.speakerSelector.updateLocalSpeakers(await this.localDevice.speakerManager.getDevices())
+    this.cameraSelector.updateLocalCameras(await this.localDevice.cameraManager.getDevices())
+  }
+
+  /**
+   * プレイヤーがボイスチャットを開始した時に実行される
+   *
+   * @param playerId ボイスチャットを開始したプレイヤーのid
+   * @param voice ボイスチャットの音声データ
+   */
+  public joinVoiceChat(playerId: string, voice: HTMLMediaElement): void {
+    this.voiceChatVolumeController.addVoice(playerId, voice)
+  }
+
+  /**
+   * プレイヤーがボイスチャットを終了した時に実行される
+   * @param playerId ボイスチャットを終了したプレイヤーのid
+   */
+  public leaveVoiceChat(playerId: string): void {
+    this.voiceChatVolumeController.deleteVoice(playerId)
+  }
+
+  /**
+   * 自プレイヤーのボイスチャットを開始する
+   */
+  public async startVoiceStream(): Promise<boolean> {
+    return await this.voiceChatSender.startStream()
+  }
+
+  /**
+   * 自プレイヤーのボイスチャットを終了する
+   */
+  public async stopVoiceStream(): Promise<boolean> {
+    return await this.voiceChatSender.stopStream()
+  }
+
+  /**
+   * ボイスチャットの音量を距離に応じて調整する
+   * @param updateIntervalMs 音量を更新する間隔(ms)
+   */
+  private startVoiceChatVolumeControl(updateIntervalMs: number): void {
+    const ownPlayer = this.players.getPlayer(this.ownPlayerId)
+    if (ownPlayer === undefined) return
+
+    setInterval(() => {
+      this.voiceChatVolumeController.updateAccordingToDistance(this.ownPlayerId, this.players)
+    }, updateIntervalMs)
+  }
+
+  /**
+   * メガホン機能のON/OFFを切り替える
+   * @param playerId メガホン機能をトグルするプレイヤー
+   * @param activate trueの時メガホン機能をON
+   */
+  public toggleMegaphone(playerId: string, activate: boolean): void {
+    // 自プレイヤーが切り替えた場合は他プレイヤーに通知するだけ
+    if (playerId === this.ownPlayerId) {
+      this.emitter.toggleMegaphone(activate)
+      return
+    }
+
+    if (activate) {
+      this.voiceChatVolumeController.activateMegaphone(playerId)
+    } else {
+      this.voiceChatVolumeController.deactivateMegaphone(playerId)
+    }
+  }
+
+  /**
+   * プレイヤーが画面共有を開始した時に実行される
+   *
+   * @param playerId 画面共有を開始したプレイヤーのid
+   * @param video 共有されている画面映像
+   */
+  public joinScreenShare(playerId: string, sharedScreenRender: ISharedScreenRender): void {
+    this.sharedScreenRenders.set(playerId, sharedScreenRender)
+  }
+
+  /**
+   * プレイヤーが画面共有を終了した時に実行される
+   * @param playerId 画面共有を終了したプレイヤーのid
+   */
+  public leaveScreenShare(playerId: string): void {
+    this.sharedScreenRenders.get(playerId)?.destroy()
+    this.sharedScreenRenders.delete(playerId)
+    this.screenShareButton.deactivateButton()
+  }
+
+  /**
+   * 自プレイヤーの画面共有を開始する
+   */
+  public async startScreenShare(): Promise<boolean> {
+    if (this.sharedScreenRenders.size > 0) {
+      alert('他のユーザーが共有中です。')
+      return false
+    }
+    return await this.screenShareSender.startStream()
+  }
+
+  /**
+   * 自プレイヤーの画面共有を終了する
+   */
+  public async stopScreenShare(): Promise<boolean> {
+    return await this.screenShareSender.stopStream()
+  }
+
+  /**
+   * プレイヤー画面にフォーカスするか共有画面にフォーカスするかを切り替える
+   */
+  public toggleScreenFocus(): void {
+    if (this.focusedRender !== this.playerRenders.get(this.ownPlayerId)) {
+      this.playerRenders.get(this.ownPlayerId)?.focus()
+      this.focusedRender = this.playerRenders.get(this.ownPlayerId)
+    } else {
+      this.sharedScreenRenders.get(this.sharedScreenRenders.keys().next().value)?.focus()
+      this.focusedRender = this.sharedScreenRenders.keys().next().value
+    }
+  }
+
+  /**
+   * プレイヤーが死亡した時に実行される
+   */
+  public addDeathLog(victim: Player, killer: Player, cause: DamageCause): void {
+    const deathLog: DeathLog = {
+      victim,
+      killer,
+      cause,
+      diedTime: new Date(),
+    } as const
+
+    this.deathLogRender.add(deathLog)
+    this.deathLog.addDeathLog(deathLog)
   }
 }

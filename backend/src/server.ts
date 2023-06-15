@@ -10,6 +10,7 @@ import { SharkRepository } from './adapter/repository/sharkRepository'
 import { MapManager } from './interface/map/mapManager'
 import { BombRepository } from './adapter/repository/bombRepository'
 import { error } from './interface/errorHandler'
+import { MegaphoneUserRepository } from './adapter/repository/megaphoneUserRepository'
 
 const app = express()
 const server: http.Server = http.createServer(app)
@@ -31,6 +32,7 @@ void MapManager.build('Map.json')
       new PlayerRepository(mapManager.currentMap),
       new SharkRepository(mapManager.currentMap),
       new BombRepository(mapManager.currentMap),
+      new MegaphoneUserRepository(),
       new SocketEmitter(socket)
     )
 

@@ -10,6 +10,7 @@ import {
   TurnInfo,
   WalkInfo,
   StopInfo,
+  MegaphoneInfo,
 } from './actionTypes'
 
 /**
@@ -28,6 +29,7 @@ export class ActionExecuter {
     shark: (data: SharkInfo & ReceiveBaseInfo) => {},
     bomb: (data: BombInfo & ReceiveBaseInfo) => {},
     chat: (data: ChatInfo & ReceiveBaseInfo) => {},
+    megaphone: (data: MegaphoneInfo & ReceiveBaseInfo) => {},
   }
 
   /**

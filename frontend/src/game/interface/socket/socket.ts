@@ -3,11 +3,12 @@ import { EventNames } from 'socket.io/dist/typed-events'
 import { ActionHelper } from './actionHelper'
 import { ActionEmitTypeTable, ActionTypeTable, SocketEmitActionType, SocketListenActionType } from './actionTypes'
 import { SocketClientListenEventRecords, SocketClientEmitEventRecords, SocketListenEventType } from './eventTypes'
+import { ISocket } from '../../adapter/controller/socket/ISocket'
 
 /**
  * Serverとの通信用クラス
  */
-export class Socket {
+export class Socket implements ISocket {
   // 最後にemitしたepoch time
   private lastEmitTime = Date.now()
 

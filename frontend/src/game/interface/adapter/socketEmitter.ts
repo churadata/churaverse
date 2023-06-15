@@ -1,15 +1,16 @@
 /* eslint-disable object-shorthand */
 import { Scene, Tilemaps } from 'phaser'
-import { Direction } from '../../domain/direction'
+import { Direction } from '../../domain/model/core/direction'
 import { IPlayerRender } from '../../domain/IRender/IPlayerRender'
 import { Player } from '../../domain/model/player'
 import { PlayerColorName } from '../../domain/model/types'
-import { Position } from '../../domain/position'
-import { ISocketEmitter } from '../../interactor/ISocketEmitter'
-import { PlayerRender } from '../../ui/Render/playerRender'
+import { Position } from '../../domain/model/core/position'
+import { ISocketEmitter, ProcessedPreloadedData } from '../../interactor/ISocketEmitter'
+import { PlayerRender } from '../ui/Render/entity/playerRender'
 import {
   BombInfo,
   ChatInfo,
+  MegaphoneInfo,
   ProfileInfo,
   SharkInfo,
   SocketEmitActionType,
@@ -35,7 +36,7 @@ export class SocketEmitter implements ISocketEmitter {
       x: player.position.x,
       y: player.position.y,
       direction: player.direction,
-      id,
+      playerId: id,
       heroColor: player.color,
       heroName: player.name,
     }
@@ -43,7 +44,7 @@ export class SocketEmitter implements ISocketEmitter {
     this.socket.emitEvent(SocketEmitEventType.EnterPlayer, info)
   }
 
-  public async requestPreloadedData(): Promise<Array<[string, Player, IPlayerRender]>> {
+  public async requestPreloadedData(): Promise<ProcessedPreloadedData> {
     return await new Promise((resolve) => {
       this.socket.emitEvent(SocketEmitEventType.RequestPreloadedData, (data) => {
         resolve(
@@ -51,7 +52,7 @@ export class SocketEmitter implements ISocketEmitter {
             Object.entries(data.existPlayers).map(async ([id, playerInfo]) => {
               const pos = new Position(playerInfo.x, playerInfo.y)
               const direction = playerInfo.direction
-              const render = await PlayerRender.build(
+              const render: IPlayerRender = await PlayerRender.build(
                 this.scene,
                 this.layer,
                 pos,
@@ -61,9 +62,19 @@ export class SocketEmitter implements ISocketEmitter {
               )
 
               // tupleで返すため,asで強制的に型を決める
-              return [id, new Player(pos, direction), render] as [string, Player, IPlayerRender]
+              return [id, new Player(pos, direction, playerInfo.heroName, playerInfo.heroColor), render] as [
+                string,
+                Player,
+                IPlayerRender
+              ]
             })
-          )
+          ).then((players) => {
+            const processedPreloadedData: ProcessedPreloadedData = {
+              existPlayers: players,
+              megaphoneUsers: data.megaphoneUsers,
+            }
+            return processedPreloadedData
+          })
         )
       })
     })
@@ -79,7 +90,7 @@ export class SocketEmitter implements ISocketEmitter {
               const direction = playerInfo.direction
 
               // tupleで返すため,asで強制的に型を決める
-              return [id, new Player(pos, direction)] as [string, Player]
+              return [id, new Player(pos, direction, playerInfo.heroName, playerInfo.heroColor)] as [string, Player]
             })
           )
         )
@@ -158,6 +169,14 @@ export class SocketEmitter implements ISocketEmitter {
     }
 
     this.socket.emitAction(SocketEmitActionType.Chat, info)
+  }
+
+  public toggleMegaphone(activate: boolean): void {
+    const info: MegaphoneInfo = {
+      activate,
+    }
+
+    this.socket.emitAction(SocketEmitActionType.Megaphone, info)
   }
 
   public flushActions(): void {

@@ -5,11 +5,15 @@ import {
   PlayerInfo,
   PreloadedData,
 } from '../interface/socket/eventTypes'
+import { IMegaphoneUserRepository } from '../domain/IRepository/IMegaphoneUserRepository'
 
 /**
  * 入室直後のプレイヤーに送信するデータを作成する
  */
-export function makePreloadedData(players: IPlayerRepository): PreloadedData {
+export function makePreloadedData(
+  players: IPlayerRepository,
+  megaphoneUsers: IMegaphoneUserRepository
+): PreloadedData {
   // 引数で受け取ったplayersから送信用のデータを作成
   const existPlayers: ExistPlayersInfo = {}
   for (const id of players.getAllId()) {
@@ -21,6 +25,7 @@ export function makePreloadedData(players: IPlayerRepository): PreloadedData {
 
   const preloadedData: PreloadedData = {
     existPlayers,
+    megaphoneUsers: megaphoneUsers.getIds(),
   }
   return preloadedData
 }

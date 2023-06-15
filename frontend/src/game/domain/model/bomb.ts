@@ -1,7 +1,7 @@
 import { Player } from './player'
 import { Entity } from './entity'
-import { Direction } from '../direction'
-import { Position } from '../position'
+import { Direction } from './core/direction'
+import { Position } from './core/position'
 
 /**
  * Bombクラス

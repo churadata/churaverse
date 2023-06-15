@@ -1,8 +1,14 @@
-import { Direction } from '../domain/direction'
+import { Direction } from '../domain/model/core/direction'
 import { IPlayerRender } from '../domain/IRender/IPlayerRender'
 import { Player } from '../domain/model/player'
 import { PlayerColorName } from '../domain/model/types'
-import { Position } from '../domain/position'
+import { Position } from '../domain/model/core/position'
+
+type Id = string
+export interface ProcessedPreloadedData {
+  existPlayers: Array<[Id, Player, IPlayerRender]>
+  megaphoneUsers: Id[]
+}
 
 /**
  * interactorからemitするためのinterface
@@ -18,7 +24,7 @@ export interface ISocketEmitter {
    * 既存プレイヤーの情報を要求する
    * @returns 既存プレイヤーの一覧 stringはid
    */
-  requestPreloadedData: () => Promise<Array<[string, Player, IPlayerRender]>>
+  requestPreloadedData: () => Promise<ProcessedPreloadedData>
 
   /**
    * keepaliveのようなもの
@@ -73,6 +79,11 @@ export interface ISocketEmitter {
    * @param message 内容
    */
   chat: (name: string, message: string) => void
+
+  /**
+   * メガホン機能ON/OFFの切り替え
+   */
+  toggleMegaphone: (activate: boolean) => void
 
   /**
    * バッファの中身を送信する

@@ -1,11 +1,12 @@
-import { Direction } from '../direction'
+import { IFocusableRender } from './IFocusableRender'
+import { Direction } from '../model/core/direction'
 import { PlayerColorName } from '../model/types'
-import { Position } from '../position'
+import { Position } from '../model/core/position'
 
 /**
  * プレイヤー描画のためのインタフェース
  */
-export interface IPlayerRender {
+export interface IPlayerRender extends IFocusableRender {
   setSpriteId: (id: string) => void
   appear: () => void
   disappear: () => void

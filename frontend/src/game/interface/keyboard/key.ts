@@ -1,5 +1,5 @@
-import { IKey } from '../../controller/IKey'
-import { KeyCode, KeyDownCallback } from './types'
+import { IKey } from '../../adapter/controller/keyboard/IKey'
+import { KeyCode, KeyDownCallback } from '../../adapter/controller/keyboard/types'
 
 export class Key implements IKey {
   private readonly phaserKey: Phaser.Input.Keyboard.Key

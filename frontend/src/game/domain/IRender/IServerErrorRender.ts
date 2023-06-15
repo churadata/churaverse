@@ -1,5 +1,5 @@
 /**
- * サーバーで発生したエラーの表示
+ * reloadでやっていたことの代わり
  */
 export interface IServerErrorRender {
   /**

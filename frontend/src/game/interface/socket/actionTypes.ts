@@ -1,5 +1,6 @@
-import { Vector } from 'matter'
-import { Direction } from '../../domain/direction'
+import { Vector } from '../../domain/model/core/vector'
+import { Direction } from '../../domain/model/core/direction'
+import { DamageCause } from '../../domain/IRender/IDeathLogRender'
 import { PlayerColorName } from '../../domain/model/types'
 
 /**
@@ -13,6 +14,7 @@ export interface ActionTypeTable {
   shark: (data: SharkInfo & RecieveBaseInfo) => void
   bomb: (data: BombInfo & RecieveBaseInfo) => void
   chat: (data: ChatInfo & RecieveBaseInfo) => void
+  megaphone: (data: MegaphoneInfo & RecieveBaseInfo) => void
   ownPlayerDie: (data: PlayerDieInfo) => void
   otherPlayerDie: (data: PlayerDieInfo) => void
   damage: (data: PlayerDamageInfo) => void
@@ -32,6 +34,7 @@ export interface ActionEmitTypeTable {
   shark: (data: SharkInfo) => void
   bomb: (data: BombInfo) => void
   chat: (data: ChatInfo) => void
+  megaphone: (data: MegaphoneInfo) => void
 }
 
 /**
@@ -58,6 +61,7 @@ export const SocketNormalActionType = {
   Profile: 'profile',
   Shark: 'shark',
   Bomb: 'bomb',
+  Megaphone: 'megaphone',
 } as const
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketNormalActionType = typeof SocketNormalActionType[keyof typeof SocketNormalActionType]
@@ -129,6 +133,7 @@ export interface RecieveBaseInfo {
 
 /**
  * profile変更時に送信するための型
+ * TODO: heroの接頭辞を削る
  */
 export interface ProfileInfo {
   heroColor: PlayerColorName
@@ -166,7 +171,7 @@ export interface TurnInfo {
 export interface PlayerDamageInfo {
   attacker: string
   target: string
-  cause: string
+  cause: DamageCause
   damage: number
 }
 
@@ -216,4 +221,11 @@ export interface BombInfo {
 export interface ChatInfo {
   name: string
   message: string
+}
+
+/**
+ * ボイスチャットのメガホン機能のON/OFF時に送信するための型
+ */
+export interface MegaphoneInfo {
+  activate: boolean
 }

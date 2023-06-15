@@ -1,12 +1,12 @@
 import { Scene } from 'phaser'
-import { Direction } from '../domain/direction'
+import { Direction } from '../domain/model/core/direction'
 import { uniqueId } from '../domain/util/uniqueId'
 import { Interactor } from '../interactor/Interactor'
 import { KeyboardHelper } from '../interface/keyboard/keyboardHelper'
-import { BombRender } from '../ui/Render/bombRender'
-import { SharkRender } from '../ui/Render/sharkRender'
+import { BombRender } from '../interface/ui/Render/entity/bombRender'
+import { SharkRender } from '../interface/ui/Render/entity/sharkRender'
 import { Player } from '../domain/model/player'
-import { Position } from '../domain/position'
+import { Position } from '../domain/model/core/position'
 import { IKeyboardController } from '../domain/IRender/IKeyboardController'
 
 /**

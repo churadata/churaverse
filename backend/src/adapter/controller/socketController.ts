@@ -18,6 +18,7 @@ import {
   SocketListenActionType,
   StopInfo,
   ProfileInfo,
+  MegaphoneInfo,
 } from '../../interface/socket/action/actionTypes'
 
 import { makePreloadedData } from '../preloadedDataFactory'
@@ -74,21 +75,29 @@ export class SocketController {
       SocketListenActionType.Shark,
       this.spawnShark.bind(this)
     )
+
     this.socket.listenAction(
       SocketListenActionType.Bomb,
       this.dropBomb.bind(this)
+    )
+
+    this.socket.listenAction(
+      SocketListenActionType.Megaphone,
+      this.toggleMegaphone.bind(this)
     )
   }
 
   private replyPreloadData(callback: (data: PreloadedData) => void): void {
     const ingredients = this.interactor.getPreloadedDataIngredients()
-    const preloadedData = makePreloadedData(ingredients)
+    const preloadedData = makePreloadedData(
+      ingredients.players,
+      ingredients.megaphoneUsers
+    )
     callback(preloadedData)
   }
 
-  private replyCheckConnect(callback: (data: PreloadedData) => void): void {
-    const ingredients = this.interactor.getCheckConnectIngredients()
-    const replyData = makePreloadedData(ingredients)
+  private replyCheckConnect(callback: (data: string[]) => void): void {
+    const replyData = this.interactor.getCheckConnectIngredients()
     callback(replyData)
   }
 
@@ -145,6 +154,10 @@ export class SocketController {
 
     const bomb = new Bomb(data.id, position, data._emitTime)
     this.interactor.dropBomb(data.bombId, bomb)
+  }
+
+  private toggleMegaphone(data: MegaphoneInfo & ReceiveBaseInfo): void {
+    this.interactor.toggleMegaphone(data.id, data.activate)
   }
 
   /**

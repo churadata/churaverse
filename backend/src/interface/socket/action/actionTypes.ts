@@ -1,5 +1,6 @@
 import { Direction } from '../../../domain/core/direction'
 import { Vector } from '../../../domain/core/vector'
+import { DamageCause } from '../../../domain/model/deathLog'
 
 export interface ActionEmitTypeTable {
   turn: (data: TurnInfo & EmitBaseInfo) => void
@@ -9,6 +10,7 @@ export interface ActionEmitTypeTable {
   shark: (data: SharkInfo & EmitBaseInfo) => void
   bomb: (data: BombInfo & EmitBaseInfo) => void
   chat: (data: ChatInfo & EmitBaseInfo) => void
+  megaphone: (data: MegaphoneInfo & EmitBaseInfo) => void
   ownPlayerDie: (data: PlayerDieInfo) => void
   otherPlayerDie: (data: PlayerDieInfo) => void
   damage: (data: PlayerDamageInfo) => void
@@ -25,6 +27,7 @@ export interface ActionListenTypeTable {
   shark: (data: SharkInfo & ReceiveBaseInfo) => void
   bomb: (data: BombInfo & ReceiveBaseInfo) => void
   chat: (data: ChatInfo & ReceiveBaseInfo) => void
+  megaphone: (data: MegaphoneInfo & ReceiveBaseInfo) => void
 }
 
 /**
@@ -52,6 +55,7 @@ export const SocketNormalActionType = {
   Profile: 'profile',
   Shark: 'shark',
   Bomb: 'bomb',
+  Megaphone: 'megaphone',
 } as const
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketNormalActionType =
@@ -187,7 +191,7 @@ export interface TurnInfo {
 export interface PlayerDamageInfo {
   attacker: string
   target: string
-  cause: string
+  cause: DamageCause
   damage: number
 }
 
@@ -236,4 +240,11 @@ export interface BombInfo {
  */
 export interface ChatInfo {
   message: string
+}
+
+/**
+ * ボイスチャットのメガホン機能のON/OFF時に送信するための型
+ */
+export interface MegaphoneInfo {
+  activate: boolean
 }

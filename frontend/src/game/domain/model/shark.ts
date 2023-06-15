@@ -1,6 +1,6 @@
 import { GRID_SIZE } from '../worldConfig'
-import { Direction } from '../direction'
-import { Position } from '../position'
+import { Direction } from './core/direction'
+import { Position } from './core/position'
 import { Entity } from './entity'
 import { Player } from './player'
 

@@ -1,20 +1,19 @@
 import { Scene } from 'phaser'
-import { TitleToMainData } from '../interactor/SceneTransitionData/titleToMain'
+import { TitleToMainData } from '../interactor/sceneTransitionData/titleToMain'
 import { TitleInteractor } from '../interactor/titleInteractor'
-import { CookieStore } from '../interface/ repository/cookieStore'
+import { CookieStore } from '../interface/repository/cookieStore'
 import { PlayerSetupInfoReader } from '../interface/playerSetupInfo/playerSetupInfoReader'
 import { TransitionManager } from '../interface/transition/transitionManager'
-import { BackgroundRender } from '../ui/Render/component/backgroundRender'
-import { JoinButtonRender } from '../ui/Render/component/joinButtonRender'
-import { LocalDeviceRender } from '../ui/Render/component/localDeviceRender'
-import { VersionRender } from '../ui/Render/component/versionRender'
+import { BackgroundRender } from '../interface/ui/Render/title/backgroundRender'
+import { JoinButtonRender } from '../interface/ui/Render/title/joinButtonRender'
+import { LocalDeviceRender } from '../interface/ui/Render/title/localDeviceRender'
+import { VersionRender } from '../interface/ui/Render/title/versionRender'
 import { LocalDevice } from '../interface/localDeviceManager/localDevice'
 import { ILocalDevice } from '../interactor/ILocalDeviceManager/ILocalDevice'
-import { LocalMicrophoneManager } from '../interface/localDeviceManager/localMicrophoneManager'
-import { LocalCameraManager } from '../interface/localDeviceManager/localCameraManager'
-import { WebRtc } from '../interface/localDeviceManager/webRtc'
-import { LocalSpeakerManager } from '../interface/localDeviceManager/localSpeakerManager'
-import { TitleNameFieldRender } from '../ui/Render/component/titleNameFieldRender'
+import { TitleNameFieldRender } from '../interface/ui/Render/title/titleNameFieldRender'
+import { MdLocalMicrophoneManager } from '../interface/localDeviceManager/mediaDevicesAPI/mdLocalMicrophoneManager'
+import { MdLocalSpeakerManager } from '../interface/localDeviceManager/mediaDevicesAPI/mdLocalSpeakerManager'
+import { MdLocalCameraManager } from '../interface/localDeviceManager/mediaDevicesAPI/mdLocalCameraManager'
 
 /**
  * エントリーポイント
@@ -40,17 +39,15 @@ export class TitleScene extends Scene {
     void this.inject()
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   private async inject(): Promise<void> {
     const transitionManager = new TransitionManager<undefined, TitleToMainData>(this.scene)
     const cookieRepository = new CookieStore()
     const playerSetupInfoReader = new PlayerSetupInfoReader(cookieRepository)
 
-    const webRtc = new WebRtc()
     const localDevice: ILocalDevice = new LocalDevice(
-      await LocalMicrophoneManager.build(webRtc.room),
-      await LocalSpeakerManager.build(webRtc.room),
-      await LocalCameraManager.build(webRtc.room)
+      await MdLocalMicrophoneManager.build(),
+      await MdLocalSpeakerManager.build(),
+      await MdLocalCameraManager.build()
     )
 
     void BackgroundRender.build(this)

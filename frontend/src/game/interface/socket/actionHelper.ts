@@ -22,6 +22,7 @@ import {
   SocketEmitActionType,
   SocketListenActionType,
   EmitOnlyAction,
+  MegaphoneInfo,
 } from './actionTypes'
 import { Socket } from './socket'
 import { BufferType } from './types'
@@ -56,6 +57,7 @@ export class ActionHelper {
     [SocketEmitActionType.Shark, new SocketBuffer<SharkInfo & BaseInfo>(BufferType.Queue)],
     [SocketEmitActionType.Bomb, new SocketBuffer<BaseInfo & BaseInfo>(BufferType.Queue)],
     [SocketEmitActionType.Chat, new SocketBuffer<ChatInfo & BaseInfo>(BufferType.Queue)],
+    [SocketEmitActionType.Megaphone, new SocketBuffer<MegaphoneInfo & BaseInfo>(BufferType.LastOnly)],
   ])
 
   /**
@@ -174,6 +176,7 @@ export class ActionHelper {
     shark: (data: SharkInfo & RecieveBaseInfo) => {},
     bomb: (data: BombInfo & RecieveBaseInfo) => {},
     chat: (data: ChatInfo & RecieveBaseInfo) => {},
+    megaphone: (data: MegaphoneInfo & RecieveBaseInfo) => {},
     ownPlayerDie: (data: PlayerDieInfo) => {},
     otherPlayerDie: (data: PlayerDieInfo) => {},
     damage: (data: PlayerDamageInfo) => {},

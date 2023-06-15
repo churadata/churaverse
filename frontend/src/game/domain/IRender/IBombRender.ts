@@ -1,4 +1,4 @@
-import { Position } from '../position'
+import { Position } from '../model/core/position'
 
 /**
  * BombRenderの抽象

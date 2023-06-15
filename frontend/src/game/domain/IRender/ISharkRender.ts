@@ -1,5 +1,5 @@
-import { Direction } from '../direction'
-import { Position } from '../position'
+import { Direction } from '../model/core/direction'
+import { Position } from '../model/core/position'
 
 /**
  * SharkRenderの抽象

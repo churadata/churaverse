@@ -1,38 +1,52 @@
 import { Scene } from 'phaser'
-import { KeyboardController } from '../controller/keyboardController'
-import { SocketController } from '../controller/socketController'
+import { KeyboardController } from '../adapter/controller/keyboard/keyboardController'
+import { SocketController } from '../adapter/controller/socket/socketController'
 import { Interactor } from '../interactor/Interactor'
 import { SocketEmitter } from '../interface/adapter/socketEmitter'
 import { Socket } from '../interface/socket/socket'
-import { MapRender } from '../ui/Render/mapRender'
-import { PlayerRender } from '../ui/Render/playerRender'
+import { MapRender } from '../interface/ui/Render/mapRender'
+import { PlayerRender } from '../interface/ui/Render/entity/playerRender'
 import { KeyboardHelper } from '../interface/keyboard/keyboardHelper'
-import { TextFieldObserver } from '../textFieldObserver'
-import { DialogButtonsContainer } from '../ui/Render/dialogButtonsContainer'
-import { DialogSwitcher } from '../ui/Render/dialogSwitcher'
-import { SettingDialog } from '../ui/component/settingDialog'
-import { PlayerColorButtons } from '../ui/component/playerColorButtons'
-import { RenameForm } from '../ui/component/renameForm'
-import { SettingButton } from '../ui/component/settingButton'
-import { ChatButton } from '../ui/component/chatButton'
-import { TextChatBoard } from '../ui/component/textChatBoard'
-import { TextChatInput } from '../ui/component/textChatInput'
-import { TextChatDialog } from '../ui/component/textChatDialog'
-import { Badge } from '../ui/component/badge'
-import { WebRtcChat } from '../ui/webRtcChat'
+import { TextFieldObserver } from '../interface/ui/util/textFieldObserver'
+import { DialogButtonsContainer } from '../interface/ui/Render/dialogButtonsContainer'
+import { DialogSwitcher } from '../interface/ui/Render/dialogSwitcher'
+import { SettingDialog } from '../interface/ui/component/settingDialog/settingDialog'
+import { PlayerColorButtons } from '../interface/ui/component/settingDialog/playerColorButtons'
+import { RenameForm } from '../interface/ui/component/settingDialog/renameForm'
+import { SettingButton } from '../interface/ui/component/settingDialog/settingButton'
+import { ChatButton } from '../interface/ui/component/textChat/chatButton'
+import { TextChatBoard } from '../interface/ui/component/textChat/textChatBoard'
+import { TextChatInput } from '../interface/ui/component/textChat/textChatInput'
+import { TextChatDialog } from '../interface/ui/component/textChat/textChatDialog'
+import { Badge } from '../interface/ui/component/textChat/badge'
 import { LocalDevice } from '../interface/localDeviceManager/localDevice'
-import { LocalMicrophoneManager } from '../interface/localDeviceManager/localMicrophoneManager'
-import { LocalCameraManager } from '../interface/localDeviceManager/localCameraManager'
-import { MicSelector } from '../ui/component/micSelector'
-import { WebRtc } from '../interface/localDeviceManager/webRtc'
-import { CameraSelector } from '../ui/component/cameraSelector'
-import { LocalSpeakerManager } from '../interface/localDeviceManager/localSpeakerManager'
-import { SpeakerSelector } from '../ui/component/speakerSelector'
+import { LkLocalMicrophoneManager } from '../interface/localDeviceManager/liveKitAPI/lkLocalMicrophoneManager'
+import { LkLocalCameraManager } from '../interface/localDeviceManager/liveKitAPI/lkLocalCameraManager'
+import { MicSelector } from '../interface/ui/component/voiceChat/micSelector'
+import { WebRtc } from '../interface/localDeviceManager/liveKitAPI/webRtc'
+import { CameraSelector } from '../interface/ui/component/camera/cameraSelector'
+import { LkLocalSpeakerManager } from '../interface/localDeviceManager/liveKitAPI/lkLocalSpeakerManager'
+import { SpeakerSelector } from '../interface/ui/component/voiceChat/speakerSelector'
 import { PlayerSetupInfoWriter } from '../interface/playerSetupInfo/playerSetupInfoWriter'
-import { CookieStore } from '../interface/ repository/cookieStore'
+import { CookieStore } from '../interface/repository/cookieStore'
 import { IKeyboardController } from '../domain/IRender/IKeyboardController'
 import { TransitionManager } from '../interface/transition/transitionManager'
-import { TitleToMainData } from '../interactor/SceneTransitionData/titleToMain'
+import { TitleToMainData } from '../interactor/sceneTransitionData/titleToMain'
+import { VoiceChatReceiver } from '../interface/voiceChat/voiceChatReceiver'
+import { VoiceChatSender } from '../interface/voiceChat/voiceChatSender'
+import { MicButton } from '../interface/ui/component/voiceChat/micButton'
+import { WebRtcButtonContainer } from '../interface/ui/Render/webRtcButtonContainer'
+import { ScreenShareSender } from '../interface/screenShare/screenShareSender'
+import { ScreenShareButton } from '../interface/ui/component/screenShare/screenShareButton'
+import { ScreenShareReceiver } from '../interface/screenShare/screenShareReceiver'
+import { CameraButton } from '../interface/ui/component/camera/cameraButton'
+import { PlayerRenderFactory } from '../interface/ui/RenderFactory/playerRenderFactory'
+import { BombRenderFactory } from '../interface/ui/RenderFactory/bombRenderFactory'
+import { SharkRenderFactory } from '../interface/ui/RenderFactory/sharkRenderFactory'
+import { ServerErrorRenderFactory } from '../interface/ui/RenderFactory/serverErrorRenderFactory'
+import { DeathLogRender } from '../interface/ui/Render/entity/deathLogRender'
+import { VoiceChatVolumeController } from '../interface/voiceChat/voiceChatVolumeController'
+import { MegaphoneButton } from '../interface/ui/component/voiceChat/megaphoneButton'
 
 /**
  * エントリーポイント
@@ -84,38 +98,52 @@ export class MainScene extends Scene {
       player.color
     )
 
-    const webRtc = new WebRtc()
+    const webRtc = new WebRtc(socket.socketId)
     const localDevice = new LocalDevice(
-      await LocalMicrophoneManager.build(webRtc.room),
-      await LocalSpeakerManager.build(webRtc.room),
-      await LocalCameraManager.build(webRtc.room)
+      await LkLocalMicrophoneManager.build(webRtc.room),
+      await LkLocalSpeakerManager.build(webRtc.room),
+      await LkLocalCameraManager.build(webRtc.room)
     )
+    const voiceChatVolumeController = new VoiceChatVolumeController()
+    const voiceChatSender = new VoiceChatSender(webRtc.room)
+    const screenShareSender = new ScreenShareSender(this, webRtc.room)
 
     const texChatInput = await TextChatInput.build(this, socket.socketId, chatDialog, textFieldObserver)
     const textChatBoard = await TextChatBoard.build(this, socket.socketId, chatDialog)
-    const playerColorButtons = await PlayerColorButtons.build(this, socket.socketId, settingDialog)
+    const playerColorButtons = await PlayerColorButtons.build(this, socket.socketId, player.color, settingDialog)
     const renameForm = await RenameForm.build(this, socket.socketId, player.name, settingDialog, textFieldObserver)
     const micSelector = await MicSelector.build(
       this,
       localDevice.microphoneManager,
       settingDialog,
-      await localDevice.microphoneManager.getMicrophones()
+      await localDevice.microphoneManager.getDevices()
     )
     const speakerSelector = await SpeakerSelector.build(
       this,
       localDevice.speakerManager,
       settingDialog,
-      await localDevice.speakerManager.getSpeakers()
+      await localDevice.speakerManager.getDevices()
     )
     const cameraSelector = await CameraSelector.build(
       this,
       localDevice.cameraManager,
       settingDialog,
-      await localDevice.cameraManager.getCameras()
+      await localDevice.cameraManager.getDevices()
     )
+
+    const webRtcButtonContainer = new WebRtcButtonContainer(this)
+    const micButton = await MicButton.build(this, webRtcButtonContainer)
+    const megaphoneButton = await MegaphoneButton.build(this, socket.socketId, webRtcButtonContainer)
+    const cameraButton = await CameraButton.build(this, webRtcButtonContainer)
+    const screenShareButton = await ScreenShareButton.build(this, webRtcButtonContainer)
+    const deathLogRender = await DeathLogRender.build()
     void ChatButton.build(this, switcher, chatDialog, dialogButtonsContainer, chatBadge)
     void SettingButton.build(this, switcher, settingDialog, dialogButtonsContainer)
-    void WebRtcChat.build(this, webRtc.room)
+
+    const playerRenderFactory = new PlayerRenderFactory(this, map.groundLayer)
+    const bombRenderFactory = new BombRenderFactory(this)
+    const sharkRenderFactory = new SharkRenderFactory(this)
+    const serverErrorRenderFactory = new ServerErrorRenderFactory(this)
 
     const cookieRepository = new CookieStore()
     const playerSetupInfoWriter = new PlayerSetupInfoWriter(cookieRepository)
@@ -133,13 +161,36 @@ export class MainScene extends Scene {
       micSelector,
       speakerSelector,
       cameraSelector,
+      voiceChatSender,
+      voiceChatVolumeController,
+      screenShareSender,
+      screenShareButton,
       playerSetupInfoWriter,
+      deathLogRender,
       player,
       playerRender
     )
     const keyboardHelper = new KeyboardHelper(this)
-    this.keyboardController = new KeyboardController(interactor, this, socket.socketId, keyboardHelper)
-    this.socketController = new SocketController(interactor, socket, map.groundLayer, this)
+    this.keyboardController = new KeyboardController(
+      interactor,
+      socket.socketId,
+      keyboardHelper,
+      bombRenderFactory,
+      sharkRenderFactory
+    )
+    this.socketController = new SocketController(
+      interactor,
+      socket,
+      playerRenderFactory,
+      sharkRenderFactory,
+      bombRenderFactory,
+      serverErrorRenderFactory
+    )
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const voiceChatReceiver = new VoiceChatReceiver(interactor, webRtc.room)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const screenShareReceiver = new ScreenShareReceiver(this, interactor, webRtc.room)
 
     // interactorに渡す必要があるが, それ自身がinteractorを必要とするものはここでinteractorを渡す
     texChatInput.setInteractor(interactor)
@@ -150,6 +201,12 @@ export class MainScene extends Scene {
     micSelector.setInteractor(interactor)
     speakerSelector.setInteractor(interactor)
     cameraSelector.setInteractor(interactor)
+    micButton.setInteractor(interactor)
+    megaphoneButton.setInteractor(interactor)
+    cameraButton.setInteractor(interactor)
+    screenShareButton.setInteractor(interactor)
+    screenShareSender.setInteractor(interactor)
+    deathLogRender.setInteractor(interactor)
 
     this.willGameEnd(interactor)
   }

@@ -1,9 +1,10 @@
 import { Scene } from 'phaser'
 import { Key } from './key'
-import { KeyCode, KeyDownCallback } from './types'
-import { IKey } from '../../controller/IKey'
+import { KeyCode, KeyDownCallback } from '../../adapter/controller/keyboard/types'
+import { IKey } from '../../adapter/controller/keyboard/IKey'
+import { IKeyboardHelper } from '../../adapter/controller/keyboard/IKeyboardHelper'
 
-export class KeyboardHelper {
+export class KeyboardHelper implements IKeyboardHelper {
   private readonly keys = new Map<KeyCode, IKey>()
 
   public constructor(private readonly scene: Scene) {}

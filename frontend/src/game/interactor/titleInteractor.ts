@@ -1,10 +1,11 @@
 import { ITransitionManager } from './ITransitionManager'
-import { TitleToMainData } from './SceneTransitionData/titleToMain'
+import { TitleToMainData } from './sceneTransitionData/titleToMain'
 import { ITitleNameFieldRender } from '../domain/IRender/ITitlenamefieldRender'
 import { Player } from '../domain/model/player'
-import { Position } from '../domain/position'
-import { Direction } from '../domain/direction'
-import { IPlayerSetupInfoReader } from './IPlayerSetupInfoReader'
+import { Position } from '../domain/model/core/position'
+import { Direction } from '../domain/model/core/direction'
+import { IPlayerSetupInfoReader } from './playerSetupInfo/IPlayerSetupInfoReader'
+import { PLAYER_COLOR_NAMES } from '../domain/model/types'
 /**
  * TitleSceneのInteractor
  * イベント駆動の中心地
@@ -32,13 +33,8 @@ export class TitleInteractor {
   private createOwnPlayer(): Player {
     const pos = new Position(800, 440)
     const direction = Direction.down
-    const ownPlayer = new Player(pos, direction)
     const color = this.playerSetupInfoReader.read().color
-    if (color !== undefined) {
-      ownPlayer.setColor(color)
-    }
-    ownPlayer.setName(this.titleNamaFieldRender.getName())
-
+    const ownPlayer = new Player(pos, direction, this.titleNamaFieldRender.getName(), color ?? PLAYER_COLOR_NAMES[0])
     return ownPlayer
   }
 }

@@ -1,5 +1,5 @@
-import { Direction } from '../direction'
-import { Position } from '../position'
+import { Direction } from './core/direction'
+import { Position } from './core/position'
 
 /**
  * マップ上の動くもの基底クラス

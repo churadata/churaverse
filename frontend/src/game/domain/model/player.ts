@@ -1,7 +1,7 @@
-import { Direction } from '../direction'
-import { Position } from '../position'
+import { Direction } from './core/direction'
+import { Position } from './core/position'
 import { Entity } from './entity'
-import { PlayerColorName, PLAYER_COLOR_NAMES } from './types'
+import { PlayerColorName } from './types'
 
 /**
  * 1マス移動するのにかかる時間(ms)
@@ -12,13 +12,15 @@ export const GRID_WALK_DURATION_MS = 320
  * Playerクラス
  */
 export class Player extends Entity {
-  private _name = 'name'
-  private _color: PlayerColorName = PLAYER_COLOR_NAMES[0]
+  private _name: string
+  private _color: PlayerColorName
 
   private _isWalking = false
 
-  public constructor(position: Position, direction: Direction) {
+  public constructor(position: Position, direction: Direction, name: string, color: PlayerColorName) {
     super(position, direction, 100)
+    this._name = name
+    this._color = color
   }
 
   /**

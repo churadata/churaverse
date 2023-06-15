@@ -1,3 +1,5 @@
+import { IMegaphoneUserRepository } from '../../domain/IRepository/IMegaphoneUserRepository'
+import { IPlayerRepository } from '../../domain/IRepository/IPlayerRepository'
 import { Direction } from '../../domain/core/direction'
 import { EmitData, ReceiveData } from './action/actionTypes'
 
@@ -44,7 +46,7 @@ export interface SocketServerListenEventRecords {
   /**
    * 情報を同期するEvent
    */
-  checkConnect: (callback: (data: PreloadedData) => void) => void
+  checkConnect: (callback: (data: string[]) => void) => void
 
   /**
    * 情報をまとめてServerに送るEvent
@@ -138,11 +140,26 @@ export interface ExistPlayersInfo {
 }
 
 /**
+ * メガホン機能をONにしているプレイヤーの情報
+ */
+export type MegaphoneUsersInfo = string[]
+
+/**
+ * PreloadedDataを作るために必要なデータ
+ */
+export interface PreloadedDataIngredients {
+  players: IPlayerRepository
+  megaphoneUsers: IMegaphoneUserRepository
+}
+
+/**
  * Preloadedの段階で取得する情報
  */
 export interface PreloadedData {
   existPlayers: ExistPlayersInfo
+  megaphoneUsers: MegaphoneUsersInfo
 }
+
 /**
  * 入室する際に受け取るデータ
  */

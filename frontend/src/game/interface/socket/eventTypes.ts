@@ -1,4 +1,4 @@
-import { Direction } from '../../domain/direction'
+import { Direction } from '../../domain/model/core/direction'
 import { PlayerColorName } from '../../domain/model/types'
 import { EmitData, RecieveData } from './actionTypes'
 
@@ -21,7 +21,7 @@ export interface SocketClientEmitEventRecords {
   /**
    * 情報を同期するEvent
    */
-  checkConnect: (callback: (data: PreloadedData) => void) => void
+  checkConnect: (callback: (data: string[]) => void) => void
 
   /**
    * 情報をまとめてServerに送るEvent
@@ -95,7 +95,7 @@ export interface PlayerInfo {
   x: number
   y: number
   direction: Direction
-  id: string
+  playerId: string
   heroColor: PlayerColorName
   heroName: string
 }
@@ -108,10 +108,16 @@ interface ExistPlayersInfo {
 }
 
 /**
+ * メガホン機能をONにしているプレイヤーの情報
+ */
+export type MegaphoneUsersInfo = string[]
+
+/**
  * Preloadedの段階で取得する情報
  */
 interface PreloadedData {
   existPlayers: ExistPlayersInfo
+  megaphoneUsers: MegaphoneUsersInfo
 }
 /**
  * 入室する際に送るデータ

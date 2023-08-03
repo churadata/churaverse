@@ -89,4 +89,14 @@ export interface ISocketEmitter {
    * バッファの中身を送信する
    */
   flushActions: () => void
+
+  /**
+   * キックする際に送るデータ
+   */
+  requestKickPlayer: (kickedId: string, kickerId: string) => void
+
+  /**
+   * 退出する際に送るデータ
+   */
+  exitOwnPlayer: (playerId: string) => void
 }

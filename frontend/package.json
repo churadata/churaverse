@@ -39,7 +39,7 @@
     "vite": "^4.0.1"
   },
   "dependencies": {
-    "livekit-client": "^1.4.3",
+    "livekit-client": "^1.9.7",
     "phaser": "^3.55.2",
     "phaser3-nineslice": "^0.5.0",
     "react": "^18.0.0",

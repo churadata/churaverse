@@ -24,6 +24,8 @@ import { IMegaphoneUserRepository } from '../domain/IRepository/IMegaphoneUserRe
 import { PreloadedDataIngredients } from '../interface/socket/eventTypes'
 
 export class Interactor {
+  private readonly sessionId = Math.random().toString(36).slice(-8)
+
   public constructor(
     private readonly mapManager: IMapManager,
     private readonly players: IPlayerRepository,
@@ -36,6 +38,13 @@ export class Interactor {
   public joinPlayer(id: string, player: Player): void {
     this.players.set(id, player)
     this.emitter.emitNewPlayer(id, player)
+
+    console.log(
+      this.sessionId,
+      player.name,
+      '現在接続数:',
+      this.players.getAllId().length
+    )
   }
 
   public leavePlayer(id: string): void {
@@ -58,6 +67,11 @@ export class Interactor {
   ): void {
     const velocity = { x: speed * direction.x, y: speed * direction.y }
     this.players.get(id)?.walk(startPos, direction, velocity)
+  }
+
+  public requestKickPlayer(kickedId: string, kickerId: string): void {
+    this.leavePlayer(kickedId)
+    this.emitter.requestKickPlayer(kickedId, kickerId)
   }
 
   public stopPlayer(
@@ -86,6 +100,7 @@ export class Interactor {
     this.emitter.emitDamage(attacker, target, cause, damage)
 
     if (player?.isDead ?? false) {
+      player?.stop()
       this.emitter.emitPlayerDie(target)
 
       // PLAYER_RESPAWN_WAITING_TIME_MS後にリスポーン

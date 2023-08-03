@@ -52,4 +52,8 @@ export class WebRtc {
     const data = (await res.json()) as AccessTokenResponse
     return data.token
   }
+
+  public async disconnect(): Promise<void> {
+    await this.room.disconnect()
+  }
 }

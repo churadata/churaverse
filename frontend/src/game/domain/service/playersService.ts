@@ -64,6 +64,10 @@ export class PlayersService {
     return this.players.get(id)?.name
   }
 
+  public getPlayerHp(id: string): number | undefined {
+    return this.players.get(id)?.hp
+  }
+
   /**
    * プレイヤーが死んでいるか確認する関数
    * @param isDead
@@ -72,7 +76,7 @@ export class PlayersService {
     return this.players.get(id)?.isDead ?? true // 指定したidのPlayerがいない場合、trueを返す
   }
 
-  public respawn(id: string, position: Position): void {
-    this.players.get(id)?.respawn(position)
+  public respawn(id: string, position: Position, direction: Direction): void {
+    this.players.get(id)?.respawn(position, direction)
   }
 }

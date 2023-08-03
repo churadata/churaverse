@@ -168,4 +168,8 @@ export class Socket {
   public removeTransmitQueue(socketId: string): void {
     this.actionHelper.removeQueue(socketId)
   }
+
+  public addTransmitQueue(socketId: string): void {
+    this.actionHelper.addQueue(socketId)
+  }
 }

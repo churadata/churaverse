@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect } from 'react'
+import { useEffect } from 'react'
 import 'phaser'
 import { MainScene } from './game/scene/main'
 import { TitleScene } from './game/scene/title'
@@ -48,13 +48,6 @@ const config: Phaser.Types.Core.GameConfig = {
  * ゲームを描写するDivコンポーネント
  */
 const App: React.FC<{ className?: string }> = ({ className }) => {
-  // フルスクリーンで、Canvasを中央寄せにする
-  const style: CSSProperties = {
-    width: '100vw',
-    height: '100vh',
-    textAlign: 'center',
-  }
-
   App.propTypes = {
     className: PropTypes.string.isRequired,
   }
@@ -69,7 +62,7 @@ const App: React.FC<{ className?: string }> = ({ className }) => {
   }, [])
 
   // canvasをAppendするdivコンポーネント
-  return <div id="game" className={className} style={style}></div>
+  return <div id="game" className={className}></div>
 }
 
 export default App

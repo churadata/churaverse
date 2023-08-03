@@ -20,7 +20,7 @@ export class MegaphoneButton {
   private constructor(scene: Scene, private readonly playerId: string, buttonContainer: WebRtcButtonContainer) {
     // マイクボタンの位置･見た目設定
     this.button = scene.add
-      .image(-370, 70, MEGAPHONE_ACTIVE_TEXTURE_NAME)
+      .image(-380, 70, MEGAPHONE_ACTIVE_TEXTURE_NAME)
       .setScrollFactor(0)
       .setAlpha(DEACTIVATE_ALPHA)
       .setDisplaySize(40, 40)

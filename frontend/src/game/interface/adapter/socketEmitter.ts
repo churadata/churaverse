@@ -1,5 +1,5 @@
 /* eslint-disable object-shorthand */
-import { Scene, Tilemaps } from 'phaser'
+import { Scene } from 'phaser'
 import { Direction } from '../../domain/model/core/direction'
 import { IPlayerRender } from '../../domain/IRender/IPlayerRender'
 import { Player } from '../../domain/model/player'
@@ -18,27 +18,25 @@ import {
   TurnInfo,
   WalkInfo,
 } from '../socket/actionTypes'
-import { EmitJoinData, PlayerInfo, SocketEmitEventType } from '../socket/eventTypes'
+import { KickPlayerInfo, EmitJoinData, PlayerInfo, SocketEmitEventType, exitOwnPlayerInfo } from '../socket/eventTypes'
 import { Socket } from '../socket/socket'
 
 /**
  * SocketEmitter ISocketEmitterの実装
  */
 export class SocketEmitter implements ISocketEmitter {
-  public constructor(
-    private readonly socket: Socket,
-    private readonly scene: Scene,
-    private readonly layer: Tilemaps.TilemapLayer
-  ) {}
+  public constructor(private readonly socket: Socket, private readonly scene: Scene) {}
 
   public join(player: Player, id: string): void {
     const playerInfo: PlayerInfo = {
+      hp: player.hp,
       x: player.position.x,
       y: player.position.y,
       direction: player.direction,
       playerId: id,
       heroColor: player.color,
       heroName: player.name,
+      role: player.role,
     }
     const info: EmitJoinData = { playerInfo }
     this.socket.emitEvent(SocketEmitEventType.EnterPlayer, info)
@@ -52,21 +50,22 @@ export class SocketEmitter implements ISocketEmitter {
             Object.entries(data.existPlayers).map(async ([id, playerInfo]) => {
               const pos = new Position(playerInfo.x, playerInfo.y)
               const direction = playerInfo.direction
+              const hp = playerInfo.hp
               const render: IPlayerRender = await PlayerRender.build(
                 this.scene,
-                this.layer,
                 pos,
                 direction,
                 playerInfo.heroName,
-                playerInfo.heroColor
+                playerInfo.heroColor,
+                hp
               )
 
               // tupleで返すため,asで強制的に型を決める
-              return [id, new Player(pos, direction, playerInfo.heroName, playerInfo.heroColor), render] as [
-                string,
-                Player,
-                IPlayerRender
-              ]
+              return [
+                id,
+                new Player(pos, direction, playerInfo.heroName, playerInfo.heroColor, playerInfo.hp, playerInfo.role),
+                render,
+              ] as [string, Player, IPlayerRender]
             })
           ).then((players) => {
             const processedPreloadedData: ProcessedPreloadedData = {
@@ -90,7 +89,10 @@ export class SocketEmitter implements ISocketEmitter {
               const direction = playerInfo.direction
 
               // tupleで返すため,asで強制的に型を決める
-              return [id, new Player(pos, direction, playerInfo.heroName, playerInfo.heroColor)] as [string, Player]
+              return [
+                id,
+                new Player(pos, direction, playerInfo.heroName, playerInfo.heroColor, playerInfo.hp, playerInfo.role),
+              ] as [string, Player]
             })
           )
         )
@@ -181,5 +183,20 @@ export class SocketEmitter implements ISocketEmitter {
 
   public flushActions(): void {
     this.socket.emitBufferd()
+  }
+
+  public requestKickPlayer(kickedId: string, kickerId: string): void {
+    const info: KickPlayerInfo = {
+      kickedId: kickedId,
+      kickerId,
+    }
+    this.socket.emitEvent(SocketEmitEventType.RequestKickPlayer, info)
+  }
+
+  public exitOwnPlayer(playerId: string): void {
+    const info: exitOwnPlayerInfo = {
+      playerId,
+    }
+    this.socket.emitEvent(SocketEmitEventType.ExitOwnPlayer, info)
   }
 }

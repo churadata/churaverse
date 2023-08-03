@@ -35,6 +35,10 @@ export class ActionHelper {
     /**
      * 受け取ったactionをcallbackに渡している
      */
+    this.listenActionEvent(socket)
+  }
+
+  public listenActionEvent(socket: Socket): void {
     socket.listenEvent(SocketListenEventType.PlayersAct, (data) => {
       data.forEach((action) => {
         // 対処は可能ですが,

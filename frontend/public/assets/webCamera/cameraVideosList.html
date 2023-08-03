@@ -1,0 +1,37 @@
+<style>
+  #cameraVideosList {
+    position: fixed;
+    width: 100vw;
+    bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #videos {
+    display: flex;
+    column-gap: 15px;
+    justify-content: center;
+    height: 18vh;
+  }
+
+  .pageButton {
+    margin: 0 15px;
+    height: 60px;
+  }
+
+  .pageButton:hover {
+    filter: brightness(0.9);
+  }
+</style>
+
+<div id="cameraVideosList">
+  <img
+    src="assets/webCamera/rightArrowButton.svg"
+    id="prevPageButton"
+    class="pageButton"
+    style="transform: scaleX(-1)"
+  />
+  <div id="videos"></div>
+  <img src="assets/webCamera/rightArrowButton.svg" id="nextPageButton" class="pageButton" />
+</div>

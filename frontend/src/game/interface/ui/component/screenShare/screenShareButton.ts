@@ -24,7 +24,7 @@ export class ScreenShareButton implements IScreenShareButton {
   private constructor(private readonly scene: Scene, buttonContainer: WebRtcButtonContainer) {
     // 画面共有buttonの位置･見た目設定
     this.button = scene.add
-      .image(-220, 70, SCREENSHARE_INACTIVE_TEXTURE_NAME)
+      .image(-230, 70, SCREENSHARE_INACTIVE_TEXTURE_NAME)
       .setScrollFactor(0)
       .setAlpha(0.5)
       .setDisplaySize(40, 40)

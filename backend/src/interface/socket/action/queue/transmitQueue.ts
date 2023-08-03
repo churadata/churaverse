@@ -97,7 +97,9 @@ export class TransmitQueue implements ITransmitQueue {
 
     // 文字列化してdeep copyするこの方法ではシリアライズ可能なオブジェクトのみコピー可能
     // socket.ioで通信できるのもシリアライズ可能なオブジェクトのみなのでこの方法でdeep copyしている
-    poppedPacket = JSON.parse(JSON.stringify(this.packets.get(playerId))) as EmitData
+    poppedPacket = JSON.parse(
+      JSON.stringify(this.packets.get(playerId))
+    ) as EmitData
     // 中身を空に
     this.packets.set(playerId, [])
     return poppedPacket
@@ -106,6 +108,9 @@ export class TransmitQueue implements ITransmitQueue {
   // 新規プレイヤー追加時に送信キューを追加
   public addQueue(playerId: string): void {
     void this.lock.acquire(TRANSMIT_QUEUE_ASYNC_LOCK_KEY, () => {
+      if (this.packets.has(playerId)) {
+        return
+      }
       this.packets.set(playerId, [])
     })
   }

@@ -7,13 +7,13 @@ export class VersionRender {
 
   public constructor(scene: Scene) {
     this.scene = scene
-    const frontendVersionLabel = this.scene.add.text(10, -60, 'Frontend Version: ', {
+    const frontendVersionLabel = this.scene.add.text(10, -70, 'Frontend Version: ', {
       color: '0x000000',
     })
-    const backendLabel = this.scene.add.text(10, -40, 'Backend Version: ', {
+    const backendLabel = this.scene.add.text(10, -50, 'Backend Version: ', {
       color: '0x000000',
     })
-    const deployVersionLabel = this.scene.add.text(10, -20, 'Deploy Version: ', {
+    const deployVersionLabel = this.scene.add.text(10, -30, 'Deploy Version: ', {
       color: '0x000000',
     })
     /** deployVersionの表示 */

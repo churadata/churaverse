@@ -43,7 +43,7 @@ export class TextChatInput implements IChatInputRender {
     this.scene = scene
     // チャット入力部分の定義
     this.inputChatArea = this.scene.add
-      .dom(-300, 555)
+      .dom(-300, 505)
       .createFromCache(CHAT_INPUT_TEXTURE_KEY)
       .setOrigin(0, 0)
       .setScrollFactor(0)

@@ -13,6 +13,8 @@ export class EventListener {
     emitAction: () => {},
     emitAllPlayersAction: () => {},
     disconnect: () => {},
+    requestKickPlayer: () => {},
+    exitOwnPlayer: () => {},
   }
 
   /**

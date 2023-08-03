@@ -1,13 +1,11 @@
 import { Scene } from 'phaser'
 import { PLAYER_COLOR_NAMES, PlayerColorName } from '../../../../domain/model/types'
-import { Interactor } from '../../../../interactor/Interactor'
-import { DEFAULT_COLOR_NAME } from '../../Render/entity/playerRender'
-import { SettingDialog } from './settingDialog'
+import { PlayerColorChangeUseCase } from '../../../../usecase/playerColorChangeUseCase'
 
 /**
  * ボタンのテクスチャ名
  */
-const TEXTURE_KEYS: { [key in PlayerColorName]: `${key}Button` } = {
+export const TEXTURE_KEYS: { [key in PlayerColorName]: `${key}Button` } = {
   basic: 'basicButton',
   red: 'redButton',
   black: 'blackButton',
@@ -18,7 +16,7 @@ const TEXTURE_KEYS: { [key in PlayerColorName]: `${key}Button` } = {
 /**
  * ボタンのテクスチャの色とファイル名
  */
-const TEXTURE_FILENAMES: { [key in PlayerColorName]: string } = {
+export const TEXTURE_FILENAMES: { [key in PlayerColorName]: string } = {
   basic: 'assets/playerColorChangeButton/brown_button.png',
   red: 'assets/playerColorChangeButton/red_button.png',
   black: 'assets/playerColorChangeButton/black_button.png',
@@ -32,56 +30,27 @@ interface ColorButton {
 }
 
 /**
- * プレイヤーの色を変更するボタン
+ * プレイヤーの色を変更するボタンの基礎となるクラス
+ * 画面への描画とInteractorに渡す部分をサブクラスに担当させる
  */
 export class PlayerColorButtons {
-  private interactor?: Interactor
-  private readonly playerId: string
-  private readonly colorButtons = new Map<PlayerColorName, ColorButton>()
+  protected interactor?: PlayerColorChangeUseCase
+  protected readonly playerId: string
+  protected colorButtons = new Map<PlayerColorName, ColorButton>()
 
-  private constructor(scene: Scene, playerId: string, selectedColor: PlayerColorName, settingDialog: SettingDialog) {
+  protected constructor(scene: Scene, playerId: string, selectedColor: PlayerColorName) {
     this.playerId = playerId
 
     // ボタンの作成
     this.createColorChangeButtons(scene)
 
-    // ボタンの表示
-    this.colorButtons.forEach((button) => {
-      settingDialog.add(button.image)
-    })
-
     this.switchButtons(selectedColor)
-  }
-
-  public static async build(
-    scene: Scene,
-    playerId: string,
-    selectedColor: PlayerColorName,
-    settingDialog: SettingDialog
-  ): Promise<PlayerColorButtons> {
-    return await new Promise<void>((resolve, reject) => {
-      if (scene.textures.exists(TEXTURE_KEYS[selectedColor])) {
-        resolve()
-      }
-
-      // 各色のボタンをロード
-      PLAYER_COLOR_NAMES.forEach((color) => {
-        scene.load.image(TEXTURE_KEYS[color], TEXTURE_FILENAMES[color])
-      })
-
-      scene.load.once('complete', () => {
-        resolve()
-      })
-      scene.load.start()
-    }).then(() => {
-      return new PlayerColorButtons(scene, playerId, selectedColor, settingDialog)
-    })
   }
 
   /**
    * 色を変更するボタンの作成
    */
-  private createColorChangeButtons(scene: Scene): void {
+  public createColorChangeButtons(scene: Scene): void {
     PLAYER_COLOR_NAMES.forEach((color: PlayerColorName, i: number) => {
       const gap = 60
       const x = -70 - gap * i
@@ -104,7 +73,7 @@ export class PlayerColorButtons {
    * buttonの切り替えを行う
    * 一度に選択できるボタンは一つのみ
    **/
-  public switchButtons(turnOnColor: PlayerColorName): void {
+  private switchButtons(turnOnColor: PlayerColorName): void {
     this.colorButtons.forEach((button, color) => {
       if (turnOnColor === color) {
         button.isSelected = true
@@ -116,7 +85,7 @@ export class PlayerColorButtons {
     })
   }
 
-  public setInteractor(interactor: Interactor): void {
+  public setInteractor(interactor: PlayerColorChangeUseCase): void {
     this.interactor = interactor
   }
 
@@ -125,7 +94,7 @@ export class PlayerColorButtons {
    */
   private onClick(color: PlayerColorName): void {
     if (this.interactor !== undefined) {
-      this.interactor?.changePlayerColor(this.playerId, color)
+      this.interactor.changePlayerColor(this.playerId, color)
       this.switchButtons(color)
     }
   }

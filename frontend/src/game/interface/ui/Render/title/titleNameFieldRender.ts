@@ -1,6 +1,7 @@
 import { GameObjects, Scene } from 'phaser'
 import { createUIContainer } from '../../util/container'
 import { ITitleNameFieldRender } from '../../../../domain/IRender/ITitlenamefieldRender'
+import { TitleInteractor } from '../../../../interactor/titleInteractor'
 
 /**
  * 名前入力フォームのHTMLのKey
@@ -23,12 +24,16 @@ export class TitleNameFieldRender implements ITitleNameFieldRender {
    */
   private readonly inputNameArea?: Phaser.GameObjects.DOMElement
   private readonly container: GameObjects.Container
+  private interactor?: TitleInteractor
 
   private constructor(scene: Scene, name: string | undefined) {
     this.inputNameArea = scene.add.dom(0, 0).createFromCache(TITLE_NAME_FORM_KEY).setOrigin(0.5).setScrollFactor(0)
-    this.container = createUIContainer(scene, 0.5, 0.55)
+    this.container = createUIContainer(scene, 0.5, 0.4)
     const nameElement = this.inputNameArea?.getChildByID(TITLE_FIELD_NAME) as HTMLInputElement
     nameElement.value = name ?? ''
+    nameElement.oninput = () => {
+      this.onInput(nameElement.value)
+    }
     this.container.add(this.inputNameArea)
   }
 
@@ -51,5 +56,13 @@ export class TitleNameFieldRender implements ITitleNameFieldRender {
 
   public getName(): string {
     return (this.inputNameArea?.getChildByID(TITLE_FIELD_NAME) as HTMLInputElement).value
+  }
+
+  public setInteractor(interactor: TitleInteractor): void {
+    this.interactor = interactor
+  }
+
+  private onInput(inputName: string): void {
+    this.interactor?.changePlayerName(inputName)
   }
 }

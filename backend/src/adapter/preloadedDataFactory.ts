@@ -38,6 +38,7 @@ function convertForEmitPlayerInfo(
   player: Player
 ): PlayerInfo {
   const info: PlayerInfo = {
+    hp: player.hp,
     x: player.position.x,
     y: player.position.y,
     direction: player.direction,

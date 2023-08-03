@@ -1,7 +1,7 @@
 import { Direction } from './core/direction'
 import { Position } from './core/position'
 import { Entity } from './entity'
-import { PlayerColorName } from './types'
+import { PlayerColorName, PlayerRoleName } from './types'
 
 /**
  * 1マス移動するのにかかる時間(ms)
@@ -9,18 +9,31 @@ import { PlayerColorName } from './types'
 export const GRID_WALK_DURATION_MS = 320
 
 /**
+ * デフォルトのプレイヤーHP
+ */
+export const DEFAULT_HP = 100
+
+/**
  * Playerクラス
  */
 export class Player extends Entity {
   private _name: string
   private _color: PlayerColorName
+  private _role: PlayerRoleName
 
   private _isWalking = false
-
-  public constructor(position: Position, direction: Direction, name: string, color: PlayerColorName) {
-    super(position, direction, 100)
+  public constructor(
+    position: Position,
+    direction: Direction,
+    name: string,
+    color: PlayerColorName,
+    hp: number,
+    role: PlayerRoleName
+  ) {
+    super(position, direction, DEFAULT_HP)
     this._name = name
     this._color = color
+    this._role = role
   }
 
   /**
@@ -60,7 +73,6 @@ export class Player extends Entity {
    * 位置の変更
    */
   public teleport(position: Position): void {
-    this.direction = Direction.down
     this.position = position
   }
 
@@ -76,9 +88,10 @@ export class Player extends Entity {
    * Player復活の関数
    * @param position 復活時の位置
    */
-  public respawn(position: Position): void {
+  public respawn(position: Position, direction: Direction): void {
+    this.turn(direction)
     this.teleport(position)
-    this.hp = 100
+    this.hp = DEFAULT_HP
   }
 
   /**
@@ -112,5 +125,16 @@ export class Player extends Entity {
 
   public get isWalking(): boolean {
     return this._isWalking
+  }
+
+  /**
+   * roleの変更
+   */
+  public setRole(roleName: PlayerRoleName): void {
+    this._role = roleName
+  }
+
+  public get role(): PlayerRoleName {
+    return this._role
   }
 }

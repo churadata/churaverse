@@ -1,7 +1,7 @@
 import { Player } from '../../../domain/model/player'
 import { Position } from '../../../domain/model/core/position'
 import { Interactor } from '../../../interactor/Interactor'
-import { PlayerInfo, SocketListenEventType } from '../../../interface/socket/eventTypes'
+import { KickPlayerInfo, PlayerInfo, SocketListenEventType } from '../../../interface/socket/eventTypes'
 import {
   StopInfo,
   TurnInfo,
@@ -44,7 +44,9 @@ export class SocketController {
     this.socket.listenEvent(SocketListenEventType.NotExistsPlayer, () => this.pageReloadRequest())
     this.socket.listenEvent(SocketListenEventType.Disconnected, (playerId) => this.playerDisconnect(playerId))
     this.socket.listenEvent(SocketListenEventType.NewPlayer, (info) => this.playerJoin(info))
-
+    this.socket.listenEvent(SocketListenEventType.HandleKickRequest, (info) => {
+      this.handleKickRequest(info)
+    })
     this.socket.listenAction(SocketNormalActionType.Turn, (data) => this.playerTurn(data))
     this.socket.listenAction(SocketNormalActionType.Stop, (data) => this.playerStop(data))
     this.socket.listenAction(SocketNormalActionType.Walk, (data) => this.playerWalk(data))
@@ -86,11 +88,18 @@ export class SocketController {
     const pos = new Position(playerInfo.x, playerInfo.y)
 
     void this.playerRenderFactory
-      .build(pos, playerInfo.direction, playerInfo.heroName, playerInfo.heroColor)
+      .build(pos, playerInfo.direction, playerInfo.heroName, playerInfo.heroColor, playerInfo.hp)
       .then((render) => {
         this.interactor.joinPlayer(
           playerInfo.playerId,
-          new Player(pos, playerInfo.direction, playerInfo.heroName, playerInfo.heroColor),
+          new Player(
+            pos,
+            playerInfo.direction,
+            playerInfo.heroName,
+            playerInfo.heroColor,
+            playerInfo.hp,
+            playerInfo.role
+          ),
           render
         )
       })
@@ -155,7 +164,11 @@ export class SocketController {
   }
 
   private playerRespawn(data: PlayerRespawnInfo): void {
-    this.interactor.respawnPlayer(data.id, new Position(data.respawnPos.x, data.respawnPos.y))
+    this.interactor.respawnPlayer(data.id, new Position(data.respawnPos.x, data.respawnPos.y), data.direction)
+  }
+
+  private handleKickRequest(data: KickPlayerInfo): void {
+    this.interactor.handleKickEvent(data.kickedId, data.kickerId)
   }
 
   public update(): void {

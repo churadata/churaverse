@@ -27,6 +27,8 @@ export interface SocketServerEmitEventRecords {
    * 他playerが参加してきた時のevent
    */
   newPlayer: (playerInfo: PlayerInfo) => void
+
+  handleKickRequest: (info: RequestKickPlayerInfo) => void
 }
 
 /**
@@ -62,6 +64,10 @@ export interface SocketServerListenEventRecords {
    * 通信切断時に呼ばれるEvent
    */
   disconnect: (reason: string) => void
+
+  requestKickPlayer: (receiveData: RequestKickPlayerInfo) => void
+
+  exitOwnPlayer: (receiveData: exitOwnPlayerInfo) => void
 }
 
 type DefaultListenEventCallbackArgs = [socketId: string]
@@ -98,6 +104,8 @@ export const SocketListenEventType = {
   EmitAction: 'emitAction',
   EmitAllPlayersAction: 'emitAllPlayersAction',
   DisConnect: 'disconnect',
+  RequestKickPlayer: 'requestKickPlayer',
+  ExitOwnPlayer: 'exitOwnPlayer',
 } as const
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketListenEventType =
@@ -115,6 +123,7 @@ export const SocketEmitEventType = {
   NotExistsPlayer: 'NotExistsPlayer',
   Disconnected: 'disconnected',
   NewPlayer: 'newPlayer',
+  HandleKickRequest: 'handleKickRequest',
 } as const
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketEmitEventType =
@@ -124,6 +133,7 @@ export type SocketEmitEventType =
  * Playerの情報
  */
 export interface PlayerInfo {
+  hp: number
   x: number
   y: number
   direction: Direction
@@ -165,4 +175,16 @@ export interface PreloadedData {
  */
 export interface ReceiveJoinData {
   playerInfo: PlayerInfo
+}
+
+/**
+ * キックする際に受け渡しするデータ
+ */
+export interface RequestKickPlayerInfo {
+  kickedId: string
+  kickerId: string
+}
+
+export interface exitOwnPlayerInfo {
+  playerId: string
 }

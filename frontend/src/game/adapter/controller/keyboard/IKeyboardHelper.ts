@@ -1,6 +1,6 @@
-import { KeyCode, KeyDownCallback } from './types'
+import { KeyCode, KeyDownCallback, KeyEvent } from '../../../domain/model/core/types'
 
 export interface IKeyboardHelper {
-  bindKey: (keyCode: KeyCode, callback: KeyDownCallback, durationMs?: number | null) => void
+  bindKey: (keyEvent: KeyEvent, keyCode: KeyCode, callback: KeyDownCallback, durationMs?: number | null) => void
   update: (delta: number) => void
 }

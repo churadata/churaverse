@@ -7,6 +7,7 @@ export class TransitionManager<ReceiveTransitionData = undefined, SendTransition
   implements ITransitionManager<ReceiveTransitionData, SendTransitionData>
 {
   public constructor(private readonly scene: Phaser.Scenes.ScenePlugin) {}
+
   private static receivedData?: any = undefined
 
   public transitionTo(dest: SceneName, sendData?: SendTransitionData): void {

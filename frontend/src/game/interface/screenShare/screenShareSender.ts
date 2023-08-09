@@ -28,6 +28,7 @@ export class ScreenShareSender implements IScreenShareSender {
    * 自プレイヤーの画面共有を開始した時に実行される
    */
   private onStartStream(publication: LocalTrackPublication, participant: LocalParticipant): void {
+    if (publication.source !== Track.Source.ScreenShare) return
     const remoteTrackPublication = participant.getTrack(Track.Source.ScreenShare)
     if (remoteTrackPublication?.videoTrack == null || remoteTrackPublication.track == null) {
       return
@@ -45,6 +46,7 @@ export class ScreenShareSender implements IScreenShareSender {
    * 自プレイヤーの画面共有を停止した時に実行される
    */
   private onStopStream(publication: LocalTrackPublication, participant: LocalParticipant): void {
+    if (publication.source !== Track.Source.ScreenShare) return
     this.interactor?.leaveScreenShare(participant.identity)
   }
 

@@ -1,5 +1,4 @@
 import { Scene } from 'phaser'
-import { TitleToMainData } from '../interactor/sceneTransitionData/titleToMain'
 import { TitleInteractor } from '../interactor/titleInteractor'
 import { CookieStore } from '../interface/repository/cookieStore'
 import { PlayerSetupInfoReader } from '../interface/playerSetupInfo/playerSetupInfoReader'
@@ -14,6 +13,18 @@ import { TitleNameFieldRender } from '../interface/ui/Render/title/titleNameFiel
 import { MdLocalMicrophoneManager } from '../interface/localDeviceManager/mediaDevicesAPI/mdLocalMicrophoneManager'
 import { MdLocalSpeakerManager } from '../interface/localDeviceManager/mediaDevicesAPI/mdLocalSpeakerManager'
 import { MdLocalCameraManager } from '../interface/localDeviceManager/mediaDevicesAPI/mdLocalCameraManager'
+import { TitleToMainData } from '../interactor/sceneTransitionData/titleToMain'
+import { Socket } from '../interface/socket/socket'
+import { PLAYER_COLOR_NAMES } from '../domain/model/types'
+import { PlayerRender } from '../interface/ui/Render/entity/playerRender'
+import { Direction } from '../domain/model/core/direction'
+import { TitlePlayerBackgroundContainerRender } from '../interface/ui/Render/title/titlePreviewPlayerBackgroundRender'
+import { Position } from '../domain/model/core/position'
+import { TitleArrowButtonRender } from '../interface/ui/Render/title/titleArrowButtonRender'
+import { DEFAULT_HP } from '../domain/model/player'
+import { PlayerRoleRender } from '../interface/ui/Render/title/playerRoleRender'
+import { ChuraDataLogoRender } from '../interface/ui/Render/title/churaDataLogoRender'
+import { KeyDetector } from '../interface/keyboard/keyDetector'
 
 /**
  * エントリーポイント
@@ -43,6 +54,7 @@ export class TitleScene extends Scene {
     const transitionManager = new TransitionManager<undefined, TitleToMainData>(this.scene)
     const cookieRepository = new CookieStore()
     const playerSetupInfoReader = new PlayerSetupInfoReader(cookieRepository)
+    const socket = await Socket.build()
 
     const localDevice: ILocalDevice = new LocalDevice(
       await MdLocalMicrophoneManager.build(),
@@ -55,10 +67,39 @@ export class TitleScene extends Scene {
     void VersionRender.build(this)
     const joinButton = await JoinButtonRender.build(this)
     const nameField = await TitleNameFieldRender.build(this, playerSetupInfoReader.read().name)
+    const keyDetector = new KeyDetector(this, ['SPACE', 'SHIFT'])
+    const playerBackgroundContainer = await TitlePlayerBackgroundContainerRender.build(this)
 
-    const interactor = new TitleInteractor(transitionManager, nameField, playerSetupInfoReader)
+    const arrowButtons = await TitleArrowButtonRender.build(this, socket.socketId)
+
+    const previewPlayer = await PlayerRender.build(
+      this,
+      new Position(0, 0),
+      Direction.down,
+      nameField.getName() ?? '',
+      playerSetupInfoReader.read().color ?? PLAYER_COLOR_NAMES[4],
+      DEFAULT_HP
+    )
+
+    const playerRoleRender = await PlayerRoleRender.build(this)
+    const churaDataLogoRender = await ChuraDataLogoRender.build(this, keyDetector)
+
+    const interactor = new TitleInteractor(
+      transitionManager,
+      nameField,
+      playerSetupInfoReader,
+      previewPlayer,
+      playerBackgroundContainer,
+      arrowButtons,
+      playerRoleRender,
+      joinButton
+    )
 
     // interactorに渡す必要があるが, それ自身がinteractorを必要とするものはここでinteractorを渡す
     joinButton.setInteractor(interactor)
+    nameField.setInteractor(interactor)
+    churaDataLogoRender.setInteractor(interactor)
+    nameField.setInteractor(interactor)
+    arrowButtons.setInteractor(interactor)
   }
 }

@@ -9,7 +9,7 @@ export abstract class Entity {
   public direction: Direction
   public hp: number
 
-  public constructor(position: Position, direction: Direction, hp = 1) {
+  public constructor(position: Position, direction: Direction, hp = 100) {
     this.position = position
     this.direction = direction
     this.hp = hp

@@ -1002,11 +1002,6 @@ assign-symbols@^1.0.0:
   resolved "https://registry.npmjs.org/assign-symbols/-/assign-symbols-1.0.0.tgz"
   integrity sha512-Q+JC7Whu8HhmTdBph/Tq59IoRtoy6KAm5zzPv00WdujX82lbAL8K7WVjne7vdCsAmbF4AYaDOPyO3k0kl8qIrw==
 
-async-await-queue@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/async-await-queue/-/async-await-queue-1.2.1.tgz"
-  integrity sha512-v2j+/EMzAnuJZ8I4570KJMFhi6G9g3WZyFh6cPnmQSJh3nLao77XpRt01kyFegQazPSKvue1yaIYDp/NfV/b0g==
-
 async-each@^1.0.1:
   version "1.0.6"
   resolved "https://registry.npmjs.org/async-each/-/async-each-1.0.6.tgz"
@@ -3420,19 +3415,17 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-livekit-client@^1.4.3:
-  version "1.4.3"
-  resolved "https://registry.npmjs.org/livekit-client/-/livekit-client-1.4.3.tgz"
-  integrity sha512-+NU9vcjrwTI5wZHTg25rXWdn++9/qTFDuvTudW13uqS53PmNOxDI3QpP3zt9bw5P+9Ai6K5O8ZwoMvsQuUJChQ==
+livekit-client@^1.9.7:
+  version "1.9.7"
+  resolved "https://registry.npmjs.org/livekit-client/-/livekit-client-1.9.7.tgz"
+  integrity sha512-w0WjLat0qF76l71esjTXam5JE+7vCpBF6WW+oloHFNBIVtEzEnBZa2JUo/e2oWN2YypEO5MjCIDPo7Tuvo9clA==
   dependencies:
-    async-await-queue "^1.2.1"
     events "^3.3.0"
     loglevel "^1.8.0"
     protobufjs "^7.0.0"
     sdp-transform "^2.14.1"
     ts-debounce "^4.0.0"
     typed-emitter "^2.1.0"
-    ua-parser-js "^1.0.2"
     webrtc-adapter "^8.1.1"
 
 loader-runner@^2.4.0:
@@ -3480,9 +3473,9 @@ loglevel@^1.8.0:
   integrity sha512-tCRIJM51SHjAayKwC+QAg8hT8vg6z7GSgLJKGvzuPb1Wc+hLzqtuVLxp6/HzSPOozuK+8ErAhy7U/sVzw8Dgfg==
 
 long@^5.0.0:
-  version "5.2.1"
-  resolved "https://registry.npmjs.org/long/-/long-5.2.1.tgz"
-  integrity sha512-GKSNGeNAtw8IryjjkhZxuKB3JzlcLTwjtiQCHKvqQet81I93kXslhDQruGI/QsddO83mcDToBVy7GqGS/zYf/A==
+  version "5.2.3"
+  resolved "https://registry.npmjs.org/long/-/long-5.2.3.tgz"
+  integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
 
 loose-envify@^1.1.0, loose-envify@^1.4.0:
   version "1.4.0"
@@ -4207,9 +4200,9 @@ prop-types@^15.8.1:
     react-is "^16.13.1"
 
 protobufjs@^7.0.0:
-  version "7.1.2"
-  resolved "https://registry.npmjs.org/protobufjs/-/protobufjs-7.1.2.tgz"
-  integrity sha512-4ZPTPkXCdel3+L81yw3dG6+Kq3umdWKh7Dc7GW/CpNk4SX3hK58iPCWeCyhVTDrbkNeKrYNZ7EojM5WDaEWTLQ==
+  version "7.2.4"
+  resolved "https://registry.npmjs.org/protobufjs/-/protobufjs-7.2.4.tgz"
+  integrity sha512-AT+RJgD2sH8phPmCf7OUZR8xGdcJRga4+1cOaXJ64hvcSkVhNcRHOwIxUatPH15+nj59WAGTDv3LSGZPEQbJaQ==
   dependencies:
     "@protobufjs/aspromise" "^1.1.2"
     "@protobufjs/base64" "^1.1.2"
@@ -4568,9 +4561,9 @@ run-queue@^1.0.0, run-queue@^1.0.3:
     aproba "^1.1.1"
 
 rxjs@*:
-  version "7.5.7"
-  resolved "https://registry.npmjs.org/rxjs/-/rxjs-7.5.7.tgz"
-  integrity sha512-z9MzKh/UcOqB3i20H6rtrlaE/CgjLOvheWK/9ILrbhROGTweAi1BaFsTT9FbwZi5Trr1qNRs+MXkhmR06awzQA==
+  version "7.8.1"
+  resolved "https://registry.npmjs.org/rxjs/-/rxjs-7.8.1.tgz"
+  integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==
   dependencies:
     tslib "^2.1.0"
 
@@ -4626,10 +4619,10 @@ sdp-transform@^2.14.1:
   resolved "https://registry.npmjs.org/sdp-transform/-/sdp-transform-2.14.1.tgz"
   integrity sha512-RjZyX3nVwJyCuTo5tGPx+PZWkDMCg7oOLpSlhjDdZfwUoNqG1mM8nyj31IGHyaPWXhjbP7cdK3qZ2bmkJ1GzRw==
 
-sdp@^3.0.2:
-  version "3.0.3"
-  resolved "https://registry.npmjs.org/sdp/-/sdp-3.0.3.tgz"
-  integrity sha512-8EkfckS+XZQaPLyChu4ey7PghrdcraCVNpJe2Gfdi2ON1ylQ7OasuKX+b37R9slnRChwIAiQgt+oj8xXGD8x+A==
+sdp@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.npmjs.org/sdp/-/sdp-3.2.0.tgz"
+  integrity sha512-d7wDPgDV3DDiqulJjKiV2865wKsJ34YI+NDREbm+FySq6WuKOikwyNQcm+doLAZ1O6ltdO0SeKle2xMpN3Brgw==
 
 semver@^5.5.0, semver@^5.6.0:
   version "5.7.1"
@@ -5173,9 +5166,9 @@ tslib@^1.8.1:
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
 tslib@^2.1.0:
-  version "2.4.1"
-  resolved "https://registry.npmjs.org/tslib/-/tslib-2.4.1.tgz"
-  integrity sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==
+  version "2.6.0"
+  resolved "https://registry.npmjs.org/tslib/-/tslib-2.6.0.tgz"
+  integrity sha512-7At1WUettjcSRHXCyYtTselblcHl9PJFFVKiCAy/bY97+BPZXSQ2wbq0P9s8tK2G7dFQfNnlJnPAiArVBVBsfA==
 
 tslib@^2.5.0:
   version "2.5.2"
@@ -5222,9 +5215,6 @@ typescript@*, typescript@^4.6.3, "typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0
   version "4.8.4"
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.8.4.tgz"
   integrity sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==
-
-ua-parser-js@^1.0.2:
-  version "1.0.32"
 
 unbox-primitive@^1.0.2:
   version "1.0.2"
@@ -5445,11 +5435,11 @@ webpack@^4.0.0, webpack@4.x.x:
     webpack-sources "^1.4.1"
 
 webrtc-adapter@^8.1.1:
-  version "8.2.0"
-  resolved "https://registry.npmjs.org/webrtc-adapter/-/webrtc-adapter-8.2.0.tgz"
-  integrity sha512-umxCMgedPAVq4Pe/jl3xmelLXLn4XZWFEMR5Iipb5wJ+k1xMX0yC4ZY9CueZUU1MjapFxai1tFGE7R/kotH6Ww==
+  version "8.2.3"
+  resolved "https://registry.npmjs.org/webrtc-adapter/-/webrtc-adapter-8.2.3.tgz"
+  integrity sha512-gnmRz++suzmvxtp3ehQts6s2JtAGPuDPjA1F3a9ckNpG1kYdYuHWYpazoAnL9FS5/B21tKlhkorbdCXat0+4xQ==
   dependencies:
-    sdp "^3.0.2"
+    sdp "^3.2.0"
 
 which-boxed-primitive@^1.0.2:
   version "1.0.2"

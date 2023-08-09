@@ -9,7 +9,11 @@ import {
   PlayerRespawnInfo,
   SharkDestroyInfo,
 } from './action/actionTypes'
-import { SocketEmitEventType, PlayerInfo } from './eventTypes'
+import {
+  SocketEmitEventType,
+  PlayerInfo,
+  RequestKickPlayerInfo,
+} from './eventTypes'
 import { Socket } from './socket'
 import { DamageCause } from '../../domain/model/deathLog'
 
@@ -21,6 +25,7 @@ export class SocketEmitter implements ISocketEmitter {
    */
   public emitNewPlayer(socketId: string, player: Player): void {
     const emitPlayerInfo: PlayerInfo = {
+      hp: player.hp,
       x: player.position.x,
       y: player.position.y,
       direction: player.direction,
@@ -28,7 +33,7 @@ export class SocketEmitter implements ISocketEmitter {
       heroColor: player.color,
       heroName: player.name,
     }
-
+    this.socket.addTransmitQueue(socketId)
     this.socket.emitEventBroadCastFrom(
       SocketEmitEventType.NewPlayer,
       socketId,
@@ -90,8 +95,8 @@ export class SocketEmitter implements ISocketEmitter {
       respawnPos: {
         x: position.x,
         y: position.y,
-        direction,
       },
+      direction,
     }
 
     this.socket.emitActionTo(playerId, 'ownPlayerRespawn', info)
@@ -106,5 +111,20 @@ export class SocketEmitter implements ISocketEmitter {
       sharkId,
     }
     this.socket.emitActionBroadCast(SocketEmitOnlyActionType.HitShark, emitInfo)
+  }
+
+  /**
+   * キックしたプレイヤーに対してemit
+   */
+  public requestKickPlayer(kickedId: string, kickerId: string): void {
+    const info: RequestKickPlayerInfo = {
+      kickedId,
+      kickerId,
+    }
+    this.socket.emitEventTo(
+      SocketEmitEventType.HandleKickRequest,
+      kickedId,
+      info
+    )
   }
 }

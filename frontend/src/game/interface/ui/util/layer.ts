@@ -10,15 +10,15 @@ type LayerbleElement =
 // layerの管理をしたいオグジェクトを追加したい際はリストに適宜追加. 優先度はindexに比例して上部に描画
 const layerArray = [
   'Video',
-  'OtherPlayer',
-  'OwnPlayer',
+  'PlayerContainer',
   'Shark',
   'Bomb',
-  'PlayerName',
-  'Damage',
+  'PlayerFrontContainer',
+  'DeathLog',
   'UIContainer',
   'WebRtcUI',
   'PlayerSettingForm',
+  'PlayerList',
   'ChatBoard',
   'badge',
 ] as const

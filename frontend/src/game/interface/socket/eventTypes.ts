@@ -1,5 +1,5 @@
 import { Direction } from '../../domain/model/core/direction'
-import { PlayerColorName } from '../../domain/model/types'
+import { PlayerColorName, PlayerRoleName } from '../../domain/model/types'
 import { EmitData, RecieveData } from './actionTypes'
 
 /**
@@ -32,6 +32,10 @@ export interface SocketClientEmitEventRecords {
    * 情報を他のClientに送るEvent
    */
   emitAllPlayersAction: (emitData: EmitData) => void
+
+  requestKickPlayer: (emitData: KickPlayerInfo) => void
+
+  exitOwnPlayer: (emitData: exitOwnPlayerInfo) => void
 }
 
 /**
@@ -59,6 +63,8 @@ export interface SocketClientListenEventRecords {
    * 他playerが参加してきた時のevent
    */
   newPlayer: (playerInfo: PlayerInfo) => void
+
+  handleKickRequest: (info: KickPlayerInfo) => void
 }
 
 /**
@@ -70,6 +76,8 @@ export const SocketEmitEventType = {
   CheckConnect: 'checkConnect',
   EmitAction: 'emitAction',
   EmitAllPlayersAction: 'emitAllPlayersAction',
+  RequestKickPlayer: 'requestKickPlayer',
+  ExitOwnPlayer: 'exitOwnPlayer',
 } as const
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketEmitEventType = typeof SocketEmitEventType[keyof typeof SocketEmitEventType]
@@ -84,6 +92,7 @@ export const SocketListenEventType = {
   NotExistsPlayer: 'NotExistsPlayer',
   Disconnected: 'disconnected',
   NewPlayer: 'newPlayer',
+  HandleKickRequest: 'handleKickRequest',
 } as const
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketListenEventType = typeof SocketListenEventType[keyof typeof SocketListenEventType]
@@ -92,12 +101,14 @@ export type SocketListenEventType = typeof SocketListenEventType[keyof typeof So
  * Playerの情報
  */
 export interface PlayerInfo {
+  hp: number
   x: number
   y: number
   direction: Direction
   playerId: string
   heroColor: PlayerColorName
   heroName: string
+  role: PlayerRoleName
 }
 
 /**
@@ -124,4 +135,18 @@ interface PreloadedData {
  */
 export interface EmitJoinData {
   playerInfo: PlayerInfo
+}
+/**
+ * キックする際に送るデータ
+ */
+export interface KickPlayerInfo {
+  kickedId: string
+  kickerId: string
+}
+
+/**
+ * 退出する際に送るデータ
+ */
+export interface exitOwnPlayerInfo {
+  playerId: string
 }

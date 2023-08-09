@@ -187,7 +187,8 @@ export interface PlayerDieInfo {
  */
 export interface PlayerRespawnInfo {
   id: string
-  respawnPos: { x: number; y: number; direction: Direction }
+  respawnPos: Vector
+  direction: Direction
 }
 
 /**
@@ -211,7 +212,7 @@ export interface SharkDestroyInfo {
  */
 export interface BombInfo {
   bombId: string
-  position: { x: number; y: number }
+  position: Vector
 }
 
 /**

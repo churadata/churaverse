@@ -1,10 +1,11 @@
-import { Direction } from '../../../domain/model/core/direction'
-import { Interactor } from '../../../interactor/Interactor'
-import { uniqueId } from '../../../domain/util/uniqueId'
-import { IKeyboardController } from '../../../domain/IRender/IKeyboardController'
 import { IKeyboardHelper } from './IKeyboardHelper'
 import { IBombRenderFactory } from '../../../domain/IRenderFactory/IBombRenderFactory'
 import { ISharkRenderFactory } from '../../../domain/IRenderFactory/ISharkRenderFactory'
+import { IKeyboardController } from '../../../domain/IRender/IKeyboardController'
+import { Interactor } from '../../../interactor/Interactor'
+import { IKeyConfiguration } from '../../../interactor/IKeyConfiguration'
+import { Direction } from '../../../domain/model/core/direction'
+import { uniqueId } from '../../../domain/util/uniqueId'
 
 /**
  * Keyboardの入力をInteractorに渡す
@@ -15,19 +16,41 @@ export class KeyboardController implements IKeyboardController {
     private readonly interactor: Interactor,
     private readonly playerId: string,
     private readonly keyboardHelper: IKeyboardHelper,
+    private readonly keyboardConfiguration: IKeyConfiguration,
     private readonly bombRenderFactory: IBombRenderFactory,
     private readonly sharkRenderFactory: ISharkRenderFactory
   ) {
-    this.keyboardHelper.bindKey('Z', () => this.bombDrop(), 320)
-    this.keyboardHelper.bindKey('X', () => this.sharkSpawn(), 300)
-    this.keyboardHelper.bindKey('V', () => this.toggleScreenFocus(), null)
+    this.keyboardHelper.bindKey(
+      'DropBomb',
+      this.keyboardConfiguration.getKeyCode('DropBomb'),
+      () => this.bombDrop(),
+      320
+    )
+    this.keyboardHelper.bindKey(
+      'ShotShark',
+      this.keyboardConfiguration.getKeyCode('ShotShark'),
+      () => this.sharkSpawn(),
+      300
+    )
 
-    this.keyboardHelper.bindKey('ENTER', () => this.sendChat(), null)
+    this.keyboardHelper.bindKey('EnterText', this.keyboardConfiguration.getKeyCode('EnterText'), () => this.sendChat())
+    this.keyboardHelper.bindKey(
+      'FocusShareScreen',
+      this.keyboardConfiguration.getKeyCode('FocusShareScreen'),
+      () => this.toggleScreenFocus(),
+      null
+    )
 
-    this.keyboardHelper.bindKey('DOWN', () => this.playerWalkDown())
-    this.keyboardHelper.bindKey('UP', () => this.playerWalkUp())
-    this.keyboardHelper.bindKey('LEFT', () => this.playerWalkLeft())
-    this.keyboardHelper.bindKey('RIGHT', () => this.playerWalkRight())
+    this.keyboardHelper.bindKey('WalkDown', this.keyboardConfiguration.getKeyCode('WalkDown'), () =>
+      this.playerWalkDown()
+    )
+    this.keyboardHelper.bindKey('WalkUp', this.keyboardConfiguration.getKeyCode('WalkUp'), () => this.playerWalkUp())
+    this.keyboardHelper.bindKey('WalkLeft', this.keyboardConfiguration.getKeyCode('WalkLeft'), () =>
+      this.playerWalkLeft()
+    )
+    this.keyboardHelper.bindKey('WalkRight', this.keyboardConfiguration.getKeyCode('WalkRight'), () =>
+      this.playerWalkRight()
+    )
   }
 
   public update(time: number, delta: number): void {

@@ -12,7 +12,7 @@ export interface ITransitionManager<ReceiveTransitionData = undefined, SendTrans
    * @param dest 遷移先のScene名
    * @param sendData 遷移先に受けわたすデータ
    */
-  transitionTo: (dest: SceneName, sendData: SendTransitionData) => void
+  transitionTo: (dest: SceneName, sendData?: SendTransitionData) => void
 
   /**
    * 遷移元のSceneから渡されたデータを取得する

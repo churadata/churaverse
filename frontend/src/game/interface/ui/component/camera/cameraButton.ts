@@ -23,7 +23,7 @@ export class CameraButton {
   private constructor(private readonly scene: Scene, buttonContainer: WebRtcButtonContainer) {
     // カメラbuttonの位置･見た目設定
     this.button = scene.add
-      .image(-270, 70, CAMERA_INACTIVE_TEXTURE_NAME)
+      .image(-280, 70, CAMERA_INACTIVE_TEXTURE_NAME)
       .setScrollFactor(0)
       .setAlpha(0.5)
       .setDisplaySize(40, 40)
@@ -62,7 +62,37 @@ export class CameraButton {
 
   /** buttonが押されたときの動作 */
   private onClick(): void {
-    alert('現在、機能の提供を停止しています。')
+    if (this.isActive) {
+      void this.tryStopCameraVideo()
+    } else {
+      void this.tryStartCameraVideo()
+    }
+  }
+
+  /**
+   * Webカメラを開始する
+   * 開始できなかった場合はbuttonを非有効化
+   */
+  private async tryStartCameraVideo(): Promise<void> {
+    const isStartSuccessful = await this.interactor?.startCameraVideo()
+    if (isStartSuccessful ?? false) {
+      this.activateButton()
+    } else {
+      this.deactivateButton()
+    }
+  }
+
+  /**
+   * Webカメラを停止する
+   * 停止できなかった場合はbuttonを有効化
+   */
+  private async tryStopCameraVideo(): Promise<void> {
+    const isStopSuccessful = await this.interactor?.stopCameraVideo()
+    if (isStopSuccessful ?? false) {
+      this.deactivateButton()
+    } else {
+      this.activateButton()
+    }
   }
 
   /** buttonが有効になったときの見た目の変化 */

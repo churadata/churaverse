@@ -23,7 +23,7 @@ export class MicButton {
   private constructor(private readonly scene: Scene, buttonContainer: WebRtcButtonContainer) {
     // マイクボタンの位置･見た目設定
     this.button = scene.add
-      .image(-320, 70, MIC_INACTIVE_TEXTURE_NAME)
+      .image(-330, 70, MIC_INACTIVE_TEXTURE_NAME)
       .setScrollFactor(0)
       .setAlpha(0.5)
       .setDisplaySize(40, 40)

@@ -1,4 +1,4 @@
-import { Scene, Tilemaps } from 'phaser'
+import { GameObjects, Scene } from 'phaser'
 import { FRAME_RATE } from '../../animationConfig'
 import { GRID_SIZE } from '../../../../domain/worldConfig'
 import { Direction, vectorToName } from '../../../../domain/model/core/direction'
@@ -6,6 +6,7 @@ import { IPlayerRender } from '../../../../domain/IRender/IPlayerRender'
 import { PLAYER_COLOR_NAMES, PlayerColorName } from '../../../../domain/model/types'
 import { Position } from '../../../../domain/model/core/position'
 import { layerSetting } from '../../util/layer'
+import { HpBarRender } from './hpBarRender'
 
 /**
  * 初期色の名前 = basic
@@ -49,7 +50,7 @@ const _anims = new Map<string, { key: string; frameStart: number; frameEnd: numb
 /**
  * PlayerのSpriteから名前プレートの相対座標
  */
-const _relativePositionToNamePlate = { x: 0, y: -30 }
+const _relativePositionToNamePlate = { x: 0, y: -40 }
 
 /**
  * Player描画クラス
@@ -58,31 +59,37 @@ export class PlayerRender implements IPlayerRender {
   private readonly scene
   private sprite
   private tween?: Phaser.Tweens.Tween
-  private _playerNamePlateTween?: Phaser.Tweens.Tween
+  private readonly _playerNamePlateTween?: Phaser.Tweens.Tween
   private damagetween?: Phaser.Tweens.Tween
   private color: PlayerColorName
-
+  private readonly playerContainer: Phaser.GameObjects.Container
+  private readonly playerFrontContainer: Phaser.GameObjects.Container
   private readonly _playerNamePlate: Phaser.GameObjects.Text
 
   private constructor(
     scene: Scene,
-    mapLayer: Tilemaps.TilemapLayer,
     position: Position,
     direction: Direction,
     name: string,
-    color: PlayerColorName
+    color: PlayerColorName,
+    private readonly hpBar: HpBarRender,
+    hp: number
   ) {
     this.scene = scene
     this.color = color
+    this.playerContainer = this.scene.add.container(position.x, position.y)
+    this.playerFrontContainer = this.scene.add.container(position.x, position.y)
 
     this.sprite = scene.add
-      .sprite(position.x, position.y, TEXTURE_KEYS[DEFAULT_COLOR_NAME])
+      .sprite(0, 0, TEXTURE_KEYS[DEFAULT_COLOR_NAME])
       // 縮尺
       .setOrigin(0.5)
       .setDisplaySize(GRID_SIZE, GRID_SIZE)
+    this.playerContainer.add(this.sprite)
+    layerSetting(this.playerContainer, 'PlayerContainer')
 
     this._playerNamePlate = scene.add
-      .text(position.x + _relativePositionToNamePlate.x, position.y + _relativePositionToNamePlate.y, name)
+      .text(_relativePositionToNamePlate.x, _relativePositionToNamePlate.y, name)
       .setOrigin(0.5)
       .setStroke('#403c3c', 3)
 
@@ -100,8 +107,10 @@ export class PlayerRender implements IPlayerRender {
 
     this.turn(direction)
 
-    layerSetting(this.sprite, 'OwnPlayer')
-    layerSetting(this._playerNamePlate, 'PlayerName')
+    this.playerFrontContainer.add(this._playerNamePlate)
+    hpBar.addContainer(this.playerFrontContainer)
+    layerSetting(this.playerFrontContainer, 'PlayerFrontContainer')
+    this.hpBar.update(hp)
   }
 
   /**
@@ -116,12 +125,13 @@ export class PlayerRender implements IPlayerRender {
    */
   public static async build(
     scene: Scene,
-    mapLayer: Tilemaps.TilemapLayer,
     pos: Position,
     direction: Direction,
     name: string,
-    color: PlayerColorName
+    color: PlayerColorName,
+    hp: number
   ): Promise<PlayerRender> {
+    const hpBarRender = await HpBarRender.build(scene, 100, hp)
     return await new Promise<void>((resolve, reject) => {
       if (scene.textures.exists(TEXTURE_KEYS[DEFAULT_COLOR_NAME])) {
         resolve()
@@ -138,7 +148,7 @@ export class PlayerRender implements IPlayerRender {
       })
       scene.load.start()
     }).then(() => {
-      return new PlayerRender(scene, mapLayer, pos, direction, name, color)
+      return new PlayerRender(scene, pos, direction, name, color, hpBarRender, hp)
     })
   }
 
@@ -154,6 +164,9 @@ export class PlayerRender implements IPlayerRender {
    * 姿を現す関数
    */
   public appear(): void {
+    this.hpBar.appear()
+    this.playerContainer.setVisible(true)
+    this.playerFrontContainer.setVisible(true)
     this.sprite.alpha = 1
     this._playerNamePlate.alpha = 1
   }
@@ -162,6 +175,9 @@ export class PlayerRender implements IPlayerRender {
    * 姿を消す関数
    */
   public disappear(): void {
+    this.hpBar.disappear()
+    this.playerContainer.setVisible(false)
+    this.playerFrontContainer.setVisible(false)
     this.sprite.alpha = 0
     this._playerNamePlate.alpha = 0
   }
@@ -170,7 +186,9 @@ export class PlayerRender implements IPlayerRender {
    * リスポーンを描画する関数
    * @param position リスポーン後の位置
    */
-  public respawn(position: Position): void {
+  public respawn(position: Position, direction: Direction, hp: number): void {
+    this.turn(direction)
+    this.hpBar.update(hp)
     this.teleport(position)
     this.appear()
   }
@@ -183,13 +201,16 @@ export class PlayerRender implements IPlayerRender {
     this.disappear()
     this.sprite.destroy()
     this._playerNamePlate.destroy()
+    this.hpBar.destroy()
+    this.playerContainer.destroy()
+    this.playerFrontContainer.destroy()
   }
 
   /**
    * 画面の追従を開始する
    */
   public focus(): void {
-    this.scene.cameras.main.startFollow(this.sprite)
+    this.scene.cameras.main.startFollow(this.playerContainer)
   }
 
   public ignore(): void {
@@ -220,7 +241,7 @@ export class PlayerRender implements IPlayerRender {
     const duration = GRID_SIZE / speed
 
     this.tween = this.scene.add.tween({
-      targets: [this.sprite],
+      targets: [this.playerContainer, this.playerFrontContainer],
 
       // X座標の移動を設定
       x: dest.x,
@@ -233,7 +254,7 @@ export class PlayerRender implements IPlayerRender {
       duration,
 
       onUpdate: () => {
-        onUpdate(new Position(this.sprite.x, this.sprite.y))
+        onUpdate(new Position(this.playerContainer.x, this.playerContainer.y))
       },
 
       onComplete: () => {
@@ -243,14 +264,6 @@ export class PlayerRender implements IPlayerRender {
         this.stopWalk()
         onComplete()
       },
-    })
-
-    // playerのネームプレートのアニメーション
-    this._playerNamePlateTween = this.scene.add.tween({
-      targets: [this._playerNamePlate],
-      x: dest.x + _relativePositionToNamePlate.x,
-      y: dest.y + _relativePositionToNamePlate.y,
-      duration,
     })
 
     // アニメーション開始
@@ -277,7 +290,8 @@ export class PlayerRender implements IPlayerRender {
   public stop(): void {
     this.sprite.anims.stop()
     this._playerNamePlateTween?.stop()
-    this.stopAllTweens(this.sprite)
+    this.stopAllTweens(this.playerContainer)
+    this.stopAllTweens(this.playerFrontContainer)
   }
 
   /**
@@ -288,20 +302,16 @@ export class PlayerRender implements IPlayerRender {
   public teleport(position: Position): void {
     // 動きを止めてる
     this.stop()
-
-    this.sprite.setPosition(position.x, position.y)
-    this._playerNamePlate.setPosition(
-      position.x + _relativePositionToNamePlate.x,
-      position.y + _relativePositionToNamePlate.y
-    )
+    this.playerContainer.setPosition(position.x, position.y)
+    this.playerFrontContainer.setPosition(position.x, position.y)
   }
 
   /**
    * spriteに基づいたすべてのtweenを止める関数
    */
-  private stopAllTweens(sprite: Phaser.GameObjects.Sprite): void {
+  private stopAllTweens(container: Phaser.GameObjects.Container): void {
     // SpriteのTweenを全て取得
-    const tweens = this.scene.tweens.getTweensOf(sprite)
+    const tweens = this.scene.tweens.getTweensOf(container)
     this.damagetween?.stop()
     // 全てのTweenを停止
     for (const tween of tweens) {
@@ -321,7 +331,7 @@ export class PlayerRender implements IPlayerRender {
    * ダメージを受けたときのアニメーション
    * @param amount 受けたダメージ数
    */
-  public damage(amount: number): void {
+  public damage(amount: number, hp: number): void {
     // プレイヤー近くにダメージをランダムに表記させる範囲
     const X_MIN = -20
     const X_MAX = 20
@@ -336,7 +346,7 @@ export class PlayerRender implements IPlayerRender {
       .text(x, y, amount.toString(), { fontSize: '23px' })
       .setOrigin(0.5)
       .setStroke('#505050', THICKNESS)
-    layerSetting(damageText, 'Damage')
+    this.playerFrontContainer.add(damageText)
     const tween = this.scene.add.tween({
       targets: [damageText],
       x,
@@ -349,6 +359,7 @@ export class PlayerRender implements IPlayerRender {
         damageText.destroy()
       },
     })
+    this.hpBar.update(hp)
     this.damagetween?.stop() // 処理の途中で新たにダメージを食らった際に処理をリセットする
     this.damagetween = this.scene.add.tween({
       targets: this.sprite,
@@ -357,6 +368,9 @@ export class PlayerRender implements IPlayerRender {
       yoyo: true,
       alpha: { start: 0, to: 1 },
       onComplete: () => {
+        this.sprite.alpha = 1
+      },
+      onStop: () => {
         this.sprite.alpha = 1
       },
     })
@@ -397,6 +411,9 @@ export class PlayerRender implements IPlayerRender {
    * spriteを消滅させる関数
    */
   public destroy(): void {
+    this.hpBar.destroy()
+    this.playerContainer.destroy()
+    this.playerFrontContainer.destroy()
     this.sprite.destroy()
     this._playerNamePlate.destroy()
   }
@@ -408,5 +425,10 @@ export class PlayerRender implements IPlayerRender {
     _anims.forEach((cfg) => {
       this.sprite.anims.remove(cfg.key)
     })
+  }
+
+  public addToContainer(container: GameObjects.Container): void {
+    container.add(this._playerNamePlate)
+    container.add(this.sprite)
   }
 }

@@ -8,6 +8,8 @@ import {
   SocketListenEventType,
   PreloadedData,
   ReceiveJoinData,
+  RequestKickPlayerInfo,
+  exitOwnPlayerInfo,
 } from '../../interface/socket/eventTypes'
 import {
   ReceiveBaseInfo,
@@ -49,6 +51,16 @@ export class SocketController {
     this.socket.listenEvent(
       SocketListenEventType.DisConnect,
       this.leavePlayer.bind(this)
+    )
+
+    this.socket.listenEvent(
+      SocketListenEventType.RequestKickPlayer,
+      this.requestKickPlayer.bind(this)
+    )
+
+    this.socket.listenEvent(
+      SocketListenEventType.ExitOwnPlayer,
+      this.exitOwnPlayer.bind(this)
     )
 
     this.socket.listenAction(
@@ -158,6 +170,14 @@ export class SocketController {
 
   private toggleMegaphone(data: MegaphoneInfo & ReceiveBaseInfo): void {
     this.interactor.toggleMegaphone(data.id, data.activate)
+  }
+
+  private requestKickPlayer(data: RequestKickPlayerInfo): void {
+    this.interactor.requestKickPlayer(data.kickedId, data.kickerId)
+  }
+
+  private exitOwnPlayer(data: exitOwnPlayerInfo): void {
+    this.interactor.leavePlayer(data.playerId)
   }
 
   /**

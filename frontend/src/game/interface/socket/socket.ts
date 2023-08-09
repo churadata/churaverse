@@ -13,6 +13,7 @@ export class Socket implements ISocket {
   private lastEmitTime = Date.now()
 
   private readonly actionHelper = new ActionHelper(this)
+  private static instance: Socket
 
   private constructor(
     // ioSocket<ListenRecords, EmitRecords> の並びです
@@ -21,6 +22,9 @@ export class Socket implements ISocket {
   ) {}
 
   public static async build(): Promise<Socket> {
+    if (Socket.instance !== undefined) {
+      return Socket.instance
+    }
     // スキーマが含まれているか確認
     const regexpUrlHasScheme = /^.+:\/\//
 
@@ -40,7 +44,10 @@ export class Socket implements ISocket {
       ioSocket.on('connect', () => {
         resolve(ioSocket)
       })
-    }).then((ioSocket) => new Socket(ioSocket))
+    }).then((ioSocket) => {
+      Socket.instance = new Socket(ioSocket)
+      return Socket.instance
+    })
   }
 
   /**
@@ -101,6 +108,7 @@ export class Socket implements ISocket {
     eventName: Ev,
     callback: SocketClientListenEventRecords[Ev]
   ): void {
+    this.iosocket.removeAllListeners(eventName)
     // 対処は可能ですが,
     // ここの変更忘れで時間をかけそうなので無視することにしました
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -1,5 +1,4 @@
 import { Scene } from 'phaser'
-import { KeyboardController } from '../adapter/controller/keyboard/keyboardController'
 import { SocketController } from '../adapter/controller/socket/socketController'
 import { Interactor } from '../interactor/Interactor'
 import { SocketEmitter } from '../interface/adapter/socketEmitter'
@@ -11,7 +10,7 @@ import { TextFieldObserver } from '../interface/ui/util/textFieldObserver'
 import { DialogButtonsContainer } from '../interface/ui/Render/dialogButtonsContainer'
 import { DialogSwitcher } from '../interface/ui/Render/dialogSwitcher'
 import { SettingDialog } from '../interface/ui/component/settingDialog/settingDialog'
-import { PlayerColorButtons } from '../interface/ui/component/settingDialog/playerColorButtons'
+import { MainPlayerColorButtons } from '../interface/ui/component/settingDialog/mainplayerColorButtons'
 import { RenameForm } from '../interface/ui/component/settingDialog/renameForm'
 import { SettingButton } from '../interface/ui/component/settingDialog/settingButton'
 import { ChatButton } from '../interface/ui/component/textChat/chatButton'
@@ -32,21 +31,34 @@ import { CookieStore } from '../interface/repository/cookieStore'
 import { IKeyboardController } from '../domain/IRender/IKeyboardController'
 import { TransitionManager } from '../interface/transition/transitionManager'
 import { TitleToMainData } from '../interactor/sceneTransitionData/titleToMain'
-import { VoiceChatReceiver } from '../interface/voiceChat/voiceChatReceiver'
+import { KeyboardSetupInfoWriter } from '../interface/keyboardSetupInfo/keyboardSetupInfoWriter'
 import { VoiceChatSender } from '../interface/voiceChat/voiceChatSender'
-import { MicButton } from '../interface/ui/component/voiceChat/micButton'
-import { WebRtcButtonContainer } from '../interface/ui/Render/webRtcButtonContainer'
 import { ScreenShareSender } from '../interface/screenShare/screenShareSender'
-import { ScreenShareButton } from '../interface/ui/component/screenShare/screenShareButton'
-import { ScreenShareReceiver } from '../interface/screenShare/screenShareReceiver'
+import { KeyboardSettingPopUpWindow } from '../interface/ui/component/keyboardSetting/keySettingPopUpWindow'
+import { WebRtcButtonContainer } from '../interface/ui/Render/webRtcButtonContainer'
+import { MicButton } from '../interface/ui/component/voiceChat/micButton'
 import { CameraButton } from '../interface/ui/component/camera/cameraButton'
+import { ScreenShareButton } from '../interface/ui/component/screenShare/screenShareButton'
 import { PlayerRenderFactory } from '../interface/ui/RenderFactory/playerRenderFactory'
 import { BombRenderFactory } from '../interface/ui/RenderFactory/bombRenderFactory'
 import { SharkRenderFactory } from '../interface/ui/RenderFactory/sharkRenderFactory'
 import { ServerErrorRenderFactory } from '../interface/ui/RenderFactory/serverErrorRenderFactory'
+import { KeyboardController } from '../adapter/controller/keyboard/keyboardController'
+import { VoiceChatReceiver } from '../interface/voiceChat/voiceChatReceiver'
+import { ScreenShareReceiver } from '../interface/screenShare/screenShareReceiver'
+import { KeyConfiguration } from '../interface/keyboard/keyConfiguration'
+import { PopUpKeySettingWindowButton } from '../interface/ui/component/keyboardSetting/popUpKeySettingWindowButton'
+import { KeyboardSetupInfoReader } from '../interface/keyboardSetupInfo/keyboardSettingInfoReader'
 import { DeathLogRender } from '../interface/ui/Render/entity/deathLogRender'
 import { VoiceChatVolumeController } from '../interface/voiceChat/voiceChatVolumeController'
 import { MegaphoneButton } from '../interface/ui/component/voiceChat/megaphoneButton'
+import { CameraVideoListRender } from '../interface/ui/component/camera/cameraVideoListRender'
+import { CameraVideoSender } from '../interface/webCamera/cameraVideoSender'
+import { CameraVideoReceiver } from '../interface/webCamera/cameraVideoReceiver'
+import { PlayerList } from '../interface/ui/component/playerList/playerList'
+import { PlayerListDialog } from '../interface/ui/component/playerList/playerListDialog'
+import { PlayerListButton } from '../interface/ui/component/playerList/playreListButton'
+import { ExitButton } from '../interface/ui/component/exit/exitButton'
 
 /**
  * エントリーポイント
@@ -84,6 +96,7 @@ export class MainScene extends Scene {
     const map = await MapRender.build(this)
     const socket = await Socket.build()
     const chatDialog = await TextChatDialog.build(this)
+    const playerListDialog = await PlayerListDialog.build(this)
     const chatBadge = await Badge.build(this)
     const settingDialog = await SettingDialog.build(this)
     const switcher = new DialogSwitcher()
@@ -91,11 +104,11 @@ export class MainScene extends Scene {
     const textFieldObserver = new TextFieldObserver()
     const playerRender = await PlayerRender.build(
       this,
-      map.groundLayer,
       player.position,
       player.direction,
       player.name,
-      player.color
+      player.color,
+      player.hp
     )
 
     const webRtc = new WebRtc(socket.socketId)
@@ -107,11 +120,15 @@ export class MainScene extends Scene {
     const voiceChatVolumeController = new VoiceChatVolumeController()
     const voiceChatSender = new VoiceChatSender(webRtc.room)
     const screenShareSender = new ScreenShareSender(this, webRtc.room)
+    const cameraVideoSender = new CameraVideoSender(this, webRtc.room)
 
     const texChatInput = await TextChatInput.build(this, socket.socketId, chatDialog, textFieldObserver)
     const textChatBoard = await TextChatBoard.build(this, socket.socketId, chatDialog)
-    const playerColorButtons = await PlayerColorButtons.build(this, socket.socketId, player.color, settingDialog)
+    const keySettingPopUPWindow = await KeyboardSettingPopUpWindow.build(this)
+    const playerColorButtons = await MainPlayerColorButtons.build(this, socket.socketId, player.color, settingDialog)
+    const playerList = await PlayerList.build(this, playerListDialog)
     const renameForm = await RenameForm.build(this, socket.socketId, player.name, settingDialog, textFieldObserver)
+    const openKeySettingFormButton = await PopUpKeySettingWindowButton.build(this, settingDialog)
     const micSelector = await MicSelector.build(
       this,
       localDevice.microphoneManager,
@@ -131,23 +148,32 @@ export class MainScene extends Scene {
       await localDevice.cameraManager.getDevices()
     )
 
+    const cameraVideoListRender = await CameraVideoListRender.build(this)
+
     const webRtcButtonContainer = new WebRtcButtonContainer(this)
     const micButton = await MicButton.build(this, webRtcButtonContainer)
     const megaphoneButton = await MegaphoneButton.build(this, socket.socketId, webRtcButtonContainer)
     const cameraButton = await CameraButton.build(this, webRtcButtonContainer)
     const screenShareButton = await ScreenShareButton.build(this, webRtcButtonContainer)
-    const deathLogRender = await DeathLogRender.build()
+    const deathLogRender = await DeathLogRender.build(this)
+    const exitButton = await ExitButton.build(this)
     void ChatButton.build(this, switcher, chatDialog, dialogButtonsContainer, chatBadge)
     void SettingButton.build(this, switcher, settingDialog, dialogButtonsContainer)
+    void PlayerListButton.build(this, switcher, playerListDialog, dialogButtonsContainer)
 
-    const playerRenderFactory = new PlayerRenderFactory(this, map.groundLayer)
+    const playerRenderFactory = new PlayerRenderFactory(this)
     const bombRenderFactory = new BombRenderFactory(this)
     const sharkRenderFactory = new SharkRenderFactory(this)
     const serverErrorRenderFactory = new ServerErrorRenderFactory(this)
 
     const cookieRepository = new CookieStore()
     const playerSetupInfoWriter = new PlayerSetupInfoWriter(cookieRepository)
-    const emitter = new SocketEmitter(socket, this, map.groundLayer)
+    const keyboardSetupInfoWriter = new KeyboardSetupInfoWriter(cookieRepository)
+
+    const keyboardSettingSetupInfoReader = new KeyboardSetupInfoReader(cookieRepository)
+    const keyConfiguration = new KeyConfiguration(keyboardSettingSetupInfoReader)
+
+    const emitter = new SocketEmitter(socket, this)
     const interactor = new Interactor(
       socket.socketId,
       emitter,
@@ -161,20 +187,29 @@ export class MainScene extends Scene {
       micSelector,
       speakerSelector,
       cameraSelector,
+      cameraVideoListRender,
+      cameraVideoSender,
       voiceChatSender,
       voiceChatVolumeController,
       screenShareSender,
       screenShareButton,
       playerSetupInfoWriter,
+      keyboardSetupInfoWriter,
+      keySettingPopUPWindow,
+      keyConfiguration,
       deathLogRender,
+      playerList,
       player,
-      playerRender
+      playerRender,
+      transitionManager,
+      webRtc
     )
-    const keyboardHelper = new KeyboardHelper(this)
+    const keyboardHelper = new KeyboardHelper(this, keyConfiguration)
     this.keyboardController = new KeyboardController(
       interactor,
       socket.socketId,
       keyboardHelper,
+      keyConfiguration,
       bombRenderFactory,
       sharkRenderFactory
     )
@@ -191,12 +226,17 @@ export class MainScene extends Scene {
     const voiceChatReceiver = new VoiceChatReceiver(interactor, webRtc.room)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const screenShareReceiver = new ScreenShareReceiver(this, interactor, webRtc.room)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const cameraVideoReceiver = new CameraVideoReceiver(this, interactor, webRtc.room)
 
     // interactorに渡す必要があるが, それ自身がinteractorを必要とするものはここでinteractorを渡す
     texChatInput.setInteractor(interactor)
     textChatBoard.setInteractor(interactor)
     playerColorButtons.setInteractor(interactor)
     renameForm.setInteractor(interactor)
+    keySettingPopUPWindow.setInteractor(interactor)
+    playerList.setInteractor(interactor)
+    openKeySettingFormButton.setInteractor(interactor)
     localDevice.setInteractor(interactor)
     micSelector.setInteractor(interactor)
     speakerSelector.setInteractor(interactor)
@@ -204,9 +244,14 @@ export class MainScene extends Scene {
     micButton.setInteractor(interactor)
     megaphoneButton.setInteractor(interactor)
     cameraButton.setInteractor(interactor)
+    cameraVideoSender.setInteractor(interactor)
     screenShareButton.setInteractor(interactor)
     screenShareSender.setInteractor(interactor)
     deathLogRender.setInteractor(interactor)
+    exitButton.setInteractor(interactor)
+
+    keySettingPopUPWindow.setKeyboardHelper(keyboardHelper)
+    keySettingPopUPWindow.setKeyboardPreference(textFieldObserver)
 
     this.willGameEnd(interactor)
   }
@@ -228,6 +273,7 @@ export class MainScene extends Scene {
   public willGameEnd(interactor: Interactor): void {
     window.addEventListener('beforeunload', () => {
       interactor.savePlayerInfo()
+      interactor.saveKeyboardInfo()
     })
   }
 }

@@ -29,15 +29,26 @@ import { Speaker } from '../domain/model/localDevice/speaker'
 import { IMicSelector } from './ILocalDeviceSelector/IMicSelector'
 import { ISpeakerSelector } from './ILocalDeviceSelector/ISpeakerSelector'
 import { ICameraSelector } from './ILocalDeviceSelector/ICameraSelector'
+import { IKeyboardSettingPopUpWindow } from '../domain/IRender/IKeySettingPopUpWindow'
+import { IKeyboardSetupInfoWriter } from './keyboardSetupInfo/IKeyboardSetupInfoWriter'
+import { IKeyConfiguration } from './IKeyConfiguration'
 import { IVoiceChatSender } from './voiceChat/IVoiceChatSender'
 import { ISharedScreenRender } from '../domain/IRender/ISharedScreenRender'
 import { IScreenShareSender } from './screenShare/IScreenShareSender'
 import { IScreenShareButton } from './screenShare/IScreenShareButton'
 import { IFocusableRender } from '../domain/IRender/IFocusableRender'
+import { PlayerColorChangeUseCase } from '../usecase/playerColorChangeUseCase'
+import { KeyCode, KeyEvent } from '../domain/model/core/types'
 import { IVoiceChatVolumeController } from './voiceChat/IVoiceChatVolumeController'
+import { ITransitionManager } from './ITransitionManager'
+import { TitleToMainData } from './sceneTransitionData/titleToMain'
 import { DeathLog } from '../domain/model/deathLog'
 import { DamageCause, IDeathLogRender } from '../domain/IRender/IDeathLogRender'
 import { DeathLogService } from '../domain/service/deathLogService'
+import { ICameraVideoListRender } from '../domain/IRender/ICameraVideoListRender'
+import { ICameraVideoSender } from './webCamera/ICameraVideoSender'
+import { IWebRtc } from './webRtc/IWebRtc'
+import { IPlayerListRender } from '../domain/IRender/IPlayerListRender'
 
 /**
  * Interactor
@@ -47,7 +58,7 @@ import { DeathLogService } from '../domain/service/deathLogService'
  * 入力は関数の引数
  * 出力はDIされたRenderやEmitter(もしくは返り値)
  */
-export class Interactor {
+export class Interactor implements PlayerColorChangeUseCase {
   /** serverからエラーを受け取ったか */
   private isReceivedError = false
 
@@ -64,14 +75,22 @@ export class Interactor {
     private readonly micSelector: IMicSelector,
     private readonly speakerSelector: ISpeakerSelector,
     private readonly cameraSelector: ICameraSelector,
+    private readonly cameraVideoListRender: ICameraVideoListRender,
+    private readonly cameraVideoSender: ICameraVideoSender,
     private readonly voiceChatSender: IVoiceChatSender,
     private readonly voiceChatVolumeController: IVoiceChatVolumeController,
     private readonly screenShareSender: IScreenShareSender,
     private readonly screenShareButton: IScreenShareButton,
     private readonly playerSetupInfoWriter: IPlayerSetupInfoWriter,
+    private readonly keyboardSetupInfoWriter: IKeyboardSetupInfoWriter,
+    private readonly keySettingPopUpWindow: IKeyboardSettingPopUpWindow,
+    private readonly keyConfiguration: IKeyConfiguration,
     private readonly deathLogRender: IDeathLogRender,
+    private readonly playerList: IPlayerListRender,
     player: Player,
-    playerRender: IPlayerRender
+    playerRender: IPlayerRender,
+    private readonly transitionManager: ITransitionManager<TitleToMainData, undefined>,
+    private readonly webRtc: IWebRtc
   ) {
     // Playerに焦点を当てる
     playerRender.focus()
@@ -93,6 +112,7 @@ export class Interactor {
           this.playerRenders.set(id, playerRender)
         }
       })
+      this.updatePlayerList()
 
       data.megaphoneUsers.forEach((id) => {
         this.toggleMegaphone(id, true)
@@ -117,12 +137,46 @@ export class Interactor {
     this.players.join(id, player)
     this.playerRenders.set(id, render)
     this.players.changePlayerName(id, player.name ?? 'name')
+    this.updatePlayerList()
   }
 
   public leavePlayer(id: string): void {
     this.players.leave(id)
     this.playerRenders.get(id)?.destroy()
     this.playerRenders.delete(id)
+    this.updatePlayerList()
+  }
+
+  public transitionToTitle(): void {
+    this.transitionManager.transitionTo('Title')
+  }
+
+  public handleKickEvent(kickedId: string, kickerId: string): void {
+    const kickerPlayer = this.players.getPlayer(kickerId)
+    if (kickerPlayer === undefined) return
+    this.savePlayerInfo()
+    this.saveKeyboardInfo()
+    this.leavePlayer(kickedId)
+    this.transitionToTitle()
+    this.webRtcDisconnect()
+    window.alert(`「${kickerPlayer.name}」 にキックされました`)
+  }
+
+  public exitOwnPlayer(): void {
+    this.emitter.exitOwnPlayer(this.ownPlayerId)
+    this.savePlayerInfo()
+    this.saveKeyboardInfo()
+    this.leavePlayer(this.ownPlayerId)
+    this.transitionToTitle()
+    this.webRtcDisconnect()
+  }
+
+  public webRtcDisconnect(): void {
+    void this.webRtc.disconnect()
+  }
+
+  public requestKickPlayer(kickedId: string): void {
+    this.emitter.requestKickPlayer(kickedId, this.ownPlayerId)
   }
 
   public turnPlayer(id: string, direction: Direction): void {
@@ -219,7 +273,8 @@ export class Interactor {
 
   public damagePlayer(targetId: string, attackerId: string, cause: DamageCause, amount: number): void {
     this.players.damage(targetId, amount)
-    this.playerRenders.get(targetId)?.damage(amount)
+    const currentHp = this.players.getPlayerHp(targetId) ?? 0
+    this.playerRenders.get(targetId)?.damage(amount, currentHp)
     if (this.isPlayerDead(targetId)) {
       this.diePlayer(targetId)
       const killer = this.players.getPlayer(attackerId)
@@ -243,6 +298,7 @@ export class Interactor {
 
       this.emitter.updatePlayerProfile(name, player.color)
     }
+    this.updatePlayerList()
   }
 
   public changePlayerColor(id: string, color: PlayerColorName): void {
@@ -264,9 +320,10 @@ export class Interactor {
     this.playerRenders.get(id)?.dead()
   }
 
-  public respawnPlayer(id: string, position: Position): void {
-    this.players.respawn(id, position)
-    this.playerRenders.get(id)?.respawn(position)
+  public respawnPlayer(id: string, position: Position, direction: Direction): void {
+    this.players.respawn(id, position, direction)
+    const currentHp = this.players.getPlayerHp(id) ?? 100
+    this.playerRenders.get(id)?.respawn(position, direction, currentHp)
   }
 
   public isPlayerDead(id: string): boolean {
@@ -279,6 +336,11 @@ export class Interactor {
       return
     }
     this.playerSetupInfoWriter.save(ownPlayer.name, ownPlayer.color)
+  }
+
+  public saveKeyboardInfo(): void {
+    const keys = this.keyConfiguration
+    this.keyboardSetupInfoWriter.save(keys)
   }
 
   public spawnShark(
@@ -504,6 +566,38 @@ export class Interactor {
   }
 
   /**
+   * プレイヤーがWebカメラを開始した時に実行される
+   *
+   * @param playerId Webカメラを開始したプレイヤーのid
+   * @param video 共有されている画面映像
+   */
+  public joinCameraVideo(playerId: string, stream: MediaStream): void {
+    this.cameraVideoListRender.addVideo(playerId, stream)
+  }
+
+  /**
+   * プレイヤーがWebカメラを終了した時に実行される
+   * @param playerId Webカメラを終了したプレイヤーのid
+   */
+  public leaveCameraVideo(playerId: string): void {
+    this.cameraVideoListRender.removeVideo(playerId)
+  }
+
+  /**
+   * 自プレイヤーのWebカメラを開始する
+   */
+  public async startCameraVideo(): Promise<boolean> {
+    return await this.cameraVideoSender.startStream()
+  }
+
+  /**
+   * 自プレイヤーのWebカメラを終了する
+   */
+  public async stopCameraVideo(): Promise<boolean> {
+    return await this.cameraVideoSender.stopStream()
+  }
+
+  /**
    * プレイヤーが画面共有を開始した時に実行される
    *
    * @param playerId 画面共有を開始したプレイヤーのid
@@ -555,6 +649,27 @@ export class Interactor {
   }
 
   /**
+   * keySettingPopUpWindowを開く
+   */
+  public openKeySettingPopUpWindow(): void {
+    this.keySettingPopUpWindow.openPopupWindow()
+  }
+
+  /**
+   * keySettingPopUpWindowを閉じる
+   */
+  public closeKeySettingPopUPWindow(): void {
+    this.keySettingPopUpWindow.closePopupWindow()
+  }
+
+  /**
+   * イベントと、それに紐づくキーコードのMapを習得
+   */
+  public getKeyPreference(): Map<KeyEvent, KeyCode> {
+    return this.keyConfiguration.getKeyPreference()
+  }
+
+  /**
    * プレイヤーが死亡した時に実行される
    */
   public addDeathLog(victim: Player, killer: Player, cause: DamageCause): void {
@@ -567,5 +682,14 @@ export class Interactor {
 
     this.deathLogRender.add(deathLog)
     this.deathLog.addDeathLog(deathLog)
+  }
+
+  /**
+   * playerの名前変更時、入退出時に実行される
+   */
+  public updatePlayerList(): void {
+    const players = this.players.players
+    if (players === undefined) return
+    this.playerList.updatePlayerList(this.ownPlayerId, players)
   }
 }

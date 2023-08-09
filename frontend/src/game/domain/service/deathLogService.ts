@@ -1,5 +1,4 @@
 import { DeathLog } from '../model/deathLog'
-import { TextChat } from '../model/textChat'
 
 export class DeathLogService {
   public readonly deathLogs: DeathLog[] = []

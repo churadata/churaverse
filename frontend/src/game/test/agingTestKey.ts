@@ -1,5 +1,5 @@
 import { IKey } from '../adapter/controller/keyboard/IKey'
-import { KeyCode, KeyDownCallback } from '../adapter/controller/keyboard/types'
+import { KeyCode, KeyDownCallback } from '../domain/model/core/types'
 
 /**
  * エイジングテスト用のkeyクラス

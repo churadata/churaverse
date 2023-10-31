@@ -1,7 +1,7 @@
 import { Scene } from 'phaser'
 import { IBombRender } from '../../../../domain/IRender/IBombRender'
 import { FRAME_RATE } from '../../animationConfig'
-import { layerSetting } from '../../util/layer'
+import { layerSetting } from '../../util/canvasLayer'
 import { Position } from '../../../../domain/model/core/position'
 
 /**
@@ -78,7 +78,7 @@ export class BombRender implements IBombRender {
       hideOnComplete: true,
     })
 
-    layerSetting(this.sprite, 'Bomb')
+    layerSetting(this.sprite, 'player', 10)
   }
 
   /**
@@ -130,5 +130,12 @@ export class BombRender implements IBombRender {
       return
     }
     this.sprite?.anims.play(animKey)
+  }
+
+  /**
+   * 描画問題時にbombを破棄する
+   */
+  public destroy(): void {
+    this.sprite.destroy()
   }
 }

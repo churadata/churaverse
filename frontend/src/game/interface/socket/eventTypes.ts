@@ -1,6 +1,6 @@
 import { Direction } from '../../domain/model/core/direction'
 import { PlayerColorName, PlayerRoleName } from '../../domain/model/types'
-import { EmitData, RecieveData } from './actionTypes'
+import { EmitData, InvincibleWorldModeInfo, RecieveData } from './actionTypes'
 
 /**
  * Clientから送るEventの名前とその送受信のデータの定義
@@ -36,6 +36,8 @@ export interface SocketClientEmitEventRecords {
   requestKickPlayer: (emitData: KickPlayerInfo) => void
 
   exitOwnPlayer: (emitData: exitOwnPlayerInfo) => void
+
+  requestNewMap: (emitData: MapInfo) => void
 }
 
 /**
@@ -52,6 +54,7 @@ export interface SocketClientListenEventRecords {
   /**
    * socket idがなくなったときにリロードする時のevent
    */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   NotExistsPlayer: () => void
 
   /**
@@ -65,11 +68,14 @@ export interface SocketClientListenEventRecords {
   newPlayer: (playerInfo: PlayerInfo) => void
 
   handleKickRequest: (info: KickPlayerInfo) => void
+
+  newMap: (info: MapInfo) => void
 }
 
 /**
  * Serverに送られるEventNameの型
  */
+/* eslint-disable */
 export const SocketEmitEventType = {
   EnterPlayer: 'enterPlayer',
   RequestPreloadedData: 'requestPreloadedData',
@@ -78,22 +84,28 @@ export const SocketEmitEventType = {
   EmitAllPlayersAction: 'emitAllPlayersAction',
   RequestKickPlayer: 'requestKickPlayer',
   ExitOwnPlayer: 'exitOwnPlayer',
+  RequestNewMap: 'requestNewMap',
 } as const
+/* eslint-enable */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketEmitEventType = typeof SocketEmitEventType[keyof typeof SocketEmitEventType]
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SocketEmitEventNames = Object.values(SocketEmitEventType) as SocketEmitEventType[]
 
 /**
  * Serverから送られてくるEventNameの型
  */
+/* eslint-disable */
 export const SocketListenEventType = {
   PlayersAct: 'playersAct',
   NotExistsPlayer: 'NotExistsPlayer',
   Disconnected: 'disconnected',
   NewPlayer: 'newPlayer',
   HandleKickRequest: 'handleKickRequest',
+  NewMap: 'newMap',
 } as const
+/* eslint-enable */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketListenEventType = typeof SocketListenEventType[keyof typeof SocketListenEventType]
 
@@ -121,7 +133,9 @@ interface ExistPlayersInfo {
 /**
  * メガホン機能をONにしているプレイヤーの情報
  */
-export type MegaphoneUsersInfo = string[]
+export interface MegaphoneUsersInfo {
+  [id: string]: boolean
+}
 
 /**
  * Preloadedの段階で取得する情報
@@ -129,6 +143,8 @@ export type MegaphoneUsersInfo = string[]
 interface PreloadedData {
   existPlayers: ExistPlayersInfo
   megaphoneUsers: MegaphoneUsersInfo
+  mapName: string
+  invincibleWorldModeInfo: InvincibleWorldModeInfo
 }
 /**
  * 入室する際に送るデータ
@@ -147,6 +163,14 @@ export interface KickPlayerInfo {
 /**
  * 退出する際に送るデータ
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface exitOwnPlayerInfo {
   playerId: string
+}
+
+/**
+ * 変更するMapデータ
+ */
+export interface MapInfo {
+  mapName: string
 }

@@ -1,0 +1,45 @@
+.uiContainer {
+  height: '100vh';
+  width: '100vw';
+  inset: 0;
+  position: 'fixed';
+  pointer-events: 'none';
+}
+
+button:not(.defaultStyle) {
+  color: white;
+
+  background-color: var(--c-primary-deep);
+  border: none;
+  border-radius: 5px;
+
+  cursor: pointer;
+
+  transition: all 0.3s;
+
+  &:hover {
+    filter: brightness(1.07);
+    transform: scale(1.01, 1.01);
+  }
+}
+
+input[type='text']:not(.defaultStyle) {
+  border: 1px solid var(--c-primary);
+  border-radius: 5px;
+
+  box-sizing: border-box;
+
+  padding: 10px;
+
+  &:focus {
+    outline-color: var(--c-primary-deep);
+  }
+}
+
+.uiContainer > * {
+  pointer-events: auto;
+}
+
+#uiContainer + div {
+  z-index: 10000;
+}

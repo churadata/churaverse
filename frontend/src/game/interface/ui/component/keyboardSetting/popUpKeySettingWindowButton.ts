@@ -1,57 +1,30 @@
 import { Scene } from 'phaser'
 import { Interactor } from '../../../../interactor/Interactor'
 import { SettingDialog } from '../settingDialog/settingDialog'
+import { SettingSection } from '../settingDialog/settingSection'
+import { DomManager } from '../../util/domManager'
+import { PopupKeySettingWindowButtonComponent } from './components/PopupKeySettingWindowButtonComponent'
 
 /**
- * キー設定フォーム開くときのボタンのHTMLのkey
+ * キーバインドフォームを開くボタン要素のid
  */
-const KEY_SETTING_BUTTON_KEY = 'keySettingButton'
-
-/**
- * キー設定フォーム開くときのボタンのHTMLのパス
- */
-const KEY_SETTING_BUTTON_PATH = 'assets/keySettingButton.html'
-
-/**
- * キーバインドフォームを開くボタン要素のname
- */
-const OPEN_POPUP_WINDOW_BUTTON_NAME = 'keySettingForm-open-button'
+export const POPUP_KEY_SETTING_WINDOW_BUTTON_ID = 'keySettingForm-open-button'
 
 export class PopUpKeySettingWindowButton {
   private interactor?: Interactor
 
-  /**
-   * キーバインド設定フォーム開くボタン
-   */
-  private readonly formElement: Phaser.GameObjects.DOMElement
-
   public constructor(scene: Scene, settingDialog: SettingDialog) {
-    // 入力フォームの定義
-    this.formElement = scene.add
-      .dom(-300, 90)
-      .createFromCache(KEY_SETTING_BUTTON_KEY)
-      .setOrigin(0, 0)
-      .setScrollFactor(0)
-    settingDialog.add(this.formElement)
+    const keyboardSection = new SettingSection('keyboardSetting', 'キーボード設定')
+    settingDialog.addSection(keyboardSection)
 
-    this.onClick()
+    const content = DomManager.jsxToDom(PopupKeySettingWindowButtonComponent())
+    settingDialog.addContent('keyboardSetting', content)
+
+    this.setupPopupButton()
   }
 
   public static async build(scene: Scene, settingDialog: SettingDialog): Promise<PopUpKeySettingWindowButton> {
-    return await new Promise<void>((resolve) => {
-      if (scene.textures.exists(KEY_SETTING_BUTTON_KEY)) {
-        resolve()
-      }
-      // PopUpKeySettingWindowButtonの読み込み
-      scene.load.html(KEY_SETTING_BUTTON_KEY, KEY_SETTING_BUTTON_PATH)
-
-      scene.load.once('complete', () => {
-        resolve()
-      })
-      scene.load.start()
-    }).then(() => {
-      return new PopUpKeySettingWindowButton(scene, settingDialog)
-    })
+    return new PopUpKeySettingWindowButton(scene, settingDialog)
   }
 
   public setInteractor(interactor: Interactor): void {
@@ -69,12 +42,11 @@ export class PopUpKeySettingWindowButton {
   /**
    * 開くボタンを押下した時の挙動を設定する
    */
-  private onClick(): void {
-    const open = this.formElement.getChildByID(OPEN_POPUP_WINDOW_BUTTON_NAME)
-    if (open !== null) {
-      open.addEventListener('pointerdown', () => {
-        this.popUpWindow()
-      })
+  private setupPopupButton(): void {
+    const button = DomManager.getElementById(POPUP_KEY_SETTING_WINDOW_BUTTON_ID)
+
+    button.onclick = () => {
+      this.popUpWindow()
     }
   }
 }

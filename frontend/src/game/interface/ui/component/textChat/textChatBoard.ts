@@ -3,62 +3,30 @@ import { IChatBoardRender } from '../../../../domain/IRender/IChatBoardRender'
 import { TextChat } from '../../../../domain/model/textChat'
 import { Interactor } from '../../../../interactor/Interactor'
 import { TextChatDialog } from './textChatDialog'
+import { DomManager } from '../../util/domManager'
+import { TextChatMessageBlockComponent } from './components/TextChatMessageBlockComponent'
 
-/**
- * チャット表示部分のHTMLのKey
- */
-
-const CHAT_BOARD_TEXTURE_KEY = 'chatBoard'
-
-/**
- * チャット表示部分のHTMLのパス
- */
-const CHAT_BOARD_PATH = 'assets/chatboard.html'
+export const TEXT_CHAT_BOARD_CONTAINER_ID = 'text-chat-board'
 
 /**
  * チャット表示部分
  */
 export class TextChatBoard implements IChatBoardRender {
-  public playerId: string
   public interactor?: Interactor
-  private readonly chatContainer: HTMLElement
-  private constructor(scene: Scene, playerId: string, chatDialog: TextChatDialog) {
-    this.playerId = playerId
-    // チャット表示部分の定義
-    const chatBoard = scene.add.dom(-300, 0).createFromCache(CHAT_BOARD_TEXTURE_KEY).setOrigin(0, 0).setScrollFactor(0)
-    const chatContainer = document.getElementById('chat-container')
-
-    if (chatContainer == null) {
-      throw new Error('id:chat-containerを持つelementが見つかりません。')
-    } else {
-      this.chatContainer = chatContainer
-      chatDialog.add(chatBoard)
-    }
+  private readonly chatBoardElement: HTMLElement
+  public constructor(private readonly playerId: string) {
+    this.chatBoardElement = DomManager.getElementById(TEXT_CHAT_BOARD_CONTAINER_ID)
   }
 
   public static async build(scene: Scene, playerId: string, chatDialog: TextChatDialog): Promise<TextChatBoard> {
-    return await new Promise<void>((resolve) => {
-      if (scene.textures.exists(CHAT_BOARD_TEXTURE_KEY)) {
-        resolve()
-      }
-      // チャット表示部分の読み込み
-      scene.load.html(CHAT_BOARD_TEXTURE_KEY, CHAT_BOARD_PATH)
-
-      // textureがロードされてないときに待つ
-      scene.load.once('complete', () => {
-        resolve()
-      })
-      scene.load.start()
-    }).then(() => {
-      return new TextChatBoard(scene, playerId, chatDialog)
-    })
+    return new TextChatBoard(playerId)
   }
 
   /**
    * メッセージが追加されると自動でスクロールする
    */
   public scrollToBottom(): void {
-    this.chatContainer.scrollTop = this.chatContainer.scrollHeight
+    this.chatBoardElement.scrollTop = this.chatBoardElement.scrollHeight
   }
 
   /**
@@ -66,14 +34,8 @@ export class TextChatBoard implements IChatBoardRender {
    * @param textChat 追加したい要素
    */
   public add(textChat: TextChat, textColor: string = '#333333'): void {
-    const content = document.createElement('li')
-    content.style.fontSize = '12px'
-    content.style.listStyle = 'none'
-    content.style.padding = '12px 15px'
-    content.style.textAlign = 'left'
-    content.style.color = textColor
-    content.textContent = `${textChat.name ?? 'name'}:${textChat.message}`
-    this.chatContainer.appendChild(content)
+    const messageElement = DomManager.jsxToDom(TextChatMessageBlockComponent({ textChat, textColor }))
+    this.chatBoardElement.appendChild(messageElement)
     this.scrollToBottom()
   }
 
@@ -84,8 +46,8 @@ export class TextChatBoard implements IChatBoardRender {
 
   public redraw(allChat: TextChat[]): void {
     // 全部削除
-    while (this.chatContainer.firstChild != null) {
-      this.chatContainer.removeChild(this.chatContainer.firstChild)
+    while (this.chatBoardElement.firstChild != null) {
+      this.chatBoardElement.removeChild(this.chatBoardElement.firstChild)
     }
 
     allChat.forEach((t) => this.add(t))

@@ -2,10 +2,7 @@ import { IBombRepository } from '../../domain/IRepository/IBombRepository'
 import { Bomb } from '../../domain/model/bomb'
 import { CollidableEntityRepository } from '../../domain/core/collisionDetection/collidableEntityRepository'
 
-export class BombRepository
-  extends CollidableEntityRepository<Bomb>
-  implements IBombRepository
-{
+export class BombRepository extends CollidableEntityRepository<Bomb> implements IBombRepository {
   private readonly bombs = new Map<string, Bomb>()
 
   public set(id: string, entity: Bomb): void {

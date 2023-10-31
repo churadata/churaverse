@@ -4,13 +4,14 @@ import express from 'express'
 import { Socket } from './interface/socket/socket'
 import { SocketController } from './adapter/controller/socketController'
 import { Interactor } from './interactor/interactor'
-import { PlayerRepository } from './adapter/repository/playerRepository'
 import { SocketEmitter } from './interface/socket/socketEmitter'
-import { SharkRepository } from './adapter/repository/sharkRepository'
 import { MapManager } from './interface/map/mapManager'
-import { BombRepository } from './adapter/repository/bombRepository'
 import { error } from './interface/errorHandler'
 import { MegaphoneUserRepository } from './adapter/repository/megaphoneUserRepository'
+import { WorldConfig } from './domain/model/worldConfig'
+import { PlayerRepository } from './adapter/repository/playerRepository'
+import { SharkRepository } from './adapter/repository/sharkRepository'
+import { BombRepository } from './adapter/repository/bombRepository'
 
 const app = express()
 const server: http.Server = http.createServer(app)
@@ -28,6 +29,7 @@ const socket = new Socket(server)
 void MapManager.build('Map.json')
   .then((mapManager) => {
     const interactor = new Interactor(
+      new WorldConfig(),
       mapManager,
       new PlayerRepository(mapManager.currentMap),
       new SharkRepository(mapManager.currentMap),

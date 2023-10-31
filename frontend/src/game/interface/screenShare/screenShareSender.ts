@@ -7,14 +7,18 @@ import {
   Track,
 } from 'livekit-client'
 import { IScreenShareSender } from '../../interactor/screenShare/IScreenShareSender'
-import { SharedScreenRender } from '../ui/Render/entity/sharedScreenRender'
 import { Scene } from 'phaser'
 import { Interactor } from '../../interactor/Interactor'
+import { SharedScreenRenderFactory } from '../ui/RenderFactory/sharedScreenRenderFactory'
 
 export class ScreenShareSender implements IScreenShareSender {
   private interactor?: Interactor
 
-  public constructor(private readonly scene: Scene, private readonly room: Room) {
+  public constructor(
+    private readonly scene: Scene,
+    private readonly room: Room,
+    private readonly sharedScreenRenderFactory: SharedScreenRenderFactory
+  ) {
     this.room
       .on(RoomEvent.LocalTrackPublished, this.onStartStream.bind(this))
       .on(RoomEvent.LocalTrackUnpublished, this.onStopStream.bind(this))
@@ -37,7 +41,7 @@ export class ScreenShareSender implements IScreenShareSender {
     const mediaStream = new MediaStream()
     mediaStream.addTrack(remoteTrackPublication.videoTrack.mediaStreamTrack)
 
-    void SharedScreenRender.build(this.scene, mediaStream).then((sharedScreenRender) => {
+    void this.sharedScreenRenderFactory.build(mediaStream).then((sharedScreenRender) => {
       this.interactor?.joinScreenShare(participant.identity, sharedScreenRender)
     })
   }
@@ -56,7 +60,6 @@ export class ScreenShareSender implements IScreenShareSender {
       await this.room.localParticipant.setScreenShareEnabled(true, screenShareCaptureOptions)
     } catch (error) {
       // 共有画面の選択時にキャンセルした場合
-      // console.log(error)
       return false
     }
     return this.room.localParticipant.isScreenShareEnabled

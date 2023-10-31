@@ -7,4 +7,5 @@ import { Position } from '../model/core/position'
 export interface IBombRender {
   drop: (source: Position) => void
   explode: () => void
+  destroy: () => void
 }

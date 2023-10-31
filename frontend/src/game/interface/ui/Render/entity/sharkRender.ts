@@ -4,7 +4,7 @@ import { Direction, vectorToName } from '../../../../domain/model/core/direction
 import { ISharkRender } from '../../../../domain/IRender/ISharkRender'
 import { SHARK_WALK_LIMIT_MS } from '../../../../domain/model/shark'
 import { Position } from '../../../../domain/model/core/position'
-import { layerSetting } from '../../util/layer'
+import { layerSetting } from '../../util/canvasLayer'
 
 /**
  * サメのテクスチャキー
@@ -64,7 +64,7 @@ export class SharkRender implements ISharkRender {
       })
     })
 
-    layerSetting(this.sprite, 'Shark')
+    layerSetting(this.sprite, 'player', 20)
   }
 
   /**
@@ -95,13 +95,7 @@ export class SharkRender implements ISharkRender {
     this.sprite.name = id
   }
 
-  public walk(
-    position: Position,
-    dest: Position,
-    direction: Direction,
-    daley: number,
-    onUpdate: (pos: Position) => void
-  ): void {
+  public walk(position: Position, dest: Position, direction: Direction, onUpdate: (pos: Position) => void): void {
     this.sprite.active = true
     const src = position.copy()
     this.tween = this.scene.add.tween({
@@ -118,7 +112,7 @@ export class SharkRender implements ISharkRender {
         getEnd: () => dest.y,
       },
       // 移動時間
-      duration: SHARK_WALK_LIMIT_MS - daley,
+      duration: SHARK_WALK_LIMIT_MS,
 
       onUpdate: () => {
         onUpdate(new Position(this.sprite.x, this.sprite.y))

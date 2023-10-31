@@ -2,10 +2,7 @@ import { Shark } from '../../domain/model/shark'
 import { ISharkRepository } from '../../domain/IRepository/ISharkRepository'
 import { CollidableEntityRepository } from '../../domain/core/collisionDetection/collidableEntityRepository'
 
-export class SharkRepository
-  extends CollidableEntityRepository<Shark>
-  implements ISharkRepository
-{
+export class SharkRepository extends CollidableEntityRepository<Shark> implements ISharkRepository {
   private readonly sharks = new Map<string, Shark>()
 
   public set(id: string, entity: Shark): void {

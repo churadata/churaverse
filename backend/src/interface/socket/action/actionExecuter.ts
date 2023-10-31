@@ -11,6 +11,7 @@ import {
   WalkInfo,
   StopInfo,
   MegaphoneInfo,
+  InvincibleWorldModeInfo,
 } from './actionTypes'
 
 /**
@@ -30,6 +31,7 @@ export class ActionExecuter {
     bomb: (data: BombInfo & ReceiveBaseInfo) => {},
     chat: (data: ChatInfo & ReceiveBaseInfo) => {},
     megaphone: (data: MegaphoneInfo & ReceiveBaseInfo) => {},
+    invincibleWorldMode: (data: InvincibleWorldModeInfo & ReceiveBaseInfo) => {},
   }
 
   /**
@@ -37,20 +39,14 @@ export class ActionExecuter {
    * @param actionName socketが受信したaction
    * @param f 発火する関数
    */
-  public registerCallback<K extends SocketListenActionType>(
-    actionName: K,
-    f: ActionListenTypeTable[K]
-  ): void {
+  public registerCallback<K extends SocketListenActionType>(actionName: K, f: ActionListenTypeTable[K]): void {
     this.listenCallbacks[actionName] = f
   }
 
   /**
    * listenActionで設定したcallbackを実行
    */
-  public exec<K extends SocketListenActionType>(
-    actionName: K,
-    data: Parameters<ActionListenTypeTable[K]>[0]
-  ): void {
+  public exec<K extends SocketListenActionType>(actionName: K, data: Parameters<ActionListenTypeTable[K]>[0]): void {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     this.listenCallbacks[actionName](data)

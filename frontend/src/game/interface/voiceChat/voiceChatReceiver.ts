@@ -15,7 +15,7 @@ export class VoiceChatReceiver {
    * ボイスチャット開始時に実行される関数
    */
   private onJoin(track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant): void {
-    if (track.kind !== Track.Kind.Audio) return
+    if (track.source !== Track.Source.Microphone) return
 
     const remoteTrackPublication = participant.getTrack(Track.Source.Microphone)
     if (remoteTrackPublication?.audioTrack == null || remoteTrackPublication.track == null) {
@@ -25,13 +25,21 @@ export class VoiceChatReceiver {
     const voice = remoteTrackPublication.track.attach()
 
     this.interactor.joinVoiceChat(participant.identity, voice)
+
+    remoteTrackPublication.addListener('unmuted', () => {
+      this.interactor.onUnmute(participant.identity)
+    })
+
+    remoteTrackPublication.addListener('muted', () => {
+      this.interactor.onMute(participant.identity)
+    })
   }
 
   /**
    * ボイスチャット終了時に実行される関数
    */
   private onLeave(track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant): void {
-    if (track.kind !== Track.Kind.Audio) return
+    if (track.source !== Track.Source.Microphone) return
 
     participant.getTrack(Track.Source.Microphone)?.track?.detach()
     this.interactor.leaveVoiceChat(participant.identity)

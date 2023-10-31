@@ -1,5 +1,5 @@
 import { Scene } from 'phaser'
-import { layerSetting } from './layer'
+import { layerSetting } from './canvasLayer'
 
 /**
  * 画面のリサイズに追従して位置を更新するコンテナを作成する
@@ -14,7 +14,7 @@ export function createUIContainer(
   const container = scene.add
     .container(scene.scale.gameSize.width * originX + offsetX, scene.scale.gameSize.height * originY + offsetY)
     .setScrollFactor(0)
-  layerSetting(container, 'UIContainer')
+  layerSetting(container, 'UI')
 
   scene.scale.on(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

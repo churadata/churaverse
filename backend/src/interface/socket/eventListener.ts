@@ -15,6 +15,7 @@ export class EventListener {
     disconnect: () => {},
     requestKickPlayer: () => {},
     exitOwnPlayer: () => {},
+    requestNewMap: () => {},
   }
 
   /**
@@ -22,10 +23,7 @@ export class EventListener {
    * @param eventName イベント名
    * @param callback イベント受信後のcallback
    */
-  public listen<Ev extends SocketListenEventType>(
-    eventName: Ev,
-    callback: ListenEventCallbackTable[Ev]
-  ): void {
+  public listen<Ev extends SocketListenEventType>(eventName: Ev, callback: ListenEventCallbackTable[Ev]): void {
     this.callbacks[eventName] = callback
   }
 }

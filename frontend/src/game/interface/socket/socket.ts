@@ -3,7 +3,8 @@ import { EventNames } from 'socket.io/dist/typed-events'
 import { ActionHelper } from './actionHelper'
 import { ActionEmitTypeTable, ActionTypeTable, SocketEmitActionType, SocketListenActionType } from './actionTypes'
 import { SocketClientListenEventRecords, SocketClientEmitEventRecords, SocketListenEventType } from './eventTypes'
-import { ISocket } from '../../adapter/controller/socket/ISocket'
+import { ISocket, SocketListenSceneName } from '../../adapter/controller/socket/ISocket'
+import { CallbackExecutionGuard } from '../../adapter/controller/socket/callbackExecutionGuard'
 
 /**
  * Serverとの通信用クラス
@@ -16,12 +17,13 @@ export class Socket implements ISocket {
   private static instance: Socket
 
   private constructor(
+    private readonly callbackExecutionGuard: CallbackExecutionGuard,
     // ioSocket<ListenRecords, EmitRecords> の並びです
     // https://socket.io/docs/v4/migrating-from-3-x-to-4-0/#typed-events
     private readonly iosocket: ioSocket<SocketClientListenEventRecords, SocketClientEmitEventRecords>
   ) {}
 
-  public static async build(): Promise<Socket> {
+  public static async build(CallbackExecutionGuard: CallbackExecutionGuard): Promise<Socket> {
     if (Socket.instance !== undefined) {
       return Socket.instance
     }
@@ -45,7 +47,7 @@ export class Socket implements ISocket {
         resolve(ioSocket)
       })
     }).then((ioSocket) => {
-      Socket.instance = new Socket(ioSocket)
+      Socket.instance = new Socket(CallbackExecutionGuard, ioSocket)
       return Socket.instance
     })
   }
@@ -106,20 +108,37 @@ export class Socket implements ISocket {
    */
   public listenEvent<Ev extends SocketListenEventType>(
     eventName: Ev,
-    callback: SocketClientListenEventRecords[Ev]
+    callback: SocketClientListenEventRecords[Ev],
+    listenScene?: SocketListenSceneName
   ): void {
+    const actualListenScene = listenScene ?? 'Main'
     this.iosocket.removeAllListeners(eventName)
     // 対処は可能ですが,
     // ここの変更忘れで時間をかけそうなので無視することにしました
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    this.iosocket.on(eventName, callback)
+    this.iosocket.on(eventName, (...arg) => {
+      if (this.callbackExecutionGuard.isCurrentScene(actualListenScene)) {
+        // @ts-expect-error
+        // eslint-disable-next-line n/no-callback-literal
+        callback(...arg)
+      }
+    })
   }
 
   public listenAction<Ac extends SocketEmitActionType | SocketListenActionType>(
     actionName: Ac,
-    callback: ActionTypeTable[Ac]
+    callback: ActionTypeTable[Ac],
+    listenScene?: SocketListenSceneName
   ): void {
-    this.actionHelper.listenAction(actionName, callback)
+    const actualListenScene = listenScene ?? 'Main'
+    // @ts-expect-error
+    this.actionHelper.listenAction(actionName, (...arg) => {
+      if (this.callbackExecutionGuard.isCurrentScene(actualListenScene)) {
+        // @ts-expect-error
+        // eslint-disable-next-line n/no-callback-literal
+        callback(...arg)
+      }
+    })
   }
 }

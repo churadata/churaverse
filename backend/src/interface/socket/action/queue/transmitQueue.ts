@@ -1,15 +1,14 @@
 import AsyncLock from 'async-lock'
-import {
-  SocketEmitOnlyActionType,
-  ActionFromServer,
-  EmitData,
-} from '../actionTypes'
+import { SocketEmitOnlyActionType, ActionFromServer, EmitData } from '../actionTypes'
 import { ITransmitQueue, TransmitQueueBuffers } from './ITransmitQueue'
 
 const TRANSMIT_QUEUE_ASYNC_LOCK_KEY = 'transmitQueue'
 
 export class TransmitQueue implements ITransmitQueue {
-  private readonly lock = new AsyncLock({ timeout: 1000 * 30 })
+  private readonly lock = new AsyncLock({
+    timeout: 1000 * 30,
+    maxPending: Infinity,
+  })
 
   // 送信キューは受信キューとは違いプレイヤーの数だけ存在する
   private readonly packets: TransmitQueueBuffers = new Map()
@@ -17,10 +16,10 @@ export class TransmitQueue implements ITransmitQueue {
   /**
    * 全プレイヤーの送信キューにパケットを追加
    */
-  public push(sendDData: EmitData): void {
-    void this.lock.acquire('TransmitQueue', () => {
+  public push(sendData: EmitData): void {
+    void this.lock.acquire(TRANSMIT_QUEUE_ASYNC_LOCK_KEY, () => {
       for (const playerId of this.packets.keys()) {
-        this.pushAt(playerId, sendDData)
+        this.pushAtWithoutLock(playerId, sendData)
       }
     })
   }
@@ -30,16 +29,22 @@ export class TransmitQueue implements ITransmitQueue {
    */
   public pushAt(playerId: string, sendData: EmitData): void {
     void this.lock.acquire(TRANSMIT_QUEUE_ASYNC_LOCK_KEY, () => {
-      this.packets.get(playerId)?.push(...sendData)
+      this.pushAtWithoutLock(playerId, sendData)
     })
+  }
+
+  /**
+   * 指定したプレイヤーの送信キューにパケットを追加
+   * 排他制御は行わないので外部からは使用しない
+   */
+  private pushAtWithoutLock(playerId: string, sendData: EmitData): void {
+    this.packets.get(playerId)?.push(...sendData)
   }
 
   /**
    * 全プレイヤーの送信キューにActionデータを追加
    */
-  public insert<T extends SocketEmitOnlyActionType>(
-    sendActionData: ActionFromServer<T>
-  ): void {
+  public insert<T extends SocketEmitOnlyActionType>(sendActionData: ActionFromServer<T>): void {
     void this.lock.acquire(TRANSMIT_QUEUE_ASYNC_LOCK_KEY, () => {
       for (const playerId of this.packets.keys()) {
         this.insertAt(playerId, sendActionData)
@@ -50,13 +55,21 @@ export class TransmitQueue implements ITransmitQueue {
   /**
    * 指定したプレイヤーの送信キューにActionデータを追加
    */
-  public insertAt<T extends SocketEmitOnlyActionType>(
+  public insertAt<T extends SocketEmitOnlyActionType>(playerId: string, sendActionData: ActionFromServer<T>): void {
+    void this.lock.acquire(TRANSMIT_QUEUE_ASYNC_LOCK_KEY, () => {
+      this.insertAtWithoutLock(playerId, sendActionData)
+    })
+  }
+
+  /**
+   * 指定したプレイヤーの送信キューにActionデータを追加.
+   * 排他制御は行わないので外部からは使用しない
+   */
+  private insertAtWithoutLock<T extends SocketEmitOnlyActionType>(
     playerId: string,
     sendActionData: ActionFromServer<T>
   ): void {
-    void this.lock.acquire(TRANSMIT_QUEUE_ASYNC_LOCK_KEY, () => {
-      this.packets.get(playerId)?.push(sendActionData)
-    })
+    this.packets.get(playerId)?.push(sendActionData)
   }
 
   /**
@@ -69,7 +82,7 @@ export class TransmitQueue implements ITransmitQueue {
     void this.lock.acquire(TRANSMIT_QUEUE_ASYNC_LOCK_KEY, () => {
       for (const playerId of this.packets.keys()) {
         if (excludeId === playerId) continue
-        this.insertAt(playerId, sendActionData)
+        this.insertAtWithoutLock(playerId, sendActionData)
       }
     })
   }
@@ -82,7 +95,7 @@ export class TransmitQueue implements ITransmitQueue {
 
     await this.lock.acquire(TRANSMIT_QUEUE_ASYNC_LOCK_KEY, () => {
       for (const playerId of this.packets.keys()) {
-        allPlayerTransmitQueue.set(playerId, this.popAt(playerId))
+        allPlayerTransmitQueue.set(playerId, this.popAtWithoutLock(playerId))
       }
     })
 
@@ -90,16 +103,15 @@ export class TransmitQueue implements ITransmitQueue {
   }
 
   /**
-   * 指定したプレイヤーの送信キュー内にある全パケットを取り出し、キューを空にする
+   * 指定したプレイヤーの送信キュー内にある全パケットを取り出し、キューを空にする.
+   * 排他制御は行わないので外部からは使用しない
    */
-  public popAt(playerId: string): EmitData {
+  private popAtWithoutLock(playerId: string): EmitData {
     let poppedPacket: EmitData = []
 
     // 文字列化してdeep copyするこの方法ではシリアライズ可能なオブジェクトのみコピー可能
     // socket.ioで通信できるのもシリアライズ可能なオブジェクトのみなのでこの方法でdeep copyしている
-    poppedPacket = JSON.parse(
-      JSON.stringify(this.packets.get(playerId))
-    ) as EmitData
+    poppedPacket = JSON.parse(JSON.stringify(this.packets.get(playerId))) as EmitData
     // 中身を空に
     this.packets.set(playerId, [])
     return poppedPacket

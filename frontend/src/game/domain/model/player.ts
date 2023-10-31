@@ -30,7 +30,7 @@ export class Player extends Entity {
     hp: number,
     role: PlayerRoleName
   ) {
-    super(position, direction, DEFAULT_HP)
+    super(position, direction, hp)
     this._name = name
     this._color = color
     this._role = role

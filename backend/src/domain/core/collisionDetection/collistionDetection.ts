@@ -14,10 +14,7 @@ interface CollidedDict {
  * @param entityRepository2 衝突対象のentityのリポジトリ2
  * @param onOverlap (entity1のid, entity1, entity2のid, entity2) => void
  */
-export function detectEntityOverlap<
-  T1 extends ICollidableEntity,
-  T2 extends ICollidableEntity
->(
+export function detectEntityOverlap<T1 extends ICollidableEntity, T2 extends ICollidableEntity>(
   entityRepository1: CollidableEntityRepository<T1>,
   entityRepository2: CollidableEntityRepository<T2>,
   onOverlap: (id1: string, entity1: T1, id2: string, entity2: T2) => void // 衝突時に実行するcallback
@@ -43,15 +40,11 @@ export function detectEntityOverlap<
  */
 export function isCollided(rect1: IRectangle, rect2: IRectangle): boolean {
   const horizontal =
-    rect2.position.x - rect2.width / 2 <
-      rect1.position.x - rect1.width / 2 + rect1.width &&
-    rect1.position.x - rect1.width / 2 <
-      rect2.position.x - rect2.width / 2 + rect2.width
+    rect2.position.x - rect2.width / 2 < rect1.position.x - rect1.width / 2 + rect1.width &&
+    rect1.position.x - rect1.width / 2 < rect2.position.x - rect2.width / 2 + rect2.width
   const vertical =
-    rect2.position.y - rect2.height / 2 <
-      rect1.position.y - rect1.height / 2 + rect1.height &&
-    rect1.position.y - rect1.height / 2 <
-      rect2.position.y - rect2.height / 2 + rect2.height
+    rect2.position.y - rect2.height / 2 < rect1.position.y - rect1.height / 2 + rect1.height &&
+    rect1.position.y - rect1.height / 2 < rect2.position.y - rect2.height / 2 + rect2.height
 
   return horizontal && vertical
 }
@@ -63,10 +56,7 @@ export function isCollided(rect1: IRectangle, rect2: IRectangle): boolean {
  * @param entityRepository1 衝突判定したいオブジェクト群1のRepository
  * @param entityRepository2 衝突判定したいオブジェクト群2のRepository
  */
-export function getCollidedDict<
-  T1 extends ICollidableEntity,
-  T2 extends ICollidableEntity
->(
+export function getCollidedDict<T1 extends ICollidableEntity, T2 extends ICollidableEntity>(
   entityRepository1: CollidableEntityRepository<T1>,
   entityRepository2: CollidableEntityRepository<T2>,
   currentIndex = 0,
@@ -80,14 +70,7 @@ export function getCollidedDict<
   // 現段階のCollidedDictに同じ空間内で衝突しているオブジェクトを追加
   Object.assign(
     collidedDict,
-    hitTestInCell(
-      currentCell1,
-      currentCell2,
-      entityRepository1,
-      entityRepository2,
-      checkStack1,
-      checkStack2
-    )
+    hitTestInCell(currentCell1, currentCell2, entityRepository1, entityRepository2, checkStack1, checkStack2)
   )
 
   // 現在参照している空間の子孫空間にオブジェクトが存在するか
@@ -99,13 +82,10 @@ export function getCollidedDict<
 
     // nextIndexが各四分木のサイズを超えている場合true
     const outOfIndex =
-      nextIndex >= entityRepository1.qtreeData.length &&
-      nextIndex >= entityRepository2.qtreeData.length
+      nextIndex >= entityRepository1.qtreeData.length && nextIndex >= entityRepository2.qtreeData.length
 
     // nextIndexで指定した空間かその子孫空間にオブジェクトが存在しない場合true
-    const noChild =
-      entityRepository1.qtreeData[nextIndex] === null &&
-      entityRepository2.qtreeData[nextIndex] === null
+    const noChild = entityRepository1.qtreeData[nextIndex] === null && entityRepository2.qtreeData[nextIndex] === null
 
     const hasChildCell = !outOfIndex && !noChild
 
@@ -121,14 +101,7 @@ export function getCollidedDict<
       }
 
       // 現在の空間内オブジェクトを衝突リストにpush、参照する空間を子空間にして再帰
-      getCollidedDict(
-        entityRepository1,
-        entityRepository2,
-        nextIndex,
-        checkStack1,
-        checkStack2,
-        collidedDict
-      )
+      getCollidedDict(entityRepository1, entityRepository2, nextIndex, checkStack1, checkStack2, collidedDict)
 
       // 子空間から戻ってきたので現在の空間内オブジェクトを衝突リストからpop
       if (currentCell1 !== null) {
@@ -148,10 +121,7 @@ export function getCollidedDict<
  * 同じ空間内にあるオブジェクト同士の衝突判定をとる
  * 衝突リストにあるオブジェクトとも衝突判定をとる
  */
-export function hitTestInCell<
-  T1 extends ICollidableEntity,
-  T2 extends ICollidableEntity
->(
+export function hitTestInCell<T1 extends ICollidableEntity, T2 extends ICollidableEntity>(
   _cell1: Set<string> | null,
   _cell2: Set<string> | null,
   entityRepository1: CollidableEntityRepository<T1>,
@@ -159,11 +129,7 @@ export function hitTestInCell<
   checkStack1: string[],
   checkStack2: string[]
 ): CollidedDict {
-  if (
-    (_cell1 === null || _cell1.size <= 0) &&
-    (_cell2 === null || _cell2.size <= 0)
-  )
-    return {}
+  if ((_cell1 === null || _cell1.size <= 0) && (_cell2 === null || _cell2.size <= 0)) return {}
 
   _cell1 ??= new Set()
   _cell2 ??= new Set()

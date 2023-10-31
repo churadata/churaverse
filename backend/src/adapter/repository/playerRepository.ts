@@ -2,10 +2,7 @@ import { Player } from '../../domain/model/player'
 import { IPlayerRepository } from '../../domain/IRepository/IPlayerRepository'
 import { CollidableEntityRepository } from '../../domain/core/collisionDetection/collidableEntityRepository'
 
-export class PlayerRepository
-  extends CollidableEntityRepository<Player>
-  implements IPlayerRepository
-{
+export class PlayerRepository extends CollidableEntityRepository<Player> implements IPlayerRepository {
   private readonly players = new Map<string, Player>()
 
   public set(id: string, entity: Player): void {

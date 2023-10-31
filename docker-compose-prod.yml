@@ -8,8 +8,8 @@ services:
     volumes:
       - ./frontend:/usr/src/app/frontend
       - frontend_node_modules:/usr/src/app/frontend/node_modules
-    ports:
-      - 3000:3000
+    expose:
+      - 3000
     working_dir: /usr/src/app/frontend
     init: true
     command: bash -c "npm i && npm start"
@@ -22,8 +22,8 @@ services:
       - NODE_ENV=development
     volumes:
       - ./backend:/usr/src/app/backend
-    ports:
-      - 12100:12100
+    expose:
+      - 12100
     working_dir: /usr/src/app/backend
     env_file:
       - ./backend/prod.env
@@ -34,8 +34,8 @@ services:
     image: node:18.14.0
     container_name: backend_livekit
     restart: always
-    ports:
-      - 12150:12150
+    expose:
+      - 12150
     env_file:
       - ./backend_livekit/prod.env
     environment:
@@ -49,8 +49,11 @@ services:
   livekit:
     image: livekit/livekit-server:v1.2.3
     container_name: livekit
-    network_mode: "host"
     restart: always
+    ports:
+      - 7880:7880
+      - 7881:7881
+      - 7882:7882/udp
     volumes:
       - ./livekit/livekit.prod.yaml:/etc/livekit.prod.yaml
     command: --config /etc/livekit.prod.yaml
@@ -58,8 +61,10 @@ services:
   nginx:
     image: nginx:1.22.0
     container_name: nginx
-    network_mode: "host"
     restart: always
+    ports:
+      - 80:80
+      - 443:443
     env_file:
       - ./nginx/prod.env
     volumes:

@@ -1,11 +1,7 @@
 import { detectEntityOverlap } from '../domain/core/collisionDetection/collistionDetection'
 import { Direction } from '../domain/core/direction'
 import { Bomb } from '../domain/model/bomb'
-import {
-  Player,
-  PlayerColorName,
-  PLAYER_RESPAWN_WAITING_TIME_MS,
-} from '../domain/model/player'
+import { Player, PlayerColorName, PLAYER_RESPAWN_WAITING_TIME_MS } from '../domain/model/player'
 import { Shark } from '../domain/model/shark'
 import { Position } from '../domain/core/position'
 import { IBombRepository } from '../domain/IRepository/IBombRepository'
@@ -22,11 +18,13 @@ import { IMegaphoneUserRepository } from '../domain/IRepository/IMegaphoneUserRe
 // acknowledgements対応のためimportを許可
 // eslint-disable-next-line import/no-restricted-paths
 import { PreloadedDataIngredients } from '../interface/socket/eventTypes'
+import { WorldConfig } from '../domain/model/worldConfig'
 
 export class Interactor {
   private readonly sessionId = Math.random().toString(36).slice(-8)
 
   public constructor(
+    private readonly worldConfig: WorldConfig,
     private readonly mapManager: IMapManager,
     private readonly players: IPlayerRepository,
     private readonly sharks: ISharkRepository,
@@ -38,13 +36,9 @@ export class Interactor {
   public joinPlayer(id: string, player: Player): void {
     this.players.set(id, player)
     this.emitter.emitNewPlayer(id, player)
+    this.toggleMegaphone(id, true)
 
-    console.log(
-      this.sessionId,
-      player.name,
-      '現在接続数:',
-      this.players.getAllId().length
-    )
+    console.log(this.sessionId, player.name, '現在接続数:', this.players.getAllId().length)
   }
 
   public leavePlayer(id: string): void {
@@ -59,14 +53,14 @@ export class Interactor {
     this.players.get(id)?.turn(direction)
   }
 
-  public walkPlayer(
-    id: string,
-    startPos: Position,
-    direction: Direction,
-    speed: number
-  ): void {
-    const velocity = { x: speed * direction.x, y: speed * direction.y }
-    this.players.get(id)?.walk(startPos, direction, velocity)
+  public walkPlayer(id: string, startPos: Position, direction: Direction, speed: number): void {
+    const player = this.players.get(id)
+    if (player?.isDead === true) {
+      player?.stop()
+    } else {
+      const velocity = { x: speed * direction.x, y: speed * direction.y }
+      player?.walk(startPos, direction, velocity)
+    }
   }
 
   public requestKickPlayer(kickedId: string, kickerId: string): void {
@@ -74,11 +68,12 @@ export class Interactor {
     this.emitter.requestKickPlayer(kickedId, kickerId)
   }
 
-  public stopPlayer(
-    id: string,
-    position: Position,
-    direction: Direction
-  ): void {
+  public async newMap(mapName: string): Promise<void> {
+    await this.reloadMap(mapName)
+    this.emitter.newMap(mapName)
+  }
+
+  public stopPlayer(id: string, position: Position, direction: Direction): void {
     const player = this.players.get(id)
     if (player === undefined) return
     player.stop()
@@ -88,16 +83,12 @@ export class Interactor {
     player.turn(direction)
   }
 
-  public damagePlayer(
-    amount: number,
-    attacker: string,
-    target: string,
-    cause: DamageCause,
-    damage: number
-  ): void {
+  public damagePlayer(attacker: string, target: string, cause: DamageCause, amount: number): void {
+    if (this.worldConfig.isInvincibleMode) return
+
     const player = this.players.get(target)
     player?.damage(amount)
-    this.emitter.emitDamage(attacker, target, cause, damage)
+    this.emitter.emitDamage(attacker, target, cause, amount)
 
     if (player?.isDead ?? false) {
       player?.stop()
@@ -115,7 +106,7 @@ export class Interactor {
     if (player === undefined) return
 
     // ランダムな通行可能マスの座標を取得
-    const position = this.mapManager.currentMap.getRandomPos(true)
+    const position = this.mapManager.currentMap.getRandomSpawnPoint()
 
     player.respawn(position)
     this.emitter.emitPlayerRespawn(id, player.position, player.direction)
@@ -143,12 +134,23 @@ export class Interactor {
     this.bombs.set(bombId, bomb)
   }
 
-  public toggleMegaphone(id: string, activate: boolean): void {
-    if (activate) {
-      this.megaphoneUsers.add(id)
+  public toggleMegaphone(id: string, active: boolean): void {
+    if (active) {
+      this.megaphoneUsers.set(id, true)
     } else {
-      this.megaphoneUsers.delete(id)
+      this.megaphoneUsers.set(id, false)
     }
+  }
+
+  public async reloadMap(mapName: string): Promise<void> {
+    await this.mapManager.reloadMap(mapName)
+    this.players.updateMap(this.mapManager.currentMap)
+    this.sharks.updateMap(this.mapManager.currentMap)
+    this.bombs.updateMap(this.mapManager.currentMap)
+  }
+
+  public toggleInvincibleWorldMode(active: boolean): void {
+    this.worldConfig.isInvincibleMode = active
   }
 
   /**
@@ -158,6 +160,8 @@ export class Interactor {
     const ingredients = {
       players: this.players,
       megaphoneUsers: this.megaphoneUsers,
+      mapName: this.mapManager.currentMap.mapName,
+      worldConfig: this.worldConfig,
     }
     return ingredients
   }
@@ -181,11 +185,7 @@ export class Interactor {
     // サメを微小時間分移動
     moveSharks(dt, this.sharks, this.mapManager.currentMap)
     // サメとプレイヤーの衝突判定
-    detectEntityOverlap(
-      this.sharks,
-      this.players,
-      this.sharkHitPlayer.bind(this)
-    )
+    detectEntityOverlap(this.sharks, this.players, this.sharkHitPlayer.bind(this))
     // プレイヤーと衝突した or 消滅時間に達した or ワールド外に出た サメを削除
     removeDieShark(this.sharks, (sharkId: string) => {
       this.emitter.emitHitShark(sharkId)
@@ -200,12 +200,7 @@ export class Interactor {
     removeExplodedBomb(this.bombs)
   }
 
-  private sharkHitPlayer(
-    sharkId: string,
-    shark: Shark,
-    playerId: string,
-    player: Player
-  ): void {
+  private sharkHitPlayer(sharkId: string, shark: Shark, playerId: string, player: Player): void {
     // サメを発射したプレイヤー自身との衝突は無視
     if (shark.ownerId === playerId) return
 
@@ -214,26 +209,15 @@ export class Interactor {
     // プレイヤーと衝突したサメは消える
     shark.isDead = true
 
-    this.damagePlayer(
-      shark.power,
-      shark.ownerId,
-      playerId,
-      'shark',
-      shark.power
-    )
+    this.damagePlayer(shark.ownerId, playerId, 'shark', shark.power)
   }
 
-  private bombHitPlayer(
-    bombId: string,
-    bomb: Bomb,
-    playerId: string,
-    player: Player
-  ): void {
+  private bombHitPlayer(bombId: string, bomb: Bomb, playerId: string, player: Player): void {
     // 爆弾を設置したプレイヤー自身との衝突は無視
     if (bomb.ownerId === playerId) return
 
     if (player.isDead) return
 
-    this.damagePlayer(bomb.power, bomb.ownerId, playerId, 'bomb', bomb.power)
+    this.damagePlayer(bomb.ownerId, playerId, 'bomb', bomb.power)
   }
 }

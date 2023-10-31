@@ -2,7 +2,7 @@
  * メガホン機能がONになっているユーザのidを保持する
  */
 export interface IMegaphoneUserRepository {
-  add: (id: string) => void
+  set: (id: string, active: boolean) => void
   delete: (id: string) => void
 
   /**
@@ -10,5 +10,5 @@ export interface IMegaphoneUserRepository {
    */
   isUsingMegaphone: (id: string) => boolean
 
-  getIds: () => string[]
+  toObject: () => { [id: string]: boolean }
 }

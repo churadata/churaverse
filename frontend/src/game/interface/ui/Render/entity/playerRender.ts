@@ -1,12 +1,13 @@
 import { GameObjects, Scene } from 'phaser'
 import { FRAME_RATE } from '../../animationConfig'
-import { GRID_SIZE } from '../../../../domain/worldConfig'
+import { GRID_SIZE } from '../../../../domain/model/worldConfig'
 import { Direction, vectorToName } from '../../../../domain/model/core/direction'
 import { IPlayerRender } from '../../../../domain/IRender/IPlayerRender'
 import { PLAYER_COLOR_NAMES, PlayerColorName } from '../../../../domain/model/types'
 import { Position } from '../../../../domain/model/core/position'
-import { layerSetting } from '../../util/layer'
+import { layerSetting } from '../../util/canvasLayer'
 import { HpBarRender } from './hpBarRender'
+import { PlayerIconsRender } from './playerIconsRender'
 
 /**
  * 初期色の名前 = basic
@@ -58,6 +59,7 @@ const _relativePositionToNamePlate = { x: 0, y: -40 }
 export class PlayerRender implements IPlayerRender {
   private readonly scene
   private sprite
+
   private tween?: Phaser.Tweens.Tween
   private readonly _playerNamePlateTween?: Phaser.Tweens.Tween
   private damagetween?: Phaser.Tweens.Tween
@@ -73,7 +75,8 @@ export class PlayerRender implements IPlayerRender {
     name: string,
     color: PlayerColorName,
     private readonly hpBar: HpBarRender,
-    hp: number
+    hp: number,
+    private readonly playerIcons: PlayerIconsRender
   ) {
     this.scene = scene
     this.color = color
@@ -86,7 +89,7 @@ export class PlayerRender implements IPlayerRender {
       .setOrigin(0.5)
       .setDisplaySize(GRID_SIZE, GRID_SIZE)
     this.playerContainer.add(this.sprite)
-    layerSetting(this.playerContainer, 'PlayerContainer')
+    layerSetting(this.playerContainer, 'player')
 
     this._playerNamePlate = scene.add
       .text(_relativePositionToNamePlate.x, _relativePositionToNamePlate.y, name)
@@ -108,8 +111,9 @@ export class PlayerRender implements IPlayerRender {
     this.turn(direction)
 
     this.playerFrontContainer.add(this._playerNamePlate)
+    this.playerIcons.addToContainer(this.playerContainer)
     hpBar.addContainer(this.playerFrontContainer)
-    layerSetting(this.playerFrontContainer, 'PlayerFrontContainer')
+    layerSetting(this.playerFrontContainer, 'abovePlayer')
     this.hpBar.update(hp)
   }
 
@@ -132,6 +136,7 @@ export class PlayerRender implements IPlayerRender {
     hp: number
   ): Promise<PlayerRender> {
     const hpBarRender = await HpBarRender.build(scene, 100, hp)
+    const playerIcons = await PlayerIconsRender.build(scene)
     return await new Promise<void>((resolve, reject) => {
       if (scene.textures.exists(TEXTURE_KEYS[DEFAULT_COLOR_NAME])) {
         resolve()
@@ -143,12 +148,13 @@ export class PlayerRender implements IPlayerRender {
           frameHeight: 32,
         })
       )
+
       scene.load.once('complete', () => {
         resolve()
       })
       scene.load.start()
     }).then(() => {
-      return new PlayerRender(scene, pos, direction, name, color, hpBarRender, hp)
+      return new PlayerRender(scene, pos, direction, name, color, hpBarRender, hp, playerIcons)
     })
   }
 
@@ -430,5 +436,21 @@ export class PlayerRender implements IPlayerRender {
   public addToContainer(container: GameObjects.Container): void {
     container.add(this._playerNamePlate)
     container.add(this.sprite)
+  }
+
+  /*
+   * マイクアイコン関連の関数
+   */
+
+  public setAlphaToMicIcon(alpha: integer): void {
+    this.playerIcons.setAlphaToMicIcon(alpha)
+  }
+
+  public handleMicIcons(active: boolean): void {
+    this.playerIcons.handleMicIcons(active)
+  }
+
+  public handleMegaphone(active: boolean): void {
+    this.playerIcons.handleMegaphone(active)
   }
 }

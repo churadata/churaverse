@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Direction = {
   up: { x: 0, y: -1 },
   down: { x: 0, y: 1 },

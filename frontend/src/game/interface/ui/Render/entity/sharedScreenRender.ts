@@ -1,6 +1,6 @@
 import { Scene } from 'phaser'
 import { Position } from '../../../../domain/model/core/position'
-import { layerSetting } from '../../util/layer'
+import { layerSetting } from '../../util/canvasLayer'
 import { ISharedScreenRender } from '../../../../domain/IRender/ISharedScreenRender'
 
 export class SharedScreenRender implements ISharedScreenRender {
@@ -25,7 +25,7 @@ export class SharedScreenRender implements ISharedScreenRender {
       )
       .play()
 
-    layerSetting(this._video, 'Video')
+    layerSetting(this._video, 'ground')
 
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
   }

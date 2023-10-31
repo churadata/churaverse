@@ -13,6 +13,7 @@ import { IPlayerRoleRender } from '../domain/IRender/IPlayerRoleRender'
 import { IPlayerRender } from '../domain/IRender/IPlayerRender'
 import { ITitlePlayerBackgroundContainerRender } from '../domain/IRender/ITitlePlayerBackgroundContainerRender'
 import { ITitleArrowButtonRender } from '../domain/IRender/ITitleArrowButtonRender'
+import { DomManager } from '../interface/ui/util/domManager'
 
 /**
  * TitleSceneのInteractor
@@ -37,15 +38,14 @@ export class TitleInteractor implements PlayerColorChangeUseCase {
     private readonly playerRoleRender: IPlayerRoleRender,
     private readonly joinButtonRender: IJoinButtonRender,
     ){
-    
     this.player = this.createOwnPlayer()
     this.currentPlayerColor = this.player.color ?? PLAYER_COLOR_NAMES[4]
     this.previewPlayer.addToContainer(this.playerBackgroundContainer.container)
 
-    
+
     // コンテナ内にプレイヤーを描画
     previewPlayer.addToContainer(playerBackgroundContainer.container)
-    
+
     this.previewPlayer.addToContainer(this.playerBackgroundContainer.container)
     this.arrowButtons.addToContainer(this.playerBackgroundContainer.container)
   }
@@ -54,6 +54,7 @@ export class TitleInteractor implements PlayerColorChangeUseCase {
    * MainSceneに遷移
    */
   public transitionToMain(): void {
+    DomManager.removeAll()
     this.transitionManager.transitionTo('Main', {
       ownPlayer: this.player,
     })
@@ -68,7 +69,7 @@ export class TitleInteractor implements PlayerColorChangeUseCase {
       this.playerSetupInfoReader.read().name ?? '',
       this.playerSetupInfoReader.read().color ?? PLAYER_COLOR_NAMES[4],
       DEFAULT_HP,
-      'user'
+      this.playerSetupInfoReader.read().role ?? 'user'
     )
     return ownPlayer
   }

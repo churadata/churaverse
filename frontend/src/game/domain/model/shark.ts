@@ -1,11 +1,11 @@
-import { GRID_SIZE } from '../worldConfig'
+import { GRID_SIZE } from './worldConfig'
 import { Direction } from './core/direction'
 import { Position } from './core/position'
 import { Entity } from './entity'
 import { Player } from './player'
 
 export const SHARK_WALK_LIMIT_GRIDS = 25
-export const SHARK_WALK_LIMIT_MS = 1600
+export const SHARK_WALK_LIMIT_MS = 2400
 export const SHARK_SPEED = (SHARK_WALK_LIMIT_GRIDS * GRID_SIZE) / SHARK_WALK_LIMIT_MS
 
 /**

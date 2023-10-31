@@ -7,7 +7,9 @@ import { Position } from '../domain/model/core/position'
 type Id = string
 export interface ProcessedPreloadedData {
   existPlayers: Array<[Id, Player, IPlayerRender]>
-  megaphoneUsers: Id[]
+  mapName: string
+  megaphoneUsers: { [id: string]: boolean }
+  invincibleWorldModeInfo: { active: boolean }
 }
 
 /**
@@ -83,7 +85,12 @@ export interface ISocketEmitter {
   /**
    * メガホン機能ON/OFFの切り替え
    */
-  toggleMegaphone: (activate: boolean) => void
+  toggleMegaphone: (active: boolean) => void
+
+  /**
+   * 全プレイヤー無敵モードのON/OFFの切り替え
+   */
+  toggleInvincibleWorldMode: (active: boolean) => void
 
   /**
    * バッファの中身を送信する
@@ -99,4 +106,9 @@ export interface ISocketEmitter {
    * 退出する際に送るデータ
    */
   exitOwnPlayer: (playerId: string) => void
+
+  /**
+   * マップを変更する際に送るデータ
+   */
+  requestNewMap: (mapName: string) => void
 }

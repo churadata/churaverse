@@ -1,12 +1,15 @@
 import { Scene } from 'phaser'
-import { Key } from './key'
 import { IKeyConfiguration } from '../../interactor/IKeyConfiguration'
 import { KeyCode, KeyDownCallback, KeyEvent } from '../../domain/model/core/types'
 import { IKey } from '../../adapter/controller/keyboard/IKey'
 import { IKeyboardHelper } from '../../adapter/controller/keyboard/IKeyboardHelper'
+import { AutoKeyFactory } from '../../test/autoKeyFactory'
+import { IKeyFactory } from '../../adapter/controller/keyboard/IKeyFactory'
+import { KeyFactory } from './keyFactory'
 
 export class KeyboardHelper implements IKeyboardHelper {
   private readonly keys = new Map<KeyEvent, IKey>()
+  private readonly keyFactory: IKeyFactory = new KeyFactory(this.scene)
 
   public constructor(private readonly scene: Scene, private readonly keyConfiguration: IKeyConfiguration) {}
 
@@ -18,8 +21,7 @@ export class KeyboardHelper implements IKeyboardHelper {
   public bindKey(keyEvent: KeyEvent, keyCode: KeyCode, callback: KeyDownCallback, durationMs: number | null = 0): void {
     // durationMs = nullの場合長押し無効
     durationMs ??= Infinity
-
-    this.keys.set(keyEvent, new Key(this.scene, keyCode, callback, durationMs))
+    this.keys.set(keyEvent, this.keyFactory.createKey(keyCode, callback, durationMs))
   }
 
   /**
@@ -36,7 +38,7 @@ export class KeyboardHelper implements IKeyboardHelper {
     const currentKey = this.keys.get(keyEvent)
     if (currentKey === undefined) return
     this.keyConfiguration.editKeyPreference(keyEvent, newKeyCode)
-    this.keys.set(keyEvent, new Key(this.scene, newKeyCode, currentKey.callback, currentKey.duration))
+    this.keys.set(keyEvent, this.keyFactory.createKey(newKeyCode, currentKey.callback, currentKey.duration))
   }
 
   /**

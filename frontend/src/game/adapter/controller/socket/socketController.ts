@@ -1,7 +1,7 @@
 import { Player } from '../../../domain/model/player'
 import { Position } from '../../../domain/model/core/position'
 import { Interactor } from '../../../interactor/Interactor'
-import { KickPlayerInfo, PlayerInfo, SocketListenEventType } from '../../../interface/socket/eventTypes'
+import { KickPlayerInfo, MapInfo, PlayerInfo, SocketListenEventType } from '../../../interface/socket/eventTypes'
 import {
   StopInfo,
   TurnInfo,
@@ -19,6 +19,7 @@ import {
   SocketListenActionType,
   SocketNormalActionType,
   MegaphoneInfo,
+  InvincibleWorldModeInfo,
 } from '../../../interface/socket/actionTypes'
 import { ISocket } from './ISocket'
 import { ISharkRenderFactory } from '../../../domain/IRenderFactory/ISharkRenderFactory'
@@ -41,26 +42,67 @@ export class SocketController {
   ) {
     // eventとactionのlisten
     // 無名関数にしないと実行時にエラーが出ます https://christina04.hatenablog.com/entry/2017/11/08/020545
-    this.socket.listenEvent(SocketListenEventType.NotExistsPlayer, () => this.pageReloadRequest())
-    this.socket.listenEvent(SocketListenEventType.Disconnected, (playerId) => this.playerDisconnect(playerId))
-    this.socket.listenEvent(SocketListenEventType.NewPlayer, (info) => this.playerJoin(info))
+    this.socket.listenEvent(SocketListenEventType.NotExistsPlayer, () => {
+      this.pageReloadRequest()
+    })
+    this.socket.listenEvent(SocketListenEventType.Disconnected, (playerId) => {
+      this.playerDisconnect(playerId)
+    })
+    this.socket.listenEvent(SocketListenEventType.NewPlayer, (info) => {
+      this.playerJoin(info)
+    })
     this.socket.listenEvent(SocketListenEventType.HandleKickRequest, (info) => {
       this.handleKickRequest(info)
     })
-    this.socket.listenAction(SocketNormalActionType.Turn, (data) => this.playerTurn(data))
-    this.socket.listenAction(SocketNormalActionType.Stop, (data) => this.playerStop(data))
-    this.socket.listenAction(SocketNormalActionType.Walk, (data) => this.playerWalk(data))
-    this.socket.listenAction(SocketNormalActionType.Profile, (data) => this.playerProfileUpdate(data))
-    this.socket.listenAction(SocketNormalActionType.Shark, (data) => this.sharkSpawn(data))
-    this.socket.listenAction(SocketNormalActionType.Bomb, (data) => this.bombDrop(data))
-    this.socket.listenAction(SocketChattableActionType.Chat, (data) => this.chatReceive(data))
-    this.socket.listenAction(SocketNormalActionType.Megaphone, (data) => this.toggleMegaphone(data))
-    this.socket.listenAction(SocketListenActionType.Damage, (data) => this.playerDamage(data))
-    this.socket.listenAction(SocketListenActionType.OwnPlayerDie, (data) => this.playerDie(data))
-    this.socket.listenAction(SocketListenActionType.OtherPlayerDie, (data) => this.playerDie(data))
-    this.socket.listenAction(SocketListenActionType.HitShark, (data) => this.sharkHit(data))
-    this.socket.listenAction(SocketListenActionType.OwnPlayerRespawn, (data) => this.playerRespawn(data))
-    this.socket.listenAction(SocketListenActionType.OtherPlayerRespawn, (data) => this.playerRespawn(data))
+    this.socket.listenEvent(SocketListenEventType.NewMap, (info) => {
+      this.newMap(info)
+    })
+
+    this.socket.listenAction(SocketNormalActionType.Turn, (data) => {
+      this.playerTurn(data)
+    })
+    this.socket.listenAction(SocketNormalActionType.Stop, (data) => {
+      this.playerStop(data)
+    })
+    this.socket.listenAction(SocketNormalActionType.Walk, (data) => {
+      this.playerWalk(data)
+    })
+    this.socket.listenAction(SocketNormalActionType.Profile, (data) => {
+      this.playerProfileUpdate(data)
+    })
+    this.socket.listenAction(SocketNormalActionType.Shark, (data) => {
+      this.sharkSpawn(data)
+    })
+    this.socket.listenAction(SocketNormalActionType.Bomb, (data) => {
+      this.bombDrop(data)
+    })
+    this.socket.listenAction(SocketChattableActionType.Chat, (data) => {
+      this.chatReceive(data)
+    })
+    this.socket.listenAction(SocketNormalActionType.Megaphone, (data) => {
+      this.toggleMegaphone(data)
+    })
+    this.socket.listenAction(SocketNormalActionType.InvincibleWorldMode, (data) => {
+      this.toggleInvincibleWorldMode(data)
+    })
+    this.socket.listenAction(SocketListenActionType.Damage, (data) => {
+      this.playerDamage(data)
+    })
+    this.socket.listenAction(SocketListenActionType.OwnPlayerDie, (data) => {
+      this.playerDie(data)
+    })
+    this.socket.listenAction(SocketListenActionType.OtherPlayerDie, (data) => {
+      this.playerDie(data)
+    })
+    this.socket.listenAction(SocketListenActionType.HitShark, (data) => {
+      this.sharkHit(data)
+    })
+    this.socket.listenAction(SocketListenActionType.OwnPlayerRespawn, (data) => {
+      this.playerRespawn(data)
+    })
+    this.socket.listenAction(SocketListenActionType.OtherPlayerRespawn, (data) => {
+      this.playerRespawn(data)
+    })
   }
 
   /**
@@ -148,7 +190,11 @@ export class SocketController {
   }
 
   private toggleMegaphone(data: MegaphoneInfo & RecieveBaseInfo): void {
-    this.interactor.toggleMegaphone(data.id, data.activate)
+    this.interactor.toggleMegaphone(data.id, data.active)
+  }
+
+  private toggleInvincibleWorldMode(data: InvincibleWorldModeInfo & RecieveBaseInfo): void {
+    this.interactor.toggleInvincibleWorldMode(data.id, data.active)
   }
 
   private playerDamage(data: PlayerDamageInfo): void {
@@ -169,6 +215,10 @@ export class SocketController {
 
   private handleKickRequest(data: KickPlayerInfo): void {
     this.interactor.handleKickEvent(data.kickedId, data.kickerId)
+  }
+
+  private newMap(data: MapInfo): void {
+    this.interactor.changeMapAlert(data.mapName)
   }
 
   public update(): void {

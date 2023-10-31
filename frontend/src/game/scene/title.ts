@@ -22,9 +22,10 @@ import { TitlePlayerBackgroundContainerRender } from '../interface/ui/Render/tit
 import { Position } from '../domain/model/core/position'
 import { TitleArrowButtonRender } from '../interface/ui/Render/title/titleArrowButtonRender'
 import { DEFAULT_HP } from '../domain/model/player'
-import { PlayerRoleRender } from '../interface/ui/Render/title/playerRoleRender'
 import { ChuraDataLogoRender } from '../interface/ui/Render/title/churaDataLogoRender'
 import { KeyDetector } from '../interface/keyboard/keyDetector'
+import { PlayerRoleRender } from '../interface/ui/Render/title/playerRoleRender'
+import { CallbackExecutionGuard } from '../adapter/controller/socket/callbackExecutionGuard'
 
 /**
  * エントリーポイント
@@ -54,7 +55,8 @@ export class TitleScene extends Scene {
     const transitionManager = new TransitionManager<undefined, TitleToMainData>(this.scene)
     const cookieRepository = new CookieStore()
     const playerSetupInfoReader = new PlayerSetupInfoReader(cookieRepository)
-    const socket = await Socket.build()
+    const callbackExecutionGuard = new CallbackExecutionGuard(this)
+    const socket = await Socket.build(callbackExecutionGuard)
 
     const localDevice: ILocalDevice = new LocalDevice(
       await MdLocalMicrophoneManager.build(),
@@ -65,8 +67,9 @@ export class TitleScene extends Scene {
     void BackgroundRender.build(this)
     void LocalDeviceRender.build(this, localDevice)
     void VersionRender.build(this)
-    const joinButton = await JoinButtonRender.build(this)
+    const joinButton = await JoinButtonRender.build(this, playerSetupInfoReader.read().role ?? 'user')
     const nameField = await TitleNameFieldRender.build(this, playerSetupInfoReader.read().name)
+    const playerRoleRender = await PlayerRoleRender.build(this, playerSetupInfoReader.read().role ?? 'user')
     const keyDetector = new KeyDetector(this, ['SPACE', 'SHIFT'])
     const playerBackgroundContainer = await TitlePlayerBackgroundContainerRender.build(this)
 
@@ -80,8 +83,6 @@ export class TitleScene extends Scene {
       playerSetupInfoReader.read().color ?? PLAYER_COLOR_NAMES[4],
       DEFAULT_HP
     )
-
-    const playerRoleRender = await PlayerRoleRender.build(this)
     const churaDataLogoRender = await ChuraDataLogoRender.build(this, keyDetector)
 
     const interactor = new TitleInteractor(

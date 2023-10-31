@@ -5,13 +5,17 @@ import { IJoinButtonRender } from '../../../../domain/IRender/IJoinButtonRender'
 import { PlayerRoleName } from '../../../../domain/model/types'
 
 const BUTTON_COLOR = {
+  /* eslint-disable */
   DEFAULT_COLOR: '#1292e2',
   MOUSEOVER_BUTTON_COLOR: '#64bbf2',
+  /* eslint-enable */
 }
 
 const ADMIN_BUTTON_COLOR = {
+  /* eslint-disable */
   DEFAULT_COLOR: '#e62ea2',
   MOUSEOVER_BUTTON_COLOR: '#ff66c7',
+  /* eslint-enable */
 }
 
 /**
@@ -23,7 +27,7 @@ export class JoinButtonRender implements IJoinButtonRender {
   private interactor?: TitleInteractor
   private joinButtonColor = BUTTON_COLOR
 
-  private constructor(scene: Scene) {
+  private constructor(scene: Scene, playerRole: PlayerRoleName) {
     const buttonWidth = 40
     const buttonHeight = 20
 
@@ -45,12 +49,13 @@ export class JoinButtonRender implements IJoinButtonRender {
 
     this.container = createUIContainer(scene, 0.5, 0.62)
     this.container.add(this.joinButton)
+    this.changeButtonColor(playerRole)
   }
 
   // 書き方統一のためbuild実装
-  public static async build(scene: Scene): Promise<JoinButtonRender> {
+  public static async build(scene: Scene, playerRole: PlayerRoleName): Promise<JoinButtonRender> {
     return await new Promise<JoinButtonRender>((resolve) => {
-      resolve(new JoinButtonRender(scene))
+      resolve(new JoinButtonRender(scene, playerRole))
     })
   }
 
@@ -83,10 +88,16 @@ export class JoinButtonRender implements IJoinButtonRender {
 
   /** buttonが押されたときの動作 */
   private onClick(): void {
-    // 処理が重複しないように処理中はボタンを押せないようにロック
-    this.joinButton.disableInteractive()
+    const validateResult = this.interactor?.titleNamaFieldRender.validate() ?? false
 
-    // MainSceneに遷移
-    this.interactor?.transitionToMain()
+    if (validateResult) {
+      // 処理が重複しないように処理中はボタンを押せないようにロック
+      this.joinButton.disableInteractive()
+
+      // MainSceneに遷移
+      this.interactor?.transitionToMain()
+    } else {
+      alert('空文字列、空白文字列のみの名前は利用できません')
+    }
   }
 }

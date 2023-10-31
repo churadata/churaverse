@@ -7,10 +7,7 @@ import {
   SocketEmitOnlyActionType,
 } from './actionTypes'
 import { SocketEmitEventType, SocketListenEventType } from '../eventTypes'
-import {
-  convertForTransmit,
-  convertForTransmitWithoutDestSorting,
-} from './packetConverter'
+import { convertForTransmit, convertForTransmitWithoutDestSorting } from './packetConverter'
 import { IReceiveQueue } from './queue/IReceiveQueue'
 import { ITransmitQueue, TransmitQueueBuffers } from './queue/ITransmitQueue'
 import { ReceiveQueue } from './queue/receiveQueue'
@@ -18,8 +15,7 @@ import { TransmitQueue } from './queue/transmitQueue'
 import { Socket } from '../socket'
 
 export class ActionHelper {
-  private readonly emitAllPlayersActReceiveQueue: IReceiveQueue =
-    new ReceiveQueue()
+  private readonly emitAllPlayersActReceiveQueue: IReceiveQueue = new ReceiveQueue()
 
   private readonly receiveQueue: IReceiveQueue = new ReceiveQueue()
   private readonly transmitQueue: ITransmitQueue = new TransmitQueue()
@@ -65,10 +61,7 @@ export class ActionHelper {
     if (packets.length === 0) return
 
     // パケット構造を送信用に変換
-    const sendPackets = convertForTransmit(
-      packets,
-      this.transmitQueue.getDestination()
-    )
+    const sendPackets = convertForTransmit(packets, this.transmitQueue.getDestination())
 
     // 送信キューに格納
     // 送信先の振り分けを行う場合
@@ -83,9 +76,7 @@ export class ActionHelper {
   /**
    * emitAllPlayersActReceiveQueueの中身を受け取って送信用の構造に変換、全プレイヤーの送信キューに格納
    */
-  public storeEmitAllPlayersActPacketsToTransmitQueue(
-    packets: ReceiveData[]
-  ): void {
+  public storeEmitAllPlayersActPacketsToTransmitQueue(packets: ReceiveData[]): void {
     if (packets.length === 0) return
 
     // パケット構造を送信用に変換
@@ -130,10 +121,7 @@ export class ActionHelper {
   /**
    * Action受信時に実行されるcallbackを登録
    */
-  public listenAction<K extends SocketListenActionType>(
-    actionName: K,
-    callback: ActionListenTypeTable[K]
-  ): void {
+  public listenAction<K extends SocketListenActionType>(actionName: K, callback: ActionListenTypeTable[K]): void {
     this.actionExecuter.registerCallback(actionName, callback)
   }
 

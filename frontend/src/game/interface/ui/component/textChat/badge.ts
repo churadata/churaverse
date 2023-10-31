@@ -1,42 +1,39 @@
-import { Scene } from 'phaser'
 import { IBadge } from '../../../../domain/IRender/IBadge'
-import { layerSetting } from '../../util/layer'
 
 export class Badge implements IBadge {
-  private readonly graphics: Phaser.GameObjects.Graphics
-  private readonly container: Phaser.GameObjects.Container
+  private readonly badgeElement: HTMLDivElement
 
-  public constructor(scene: Scene) {
-    // graphicsは移動させるのが手間なのでcontainerに入れて操作する
-    this.container = scene.add.container(0, 0)
+  public constructor() {
+    const BADGE_SIZE = '14px'
 
-    this.graphics = scene.add.graphics().fillStyle(0xffffff, 1).setScrollFactor(0).fillCircle(0, 0, 7) // .fillCircle(12, -10, 7)
-    this.container.add(this.graphics)
-    this.graphics.setVisible(false)
-    layerSetting(this.graphics, 'badge')
-  }
+    const div = document.createElement('div')
+    div.style.position = 'absolute'
+    div.style.backgroundColor = 'white'
+    div.style.borderRadius = '9999px'
+    div.style.height = BADGE_SIZE
+    div.style.width = BADGE_SIZE
+    div.style.pointerEvents = 'none'
+    div.style.zIndex = '10'
 
-  public static async build(scene: Scene): Promise<Badge> {
-    return await new Promise<void>((resolve) => {
-      resolve()
-    }).then(() => {
-      return new Badge(scene)
-    })
+    this.badgeElement = div
+
+    this.deactivate()
   }
 
   public activate(): void {
-    this.graphics.setVisible(true)
+    this.badgeElement.style.opacity = '1'
   }
 
   public deactivate(): void {
-    this.graphics.setVisible(false)
+    this.badgeElement.style.opacity = '0'
   }
 
-  public getGraphicsContainer(): Phaser.GameObjects.Container {
-    return this.container
+  public setBadgeOn(node: HTMLElement): void {
+    node.appendChild(this.badgeElement)
   }
 
-  public moveTo(x: number, y: number): void {
-    this.container.setPosition(x, y)
+  public moveTo(top: number, right: number): void {
+    this.badgeElement.style.top = `${top}px`
+    this.badgeElement.style.right = `${right}px`
   }
 }

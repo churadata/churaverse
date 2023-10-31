@@ -69,9 +69,6 @@ export class Position {
    * @returns 距離
    */
   public distanceTo(oppositePos: Position): number {
-    return Math.sqrt(
-      Math.pow(this._x - oppositePos.x, 2) +
-        Math.pow(this._y - oppositePos.y, 2)
-    )
+    return Math.sqrt(Math.pow(this._x - oppositePos.x, 2) + Math.pow(this._y - oppositePos.y, 2))
   }
 }

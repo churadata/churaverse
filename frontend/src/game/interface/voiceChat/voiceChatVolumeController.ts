@@ -6,7 +6,7 @@ export class VoiceChatVolumeController implements IVoiceChatVolumeController {
   /**
    * メガホンをオンにしたプレイヤーのid
    */
-  private readonly megaphoneUserIds = new Set<string>()
+  private readonly megaphoneActiveMap = new Map<string, boolean>()
 
   public setVolume(playerId: string, volume: number): void {
     const voice = this.voices.get(playerId)
@@ -25,12 +25,12 @@ export class VoiceChatVolumeController implements IVoiceChatVolumeController {
   }
 
   public activateMegaphone(playerId: string): void {
-    this.megaphoneUserIds.add(playerId)
+    this.megaphoneActiveMap.set(playerId, true)
     this.setVolume(playerId, 1)
   }
 
   public deactivateMegaphone(playerId: string): void {
-    this.megaphoneUserIds.delete(playerId)
+    this.megaphoneActiveMap.set(playerId, false)
   }
 
   public updateAccordingToDistance(ownPlayerId: string, players: PlayersService): void {
@@ -43,10 +43,13 @@ export class VoiceChatVolumeController implements IVoiceChatVolumeController {
       if (id === ownPlayerId) return
 
       // メガホンを使用している場合は音量調整しない
-      if (this.megaphoneUserIds.has(id)) return
+      if (this.megaphoneActiveMap.get(id) ?? false) return
 
       const distance = ownPlayer.position.distanceTo(player.position)
-      const volume = Math.max(0, audibleDistance - distance) / audibleDistance
+
+      const attenuatedVolume = (audibleDistance - (distance / Math.sqrt(audibleDistance)) ** 2) / audibleDistance
+      const volume = Math.max(0, attenuatedVolume)
+
       this.setVolume(id, volume)
     })
   }

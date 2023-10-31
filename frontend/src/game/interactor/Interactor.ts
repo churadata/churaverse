@@ -1,4 +1,3 @@
-import { GRID_SIZE } from '../domain/worldConfig'
 import { Direction } from '../domain/model/core/direction'
 import { IBadge } from '../domain/IRender/IBadge'
 import { IBombRender } from '../domain/IRender/IBombRender'
@@ -35,7 +34,6 @@ import { IKeyConfiguration } from './IKeyConfiguration'
 import { IVoiceChatSender } from './voiceChat/IVoiceChatSender'
 import { ISharedScreenRender } from '../domain/IRender/ISharedScreenRender'
 import { IScreenShareSender } from './screenShare/IScreenShareSender'
-import { IScreenShareButton } from './screenShare/IScreenShareButton'
 import { IFocusableRender } from '../domain/IRender/IFocusableRender'
 import { PlayerColorChangeUseCase } from '../usecase/playerColorChangeUseCase'
 import { KeyCode, KeyEvent } from '../domain/model/core/types'
@@ -49,6 +47,14 @@ import { ICameraVideoListRender } from '../domain/IRender/ICameraVideoListRender
 import { ICameraVideoSender } from './webCamera/ICameraVideoSender'
 import { IWebRtc } from './webRtc/IWebRtc'
 import { IPlayerListRender } from '../domain/IRender/IPlayerListRender'
+import { IMapRenderFactory } from '../domain/IRenderFactory/IMapRenderFactory'
+import { IMapSelector } from '../domain/IRender/IMapSelector'
+import { GRID_SIZE, WorldConfig } from '../domain/model/worldConfig'
+import { IJoinLeaveLogRender } from '../domain/IRender/IJoinLeaveLogRender'
+import { IFadeOutLogRender } from '../domain/IRender/IFadeOutLogRender'
+import { DomManager } from '../interface/ui/util/domManager'
+import { ITopBarIconRender } from './IDialogIconRender'
+import { IInvincibleWorldModeSwitch } from './adminSetting/IInvincibleWorldModeSwitch'
 
 /**
  * Interactor
@@ -61,16 +67,19 @@ import { IPlayerListRender } from '../domain/IRender/IPlayerListRender'
 export class Interactor implements PlayerColorChangeUseCase {
   /** serverからエラーを受け取ったか */
   private isReceivedError = false
+  private mapRender?: IMapRender
 
   public constructor(
     private readonly ownPlayerId: string,
     private readonly emitter: ISocketEmitter,
-    private readonly mapRender: IMapRender,
+    private readonly mapSelector: IMapSelector,
+    private readonly mapRenderFactory: IMapRenderFactory,
     private readonly textFieldObserver: ITextFieldObserver,
     private readonly chatBoardRender: IChatBoardRender,
     private readonly chatInputRender: IChatInputRender,
     private readonly chatBadge: IBadge,
     private readonly chatDialog: IDialog,
+    private readonly invincibleWorldModeSwitch: IInvincibleWorldModeSwitch,
     private readonly localDevice: ILocalDevice,
     private readonly micSelector: IMicSelector,
     private readonly speakerSelector: ISpeakerSelector,
@@ -80,14 +89,18 @@ export class Interactor implements PlayerColorChangeUseCase {
     private readonly voiceChatSender: IVoiceChatSender,
     private readonly voiceChatVolumeController: IVoiceChatVolumeController,
     private readonly screenShareSender: IScreenShareSender,
-    private readonly screenShareButton: IScreenShareButton,
+    private readonly screenShareIcon: ITopBarIconRender,
+    private readonly invincibleModeIndicator: ITopBarIconRender,
     private readonly playerSetupInfoWriter: IPlayerSetupInfoWriter,
     private readonly keyboardSetupInfoWriter: IKeyboardSetupInfoWriter,
     private readonly keySettingPopUpWindow: IKeyboardSettingPopUpWindow,
     private readonly keyConfiguration: IKeyConfiguration,
     private readonly deathLogRender: IDeathLogRender,
     private readonly playerList: IPlayerListRender,
-    player: Player,
+    worldConfig: WorldConfig,
+    private readonly joinLeaveLogRender: IJoinLeaveLogRender,
+    private readonly fadeOutLogRender: IFadeOutLogRender,
+    private readonly player: Player,
     playerRender: IPlayerRender,
     private readonly transitionManager: ITransitionManager<TitleToMainData, undefined>,
     private readonly webRtc: IWebRtc
@@ -97,15 +110,18 @@ export class Interactor implements PlayerColorChangeUseCase {
     this.focusedRender = playerRender
     this.players.join(this.ownPlayerId, player)
     this.playerRenders.set(this.ownPlayerId, playerRender)
+    this.joinLeaveLogRender.join(this.ownPlayerId, this.players.getPlayerName(this.ownPlayerId) ?? 'name')
 
-    // serverにjoinの通知
-    emitter.join(player, this.ownPlayerId)
     // serverに既存プレイヤーの要求
     void emitter.requestPreloadedData().then((data) => {
+      void this.mapRenderFactory.build(data.mapName).then((mapRender) => {
+        this.mapRender = mapRender
+      })
       data.existPlayers.forEach(([id, player, playerRender]) => {
         if (this.ownPlayerId === id) {
-          // 自分のspriteだった場合だけ,
-          // 捨てる
+          // 自分のspriteだった場合だけ捨てる
+          this.player.position.x = player.position.x
+          this.player.position.y = player.position.y
           playerRender.destroy()
         } else {
           this.players.join(id, player)
@@ -114,9 +130,20 @@ export class Interactor implements PlayerColorChangeUseCase {
       })
       this.updatePlayerList()
 
-      data.megaphoneUsers.forEach((id) => {
-        this.toggleMegaphone(id, true)
+      const megaphoneActiveMap: Map<string, boolean> = new Map(Object.entries(data.megaphoneUsers))
+
+      megaphoneActiveMap.forEach((active, id) => {
+        this.toggleMegaphone(id, active)
       })
+      this.toggleMegaphone(this.ownPlayerId, true)
+      this.mapSelector.initialMap(data.mapName)
+      worldConfig.setMap(data.mapName)
+
+      this.invincibleWorldModeSwitch.initState(data.invincibleWorldModeInfo.active)
+      // serverにjoinの通知
+      emitter.join(this.player, this.ownPlayerId)
+
+      this.webRtc.setInitialState(this.playerRenders)
     })
 
     this.startVoiceChatVolumeControl(300)
@@ -138,9 +165,13 @@ export class Interactor implements PlayerColorChangeUseCase {
     this.playerRenders.set(id, render)
     this.players.changePlayerName(id, player.name ?? 'name')
     this.updatePlayerList()
+    this.toggleMegaphone(id, true)
+    this.voiceChatVolumeController.activateMegaphone(id)
+    this.joinLeaveLogRender.join(id, player.name)
   }
 
   public leavePlayer(id: string): void {
+    this.joinLeaveLogRender.leave(id, this.players.getPlayerName(id) ?? 'name')
     this.players.leave(id)
     this.playerRenders.get(id)?.destroy()
     this.playerRenders.delete(id)
@@ -148,6 +179,8 @@ export class Interactor implements PlayerColorChangeUseCase {
   }
 
   public transitionToTitle(): void {
+    this.fadeOutLogRender.destroy()
+    DomManager.removeAll()
     this.transitionManager.transitionTo('Title')
   }
 
@@ -160,6 +193,11 @@ export class Interactor implements PlayerColorChangeUseCase {
     this.transitionToTitle()
     this.webRtcDisconnect()
     window.alert(`「${kickerPlayer.name}」 にキックされました`)
+  }
+
+  public changeMapAlert(newMap: string): void {
+    window.alert(`マップが変更されました。再度入場してください。`)
+    this.exitOwnPlayer()
   }
 
   public exitOwnPlayer(): void {
@@ -232,8 +270,10 @@ export class Interactor implements PlayerColorChangeUseCase {
     dest.gridX += direction.x
     dest.gridY += direction.y
 
-    // 移動先が通行不可マスの場合は移動しない
-    if (this.mapRender.hasBlockingTile(dest)) return
+    if (this.mapRender !== undefined)
+      if (this.mapRender.hasBlockingTile(dest))
+        // 移動先が通行不可マスの場合は移動しない
+        return
 
     if (this.ownPlayerId === id && !this.isReceivedError) {
       // 移動開始時の座標をemitする必要がある
@@ -335,7 +375,7 @@ export class Interactor implements PlayerColorChangeUseCase {
     if (ownPlayer === undefined) {
       return
     }
-    this.playerSetupInfoWriter.save(ownPlayer.name, ownPlayer.color)
+    this.playerSetupInfoWriter.save(ownPlayer.name, ownPlayer.color, ownPlayer.role)
   }
 
   public saveKeyboardInfo(): void {
@@ -353,6 +393,7 @@ export class Interactor implements PlayerColorChangeUseCase {
   ): void {
     const source = this.players.getPlayer(playerId)
     if (source === undefined) {
+      render.dead()
       return
     }
     // 自プレイヤーの位置からgap分だけ前にずらしてサメを出す
@@ -364,10 +405,9 @@ export class Interactor implements PlayerColorChangeUseCase {
     // directionがない場合は、自プレイヤーのサメの方向
     direction ??= source.direction
     spawnTime ??= Date.now()
-    const daley = Date.now() - spawnTime
     // 受信時のサメの出現位置を補正
-    position.x += SHARK_SPEED * daley * direction.x
-    position.y += SHARK_SPEED * daley * direction.y
+    position.x += SHARK_SPEED * direction.x
+    position.y += SHARK_SPEED * direction.y
     const shark = new Shark(source, position, direction, spawnTime)
     this.shark.spawn(id, shark)
     this.sharkRenders.set(id, render)
@@ -377,15 +417,15 @@ export class Interactor implements PlayerColorChangeUseCase {
     }
 
     // spawnしたら動き出す
-    this.walkShark(shark, render, daley)
+    this.walkShark(shark, render)
   }
 
-  public walkShark(shark: Shark, render: ISharkRender, daley: number): void {
+  public walkShark(shark: Shark, render: ISharkRender): void {
     const dest = shark.position.copy()
     dest.x = shark.direction.x * SHARK_WALK_LIMIT_GRIDS * GRID_SIZE + shark.position.x
     dest.y = shark.direction.y * SHARK_WALK_LIMIT_GRIDS * GRID_SIZE + shark.position.y
 
-    render.walk(shark.position, dest, shark.direction, daley, (pos) => {
+    render.walk(shark.position, dest, shark.direction, (pos) => {
       shark.walk(pos)
     })
   }
@@ -398,6 +438,7 @@ export class Interactor implements PlayerColorChangeUseCase {
   public dropBomb(bombId: string, playerId: string, render: IBombRender, position?: Position): void {
     const source = this.players.getPlayer(playerId)
     if (source === undefined) {
+      render.destroy()
       return
     }
     // positionがない場合は、自プレイヤーの位置
@@ -508,7 +549,16 @@ export class Interactor implements PlayerColorChangeUseCase {
    * @param voice ボイスチャットの音声データ
    */
   public joinVoiceChat(playerId: string, voice: HTMLMediaElement): void {
+    this.playerRenders.get(playerId)?.handleMicIcons(true)
     this.voiceChatVolumeController.addVoice(playerId, voice)
+  }
+
+  public onUnmute(playerId: string): void {
+    this.playerRenders.get(playerId)?.handleMicIcons(true)
+  }
+
+  public onMute(playerId: string): void {
+    this.playerRenders.get(playerId)?.handleMicIcons(false)
   }
 
   /**
@@ -523,6 +573,7 @@ export class Interactor implements PlayerColorChangeUseCase {
    * 自プレイヤーのボイスチャットを開始する
    */
   public async startVoiceStream(): Promise<boolean> {
+    this.playerRenders.get(this.ownPlayerId)?.handleMicIcons(true)
     return await this.voiceChatSender.startStream()
   }
 
@@ -530,6 +581,7 @@ export class Interactor implements PlayerColorChangeUseCase {
    * 自プレイヤーのボイスチャットを終了する
    */
   public async stopVoiceStream(): Promise<boolean> {
+    this.playerRenders.get(this.ownPlayerId)?.handleMicIcons(false)
     return await this.voiceChatSender.stopStream()
   }
 
@@ -549,19 +601,38 @@ export class Interactor implements PlayerColorChangeUseCase {
   /**
    * メガホン機能のON/OFFを切り替える
    * @param playerId メガホン機能をトグルするプレイヤー
-   * @param activate trueの時メガホン機能をON
+   * @param active trueの時メガホン機能をON
    */
-  public toggleMegaphone(playerId: string, activate: boolean): void {
+  public toggleMegaphone(playerId: string, active: boolean): void {
+    // PlayerRenderのアイコン切り替え
+    this.playerRenders.get(playerId)?.handleMegaphone(active)
+
     // 自プレイヤーが切り替えた場合は他プレイヤーに通知するだけ
     if (playerId === this.ownPlayerId) {
-      this.emitter.toggleMegaphone(activate)
+      this.emitter.toggleMegaphone(active)
       return
     }
 
-    if (activate) {
+    if (active) {
       this.voiceChatVolumeController.activateMegaphone(playerId)
     } else {
       this.voiceChatVolumeController.deactivateMegaphone(playerId)
+    }
+  }
+
+  /**
+   * 全プレイヤー無敵モードのON/OFFを切り替える
+   */
+  public toggleInvincibleWorldMode(playerId: string, active: boolean): void {
+    this.invincibleWorldModeSwitch.setChecked(active)
+    // 自プレイヤーが切り替えた場合のみemit
+    if (playerId === this.ownPlayerId) {
+      this.emitter.toggleInvincibleWorldMode(active)
+    }
+    if (active) {
+      this.invincibleModeIndicator.activate()
+    } else {
+      this.invincibleModeIndicator.deactivate()
     }
   }
 
@@ -604,6 +675,13 @@ export class Interactor implements PlayerColorChangeUseCase {
    * @param video 共有されている画面映像
    */
   public joinScreenShare(playerId: string, sharedScreenRender: ISharedScreenRender): void {
+    // 既存の画面共有を停止
+    for (const sharedPlayerId of this.sharedScreenRenders.keys()) {
+      if (sharedPlayerId === this.ownPlayerId) {
+        void this.stopScreenShare()
+        break
+      }
+    }
     this.sharedScreenRenders.set(playerId, sharedScreenRender)
   }
 
@@ -614,7 +692,9 @@ export class Interactor implements PlayerColorChangeUseCase {
   public leaveScreenShare(playerId: string): void {
     this.sharedScreenRenders.get(playerId)?.destroy()
     this.sharedScreenRenders.delete(playerId)
-    this.screenShareButton.deactivateButton()
+    if (playerId === this.ownPlayerId) {
+      this.screenShareIcon.deactivate()
+    }
   }
 
   /**
@@ -622,8 +702,10 @@ export class Interactor implements PlayerColorChangeUseCase {
    */
   public async startScreenShare(): Promise<boolean> {
     if (this.sharedScreenRenders.size > 0) {
-      alert('他のユーザーが共有中です。')
-      return false
+      const cancelScreenShare = !window.confirm(
+        '他のユーザーが画面共有中です。新しく共有を開始すると、他のユーザーの共有は終了します。よろしいですか？'
+      )
+      if (cancelScreenShare) return false
     }
     return await this.screenShareSender.startStream()
   }
@@ -691,5 +773,12 @@ export class Interactor implements PlayerColorChangeUseCase {
     const players = this.players.players
     if (players === undefined) return
     this.playerList.updatePlayerList(this.ownPlayerId, players)
+  }
+
+  /**
+   * 管理者がマップを変更時に実行される
+   */
+  public changeMap(mapName: string): void {
+    this.emitter.requestNewMap(mapName)
   }
 }

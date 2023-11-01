@@ -1,30 +1,23 @@
-import 'phaser'
+export function getLayerPosition(layerInterval: number, layerNumber: number): number {
+  // 各抽象レイヤーの持つ領域の範囲
+  const abstractLayerRange: number = 2 * layerInterval
+  return layerInterval + layerNumber * (abstractLayerRange + 1)
+}
 
-type LayerbleElement =
-  | Phaser.GameObjects.Text
-  | Phaser.GameObjects.Sprite
-  | Phaser.GameObjects.Image
-  | Phaser.GameObjects.Graphics
-  | Phaser.GameObjects.Container
-  | Phaser.GameObjects.Video
-// layerの管理をしたいオグジェクトを追加したい際はリストに適宜追加. 優先度はindexに比例して上部に描画
-const layerArray = [
-  'Video',
-  'PlayerContainer',
-  'Shark',
-  'Bomb',
-  'PlayerFrontContainer',
-  'DeathLog',
-  'UIContainer',
-  'WebRtcUI',
-  'PlayerSettingForm',
-  'PlayerList',
-  'ChatBoard',
-  'badge',
-] as const
-type LayerName = typeof layerArray[number]
+// 与えられたzIndexの絶対値がlayerIntervalより大きい場合、符号は維持し、zIndexの絶対値をlayerIntervalに修正
+export function getAbstractZIndex(zIndex: number, layerInterval: number): number {
+  const result: number = limitValue(Math.abs(zIndex), layerInterval)
+  if (zIndex !== result) {
+    console.warn(`表示する要素のzIndexは絶対値${layerInterval}の間でのみ指定可能です。`)
+  }
+  return result
+}
 
-export function layerSetting(settingElement: LayerbleElement, layerName: LayerName): void {
-  const layerOrder = layerArray.indexOf(layerName)
-  settingElement.depth = layerOrder
+// valueがlimitValueよりも大きい場合limitValueを返す。そうでなければvalueを返す
+function limitValue(value: number, limitValue: number): number {
+  if (value > limitValue) {
+    return limitValue
+  } else {
+    return value
+  }
 }

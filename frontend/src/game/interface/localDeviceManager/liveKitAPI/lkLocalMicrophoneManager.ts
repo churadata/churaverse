@@ -1,6 +1,7 @@
 import { Room } from 'livekit-client'
 import { Microphone } from '../../../domain/model/localDevice/microphone'
 import { ILocalMicrophoneManager } from '../../../interactor/ILocalDeviceManager/ILocalMicrophoneManager'
+import { peripheralPermissionCheck } from './peripheralPermissionCheck'
 
 /**
  * 接続されているマイクを操作する
@@ -36,7 +37,9 @@ export class LkLocalMicrophoneManager implements ILocalMicrophoneManager {
     // 最初の要素がデフォルトのキャプチャ機器
     // https://docs.livekit.io/client-sdk-js/index.html#device-management-apis
     // https://developer.mozilla.org/ja/docs/Web/API/MediaDevices/enumerateDevices#%E8%BF%94%E5%80%A4
-    const devices = await Room.getLocalDevices('audioinput', true)
+
+    const microphoneStatus: boolean = await peripheralPermissionCheck('microphone')
+    const devices = await Room.getLocalDevices('audioinput', microphoneStatus)
     return devices.map((device) => new Microphone(device.label, device.deviceId))
   }
 

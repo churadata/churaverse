@@ -65,11 +65,7 @@ export class Player implements ICollidableEntity {
     this._direction = direction
   }
 
-  public walk(
-    position: Position,
-    direction: Direction,
-    velocity: Vector
-  ): void {
+  public walk(position: Position, direction: Direction, velocity: Vector): void {
     this._position.x = position.x
     this._position.y = position.y
     this._direction = direction

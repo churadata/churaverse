@@ -58,6 +58,11 @@ export class TitleNameFieldRender implements ITitleNameFieldRender {
     return (this.inputNameArea?.getChildByID(TITLE_FIELD_NAME) as HTMLInputElement).value
   }
 
+  public validate(): boolean {
+    // 名前の文字列が空白文字のみまたは空文字のみでないかを判定
+    return this.getName()?.trim() !== ''
+  }
+
   public setInteractor(interactor: TitleInteractor): void {
     this.interactor = interactor
   }

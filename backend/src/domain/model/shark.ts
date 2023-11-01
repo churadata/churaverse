@@ -6,7 +6,7 @@ import { Position } from '../core/position'
 import { Vector } from '../core/vector'
 
 export const SHARK_WALK_LIMIT_GRIDS = 25
-export const SHARK_WALK_LIMIT_MS = 1600
+export const SHARK_WALK_LIMIT_MS = 2400
 
 export class Shark implements ICollidableEntity {
   public isCollidable = true
@@ -31,12 +31,7 @@ export class Shark implements ICollidableEntity {
   private readonly _width: number
   private readonly _height: number
 
-  public constructor(
-    ownerId: string,
-    position: Position,
-    direction: Direction,
-    spawnTime: number
-  ) {
+  public constructor(ownerId: string, position: Position, direction: Direction, spawnTime: number) {
     this.ownerId = ownerId
     this._position = position
     this._direction = direction

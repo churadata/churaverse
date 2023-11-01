@@ -15,6 +15,7 @@ export interface ActionTypeTable {
   bomb: (data: BombInfo & RecieveBaseInfo) => void
   chat: (data: ChatInfo & RecieveBaseInfo) => void
   megaphone: (data: MegaphoneInfo & RecieveBaseInfo) => void
+  invincibleWorldMode: (data: InvincibleWorldModeInfo & RecieveBaseInfo) => void
   ownPlayerDie: (data: PlayerDieInfo) => void
   otherPlayerDie: (data: PlayerDieInfo) => void
   damage: (data: PlayerDamageInfo) => void
@@ -35,11 +36,13 @@ export interface ActionEmitTypeTable {
   bomb: (data: BombInfo) => void
   chat: (data: ChatInfo) => void
   megaphone: (data: MegaphoneInfo) => void
+  invincibleWorldMode: (data: InvincibleWorldModeInfo) => void
 }
 
 /**
  * 受け取りだけのaction名
  */
+/* eslint-disable */
 export const SocketListenActionType = {
   OwnPlayerDie: 'ownPlayerDie',
   OtherPlayerDie: 'otherPlayerDie',
@@ -48,12 +51,14 @@ export const SocketListenActionType = {
   OwnPlayerRespawn: 'ownPlayerRespawn',
   OtherPlayerRespawn: 'otherPlayerRespawn',
 } as const
+/* eslint-enable */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketListenActionType = typeof SocketListenActionType[keyof typeof SocketListenActionType]
 
 /**
  * 他のactionと一緒に送られるaction名
  */
+/* eslint-disable */
 export const SocketNormalActionType = {
   Turn: 'turn',
   Walk: 'walk',
@@ -62,28 +67,34 @@ export const SocketNormalActionType = {
   Shark: 'shark',
   Bomb: 'bomb',
   Megaphone: 'megaphone',
+  InvincibleWorldMode: 'invincibleWorldMode',
 } as const
+/* eslint-enable */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketNormalActionType = typeof SocketNormalActionType[keyof typeof SocketNormalActionType]
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SocketNormalActionNames = Object.values(SocketNormalActionType) as SocketNormalActionType[]
 
 /**
  * 会話用のaction名
  */
+/* eslint-disable */
 export const SocketChattableActionType = {
   Chat: 'chat',
 } as const
+/* eslint-enable */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketChattableActionType = typeof SocketChattableActionType[keyof typeof SocketChattableActionType]
 
 // 要素がchatの1つのためtype assertionが不要だが, 書き方の統一のためにsuppress
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/naming-convention
 export const SocketChattableActionNames = Object.values(SocketChattableActionType) as SocketChattableActionType[]
 
 /**
  * 送るだけのaction名
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SocketEmitActionType = { ...SocketNormalActionType, ...SocketChattableActionType }
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type SocketEmitActionType = typeof SocketEmitActionType[keyof typeof SocketEmitActionType]
@@ -228,5 +239,12 @@ export interface ChatInfo {
  * ボイスチャットのメガホン機能のON/OFF時に送信するための型
  */
 export interface MegaphoneInfo {
-  activate: boolean
+  active: boolean
+}
+
+/**
+ * 全プレイヤー無敵モードのON/OFF時に送信するための型
+ */
+export interface InvincibleWorldModeInfo {
+  active: boolean
 }

@@ -9,11 +9,7 @@ import {
   PlayerRespawnInfo,
   SharkDestroyInfo,
 } from './action/actionTypes'
-import {
-  SocketEmitEventType,
-  PlayerInfo,
-  RequestKickPlayerInfo,
-} from './eventTypes'
+import { SocketEmitEventType, PlayerInfo, RequestKickPlayerInfo, MapInfo } from './eventTypes'
 import { Socket } from './socket'
 import { DamageCause } from '../../domain/model/deathLog'
 
@@ -34,11 +30,7 @@ export class SocketEmitter implements ISocketEmitter {
       heroName: player.name,
     }
     this.socket.addTransmitQueue(socketId)
-    this.socket.emitEventBroadCastFrom(
-      SocketEmitEventType.NewPlayer,
-      socketId,
-      emitPlayerInfo
-    )
+    this.socket.emitEventBroadCastFrom(SocketEmitEventType.NewPlayer, socketId, emitPlayerInfo)
   }
 
   /**
@@ -46,22 +38,13 @@ export class SocketEmitter implements ISocketEmitter {
    */
   public emitLeavePlayer(socketId: string): void {
     this.socket.removeTransmitQueue(socketId)
-    this.socket.emitEventBroadCastFrom(
-      SocketEmitEventType.Disconnected,
-      socketId,
-      socketId
-    )
+    this.socket.emitEventBroadCastFrom(SocketEmitEventType.Disconnected, socketId, socketId)
   }
 
   /**
    * プレイヤーがダメージを受けたことを全プレイヤーにemit
    */
-  public emitDamage(
-    attacker: string,
-    target: string,
-    cause: DamageCause,
-    damage: number
-  ): void {
+  public emitDamage(attacker: string, target: string, cause: DamageCause, damage: number): void {
     const info: PlayerDamageInfo = {
       attacker,
       target,
@@ -85,11 +68,7 @@ export class SocketEmitter implements ISocketEmitter {
   /**
    * プレイヤーが復活したことを全プレイヤーにemit
    */
-  public emitPlayerRespawn(
-    playerId: string,
-    position: Position,
-    direction: Direction
-  ): void {
+  public emitPlayerRespawn(playerId: string, position: Position, direction: Direction): void {
     const info: PlayerRespawnInfo = {
       id: playerId,
       respawnPos: {
@@ -121,10 +100,16 @@ export class SocketEmitter implements ISocketEmitter {
       kickedId,
       kickerId,
     }
-    this.socket.emitEventTo(
-      SocketEmitEventType.HandleKickRequest,
-      kickedId,
-      info
-    )
+    this.socket.emitEventTo(SocketEmitEventType.HandleKickRequest, kickedId, info)
+  }
+
+  /**
+   * 全プレイヤーに対してmap名を送信
+   */
+  public newMap(mapName: string): void {
+    const info: MapInfo = {
+      mapName,
+    }
+    this.socket.emitEventBroadCast(SocketEmitEventType.NewMap, info)
   }
 }

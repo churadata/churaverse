@@ -4,21 +4,13 @@ import { Camera } from '../../../../domain/model/localDevice/camera'
 import { Interactor } from '../../../../interactor/Interactor'
 import { ILocalCameraManager } from '../../../../interactor/ILocalDeviceManager/ILocalCameraManager'
 import { ICameraSelector } from '../../../../interactor/ILocalDeviceSelector/ICameraSelector'
+import { DomManager } from '../../util/domManager'
+import { CameraSelectorComponent } from './components/CameraSelectorComponent'
 
 /**
- * カメラセレクタのHTMLと紐付けるKey
+ * カメラセレクタのHTML内にあるselectタグのid
  */
-const CAMERA_SELECTOR_KEY = 'cameraSelector'
-
-/**
- * カメラセレクタのHTMLのパス
- */
-const CAMERA_SELECTOR_PATH = 'assets/deviceSelector.html'
-
-/**
- * カメラセレクタのHTML内にあるselectタグのname
- */
-const CAMERA_SELECT_TAG_NAME = 'deviceSelector'
+export const CAMERA_SELECT_TAG_ID = 'cameraSelector'
 
 export class CameraSelector implements ICameraSelector {
   private readonly selectTag: HTMLSelectElement
@@ -28,20 +20,13 @@ export class CameraSelector implements ICameraSelector {
     scene: Scene,
     private readonly cameraManager: ILocalCameraManager,
     settingDialog: SettingDialog,
-    camera: Camera[]
+    cameras: Camera[]
   ) {
-    const selectorElement = scene.add
-      .dom(-300, 180)
-      .createFromCache(CAMERA_SELECTOR_KEY)
-      .setOrigin(0)
-      .setScrollFactor(0)
+    const content = DomManager.jsxToDom(CameraSelectorComponent({ cameras }))
+    settingDialog.addContent('peripheralSetting', content)
 
-    this.selectTag = selectorElement.getChildByName(CAMERA_SELECT_TAG_NAME) as HTMLSelectElement
+    this.selectTag = DomManager.getElementById<HTMLSelectElement>(CAMERA_SELECT_TAG_ID)
     this.selectTag.addEventListener('change', () => this.onSelect())
-
-    this.setOptions(camera)
-
-    settingDialog.add(selectorElement)
   }
 
   public static async build(
@@ -50,21 +35,7 @@ export class CameraSelector implements ICameraSelector {
     settingDialog: SettingDialog,
     camera: Camera[]
   ): Promise<CameraSelector> {
-    return await new Promise<void>((resolve) => {
-      if (scene.textures.exists(CAMERA_SELECTOR_KEY)) {
-        resolve()
-      }
-
-      // カメラセレクタの読み込み
-      scene.load.html(CAMERA_SELECTOR_KEY, CAMERA_SELECTOR_PATH)
-
-      scene.load.once('complete', () => {
-        resolve()
-      })
-      scene.load.start()
-    }).then(() => {
-      return new CameraSelector(scene, cameraManager, settingDialog, camera)
-    })
+    return new CameraSelector(scene, cameraManager, settingDialog, camera)
   }
 
   public setInteractor(interactor: Interactor): void {
@@ -136,6 +107,12 @@ export class CameraSelector implements ICameraSelector {
     const option = document.createElement('option')
     option.value = camera.id
     option.textContent = camera.name
+
+    const noCameraDeviceMsg = '利用可能なカメラを取得できません'
+
+    if (option.textContent === '') {
+      option.textContent = noCameraDeviceMsg
+    }
 
     this.selectTag.appendChild(option)
   }

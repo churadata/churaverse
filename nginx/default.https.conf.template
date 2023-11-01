@@ -21,7 +21,7 @@ server {
     ssl_certificate_key ${NGINX_SSL_KEY};
 
     location / {
-        proxy_pass          http://${NGINX_PROXY_PASS_HOST}:3000/;
+        proxy_pass          http://frontend:3000/;
         proxy_http_version  1.1;
         proxy_set_header    Upgrade $http_upgrade;
         proxy_set_header    Connection $connection_upgrade;
@@ -29,7 +29,7 @@ server {
     }
 
     location /backend/ {
-        proxy_pass          http://${NGINX_PROXY_PASS_HOST}:12100/;
+        proxy_pass          http://backend:12100/;
         proxy_http_version  1.1;
         proxy_set_header    Upgrade $http_upgrade;
         proxy_set_header    Connection $connection_upgrade;
@@ -37,11 +37,11 @@ server {
     }
 
     location /backend_livekit/ {
-        proxy_pass          http://${NGINX_PROXY_PASS_HOST}:12150/;
+        proxy_pass          http://backend_livekit:12150/;
     }
 
     location /livekit/ {
-        proxy_pass          http://${NGINX_PROXY_PASS_HOST}:7880/;
+        proxy_pass          http://livekit:7880/;
         proxy_http_version  1.1;
         proxy_set_header    Upgrade $http_upgrade;
         proxy_set_header    Connection $connection_upgrade;

@@ -1,4 +1,4 @@
-import { PlayerColorName } from '../../domain/model/types'
+import { PlayerColorName, PlayerRoleName } from '../../domain/model/types'
 import { IPersistStore } from '../../interactor/IPersistStore'
 import { IPlayerSetupInfoReader } from '../../interactor/playerSetupInfo/IPlayerSetupInfoReader'
 import { PlayerSetupInfo, PLAYER_SETUP_PROPERTY } from '../../interactor/playerSetupInfo/playerSetupInfo'
@@ -10,6 +10,7 @@ export class PlayerSetupInfoReader implements IPlayerSetupInfoReader {
     const info: PlayerSetupInfo = {
       name: this.cookieRepository.read(PLAYER_SETUP_PROPERTY.name),
       color: this.cookieRepository.read(PLAYER_SETUP_PROPERTY.color) as PlayerColorName,
+      role: this.cookieRepository.read(PLAYER_SETUP_PROPERTY.role) as PlayerRoleName,
     }
     return info
   }

@@ -7,8 +7,8 @@ services:
     tty: true
     volumes:
       - ./frontend:/usr/src/app/frontend
-    ports:
-      - 3000:3000
+    expose:
+      - 3000
     working_dir: /usr/src/app/frontend
     init: true
     command: bash -c "npm i && npm start"
@@ -21,9 +21,9 @@ services:
       - NODE_ENV=development
     volumes:
       - ./backend:/usr/src/app/backend
-    ports:
-      - 12100:12100
-      - 9229:9229
+    expose:
+      - 12100
+      - 9229
     working_dir: /usr/src/app/backend
     env_file:
       - ./backend/local.env
@@ -34,8 +34,8 @@ services:
     image: node:18.14.0
     container_name: backend_livekit
     tty: true
-    ports:
-      - 12150:12150
+    expose:
+      - 12150
     env_file:
       - ./backend_livekit/local.env
     environment:

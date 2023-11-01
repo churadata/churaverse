@@ -1,10 +1,6 @@
 import { Player } from '../domain/model/player'
 import { IPlayerRepository } from '../domain/IRepository/IPlayerRepository'
-import {
-  ExistPlayersInfo,
-  PlayerInfo,
-  PreloadedData,
-} from '../interface/socket/eventTypes'
+import { ExistPlayersInfo, PlayerInfo, PreloadedData } from '../interface/socket/eventTypes'
 import { IMegaphoneUserRepository } from '../domain/IRepository/IMegaphoneUserRepository'
 
 /**
@@ -12,7 +8,9 @@ import { IMegaphoneUserRepository } from '../domain/IRepository/IMegaphoneUserRe
  */
 export function makePreloadedData(
   players: IPlayerRepository,
-  megaphoneUsers: IMegaphoneUserRepository
+  megaphoneUsers: IMegaphoneUserRepository,
+  mapName: string,
+  invincibleWorldMode: boolean
 ): PreloadedData {
   // 引数で受け取ったplayersから送信用のデータを作成
   const existPlayers: ExistPlayersInfo = {}
@@ -25,7 +23,9 @@ export function makePreloadedData(
 
   const preloadedData: PreloadedData = {
     existPlayers,
-    megaphoneUsers: megaphoneUsers.getIds(),
+    mapName,
+    megaphoneUsers: megaphoneUsers.toObject(),
+    invincibleWorldModeInfo: { active: invincibleWorldMode },
   }
   return preloadedData
 }
@@ -33,10 +33,7 @@ export function makePreloadedData(
 /**
  * playerから送信用のデータを生成
  */
-function convertForEmitPlayerInfo(
-  playerId: string,
-  player: Player
-): PlayerInfo {
+function convertForEmitPlayerInfo(playerId: string, player: Player): PlayerInfo {
   const info: PlayerInfo = {
     hp: player.hp,
     x: player.position.x,

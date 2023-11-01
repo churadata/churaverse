@@ -114,8 +114,7 @@ export class LinearQuadTreeSpace {
    */
   private changeNullIfNeeded(index: number): void {
     const indexData = this.data[index]
-    if (indexData === null || indexData === undefined || indexData.size > 0)
-      return
+    if (indexData === null || indexData === undefined || indexData.size > 0) return
     // 子空間が全てnullなら自分をnullにする
     let noChildren = true
     for (let i = 0; i < 4; i++) {

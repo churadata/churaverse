@@ -10,6 +10,7 @@ import {
   ReceiveJoinData,
   RequestKickPlayerInfo,
   exitOwnPlayerInfo,
+  MapInfo,
 } from '../../interface/socket/eventTypes'
 import {
   ReceiveBaseInfo,
@@ -21,89 +22,54 @@ import {
   StopInfo,
   ProfileInfo,
   MegaphoneInfo,
+  InvincibleWorldModeInfo,
 } from '../../interface/socket/action/actionTypes'
 
 import { makePreloadedData } from '../preloadedDataFactory'
 import { ISocket } from '../ISocket'
 
 export class SocketController {
-  public constructor(
-    private readonly interactor: Interactor,
-    private readonly socket: ISocket
-  ) {
+  public constructor(private readonly interactor: Interactor, private readonly socket: ISocket) {
     // eventとactionのlisten
     // 無名関数にしないと実行時にエラーが出ます https://christina04.hatenablog.com/entry/2017/11/08/020545
-    this.socket.listenEvent(
-      SocketListenEventType.RequestPreloadedData,
-      this.replyPreloadData.bind(this)
-    )
+    this.socket.listenEvent(SocketListenEventType.RequestPreloadedData, this.replyPreloadData.bind(this))
 
-    this.socket.listenEvent(
-      SocketListenEventType.EnterPlayer,
-      this.playerJoin.bind(this)
-    )
+    this.socket.listenEvent(SocketListenEventType.EnterPlayer, this.playerJoin.bind(this))
 
-    this.socket.listenEvent(
-      SocketListenEventType.CheckConnect,
-      this.replyCheckConnect.bind(this)
-    )
+    this.socket.listenEvent(SocketListenEventType.CheckConnect, this.replyCheckConnect.bind(this))
 
-    this.socket.listenEvent(
-      SocketListenEventType.DisConnect,
-      this.leavePlayer.bind(this)
-    )
+    this.socket.listenEvent(SocketListenEventType.DisConnect, this.leavePlayer.bind(this))
 
-    this.socket.listenEvent(
-      SocketListenEventType.RequestKickPlayer,
-      this.requestKickPlayer.bind(this)
-    )
+    this.socket.listenEvent(SocketListenEventType.RequestKickPlayer, this.requestKickPlayer.bind(this))
 
-    this.socket.listenEvent(
-      SocketListenEventType.ExitOwnPlayer,
-      this.exitOwnPlayer.bind(this)
-    )
+    this.socket.listenEvent(SocketListenEventType.RequestNewMap, this.updateMap.bind(this))
 
-    this.socket.listenAction(
-      SocketListenActionType.Walk,
-      this.playerWalk.bind(this)
-    )
+    this.socket.listenEvent(SocketListenEventType.ExitOwnPlayer, this.exitOwnPlayer.bind(this))
 
-    this.socket.listenAction(
-      SocketListenActionType.Stop,
-      this.stopPlayer.bind(this)
-    )
+    this.socket.listenAction(SocketListenActionType.Walk, this.playerWalk.bind(this))
 
-    this.socket.listenAction(
-      SocketListenActionType.Turn,
-      this.turnPlayer.bind(this)
-    )
+    this.socket.listenAction(SocketListenActionType.Stop, this.stopPlayer.bind(this))
 
-    this.socket.listenAction(
-      SocketListenActionType.Profile,
-      this.updatePlayerProfile.bind(this)
-    )
+    this.socket.listenAction(SocketListenActionType.Turn, this.turnPlayer.bind(this))
 
-    this.socket.listenAction(
-      SocketListenActionType.Shark,
-      this.spawnShark.bind(this)
-    )
+    this.socket.listenAction(SocketListenActionType.Profile, this.updatePlayerProfile.bind(this))
 
-    this.socket.listenAction(
-      SocketListenActionType.Bomb,
-      this.dropBomb.bind(this)
-    )
+    this.socket.listenAction(SocketListenActionType.Shark, this.spawnShark.bind(this))
 
-    this.socket.listenAction(
-      SocketListenActionType.Megaphone,
-      this.toggleMegaphone.bind(this)
-    )
+    this.socket.listenAction(SocketListenActionType.Bomb, this.dropBomb.bind(this))
+
+    this.socket.listenAction(SocketListenActionType.Megaphone, this.toggleMegaphone.bind(this))
+
+    this.socket.listenAction(SocketListenActionType.InvincibleWorldMode, this.toggleInvincibleWorldMode.bind(this))
   }
 
   private replyPreloadData(callback: (data: PreloadedData) => void): void {
     const ingredients = this.interactor.getPreloadedDataIngredients()
     const preloadedData = makePreloadedData(
       ingredients.players,
-      ingredients.megaphoneUsers
+      ingredients.megaphoneUsers,
+      ingredients.mapName,
+      ingredients.worldConfig.isInvincibleMode
     )
     callback(preloadedData)
   }
@@ -125,12 +91,7 @@ export class SocketController {
   }
 
   private playerWalk(data: WalkInfo & ReceiveBaseInfo): void {
-    this.interactor.walkPlayer(
-      data.id,
-      new Position(data.startPos.x, data.startPos.y),
-      data.direction,
-      data.speed
-    )
+    this.interactor.walkPlayer(data.id, new Position(data.startPos.x, data.startPos.y), data.direction, data.speed)
   }
 
   private leavePlayer(reason: string, socketId: string): void {
@@ -169,7 +130,11 @@ export class SocketController {
   }
 
   private toggleMegaphone(data: MegaphoneInfo & ReceiveBaseInfo): void {
-    this.interactor.toggleMegaphone(data.id, data.activate)
+    this.interactor.toggleMegaphone(data.id, data.active)
+  }
+
+  private toggleInvincibleWorldMode(data: InvincibleWorldModeInfo & ReceiveBaseInfo): void {
+    this.interactor.toggleInvincibleWorldMode(data.active)
   }
 
   private requestKickPlayer(data: RequestKickPlayerInfo): void {
@@ -178,6 +143,10 @@ export class SocketController {
 
   private exitOwnPlayer(data: exitOwnPlayerInfo): void {
     this.interactor.leavePlayer(data.playerId)
+  }
+
+  private async updateMap(data: MapInfo): Promise<void> {
+    return await this.interactor.newMap(data.mapName)
   }
 
   /**

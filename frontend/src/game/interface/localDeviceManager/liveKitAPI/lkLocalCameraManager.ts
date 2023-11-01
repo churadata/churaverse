@@ -1,6 +1,7 @@
 import { Room } from 'livekit-client'
 import { Camera } from '../../../domain/model/localDevice/camera'
 import { ILocalCameraManager } from '../../../interactor/ILocalDeviceManager/ILocalCameraManager'
+import { peripheralPermissionCheck } from './peripheralPermissionCheck'
 
 /**
  * 接続されているカメラを操作する
@@ -36,7 +37,9 @@ export class LkLocalCameraManager implements ILocalCameraManager {
     // 最初の要素がデフォルトのキャプチャ機器
     // https://docs.livekit.io/client-sdk-js/index.html#device-management-apis
     // https://developer.mozilla.org/ja/docs/Web/API/MediaDevices/enumerateDevices#%E8%BF%94%E5%80%A4
-    const devices = await Room.getLocalDevices('videoinput', true)
+
+    const cameraStatus: boolean = await peripheralPermissionCheck('camera')
+    const devices = await Room.getLocalDevices('videoinput', cameraStatus)
     return devices.map((device) => new Camera(device.label, device.deviceId))
   }
 

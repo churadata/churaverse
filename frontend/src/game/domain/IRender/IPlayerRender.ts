@@ -34,4 +34,7 @@ export interface IPlayerRender extends IFocusableRender {
   applyPlayerName: (name: string) => void
   destroy: () => void
   addToContainer: (container: GameObjects.Container) => void
+  setAlphaToMicIcon: (alpha: integer) => void
+  handleMicIcons: (active: boolean) => void
+  handleMegaphone: (active: boolean) => void
 }

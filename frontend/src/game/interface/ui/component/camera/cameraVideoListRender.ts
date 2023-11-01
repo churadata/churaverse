@@ -2,6 +2,7 @@ import { Scene } from 'phaser'
 import { CameraVideoRender } from './cameraVideoRender'
 import { createUIContainer } from '../../util/container'
 import { ICameraVideoListRender } from '../../../../domain/IRender/ICameraVideoListRender'
+import { makeLayerHigherTemporary } from '../../util/makeLayerHigherTemporary'
 
 // const RIGHT_ARROW_BUTTON_PATH = 'assets/rightArrowButton.png'
 
@@ -52,7 +53,6 @@ export class CameraVideoListRender implements ICameraVideoListRender {
 
       // カメラ映像表示部分+ページボタンの読み込み
       scene.load.html(VIDEOS_CONTAINER_KEY, VIDEOS_CONTAINER_PATH)
-
       // textureがロードされてないときに待つ
       scene.load.once('complete', () => {
         resolve()
@@ -78,6 +78,9 @@ export class CameraVideoListRender implements ICameraVideoListRender {
   private setupScreens(screens: CameraVideoRender[]): void {
     // スクリーンを横並びにするdivに追加していく
     const videosContainerElement = this.cameraVideoListPhaserDOM.getChildByID(VIDEOS_CONTAINER_ID)
+    videosContainerElement.addEventListener('mousedown', () => {
+      makeLayerHigherTemporary(videosContainerElement, 'low')
+    })
     for (const screen of screens) {
       videosContainerElement.append(screen.getScreenContainer())
     }
@@ -183,8 +186,10 @@ export class CameraVideoListRender implements ICameraVideoListRender {
 
     if (this.hasNextPage()) {
       this.nextPageButton.style.opacity = '1'
+      this.nextPageButton.style.pointerEvents = 'auto'
     } else {
       this.nextPageButton.style.opacity = '0'
+      this.nextPageButton.style.pointerEvents = 'none'
     }
   }
 
@@ -193,8 +198,10 @@ export class CameraVideoListRender implements ICameraVideoListRender {
 
     if (this.hasPrevPage()) {
       this.prevPageButton.style.opacity = '1'
+      this.prevPageButton.style.pointerEvents = 'auto'
     } else {
       this.prevPageButton.style.opacity = '0'
+      this.prevPageButton.style.pointerEvents = 'none'
     }
   }
 }

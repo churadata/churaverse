@@ -1,7 +1,8 @@
 import { IMegaphoneUserRepository } from '../../domain/IRepository/IMegaphoneUserRepository'
 import { IPlayerRepository } from '../../domain/IRepository/IPlayerRepository'
 import { Direction } from '../../domain/core/direction'
-import { EmitData, ReceiveData } from './action/actionTypes'
+import { WorldConfig } from '../../domain/model/worldConfig'
+import { EmitData, InvincibleWorldModeInfo, ReceiveData } from './action/actionTypes'
 
 /**
  * Serverから送るEventの名前とその送受信のデータの定義
@@ -16,6 +17,7 @@ export interface SocketServerEmitEventRecords {
   /**
    * socket idがなくなったときにリロードする時のevent
    */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   NotExistsPlayer: () => void
 
   /**
@@ -29,6 +31,8 @@ export interface SocketServerEmitEventRecords {
   newPlayer: (playerInfo: PlayerInfo) => void
 
   handleKickRequest: (info: RequestKickPlayerInfo) => void
+
+  newMap: (info: MapInfo) => void
 }
 
 /**
@@ -68,35 +72,32 @@ export interface SocketServerListenEventRecords {
   requestKickPlayer: (receiveData: RequestKickPlayerInfo) => void
 
   exitOwnPlayer: (receiveData: exitOwnPlayerInfo) => void
+
+  requestNewMap: (receiveData: MapInfo) => void
 }
 
 type DefaultListenEventCallbackArgs = [socketId: string]
-type AddArgs<
-  Func extends (...args: any) => any,
-  AddedArgs extends [...args: any]
-> = (...args: [...Parameters<Func>, ...AddedArgs]) => ReturnType<Func>
+type AddArgs<Func extends (...args: any) => any, AddedArgs extends [...args: any]> = (
+  ...args: [...Parameters<Func>, ...AddedArgs]
+) => ReturnType<Func>
 
 /**
  * 関数の引数にDefaultListenEventCallbackArgsを追加する
  */
-type ListenEventCallback<Func extends (...args: any) => any> = AddArgs<
-  Func,
-  DefaultListenEventCallbackArgs
->
+type ListenEventCallback<Func extends (...args: any) => any> = AddArgs<Func, DefaultListenEventCallbackArgs>
 
 /**
  * ListenEventに渡すcallbackの型テーブル
  * SocketServerListenEventRecordsで定義された関数の引数にDefaultListenEventCallbackArgsが追加された関数
  */
 export type ListenEventCallbackTable = {
-  [eventName in SocketListenEventType]: ListenEventCallback<
-    SocketServerListenEventRecords[eventName]
-  >
+  [eventName in SocketListenEventType]: ListenEventCallback<SocketServerListenEventRecords[eventName]>
 }
 
 /**
  * Clientから送られてくるEventNameの型
  */
+/* eslint-disable */
 export const SocketListenEventType = {
   EnterPlayer: 'enterPlayer',
   RequestPreloadedData: 'requestPreloadedData',
@@ -106,28 +107,27 @@ export const SocketListenEventType = {
   DisConnect: 'disconnect',
   RequestKickPlayer: 'requestKickPlayer',
   ExitOwnPlayer: 'exitOwnPlayer',
+  RequestNewMap: 'requestNewMap',
 } as const
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export type SocketListenEventType =
-  typeof SocketListenEventType[keyof typeof SocketListenEventType]
+export type SocketListenEventType = typeof SocketListenEventType[keyof typeof SocketListenEventType]
 
-export const SocketEventNames = Object.values(
-  SocketListenEventType
-) as SocketListenEventType[]
-
+export const SocketEventNames = Object.values(SocketListenEventType) as SocketListenEventType[]
+/* eslint-enable */
 /**
  * Clientに送られるEventNameの型
  */
+/* eslint-disable */
 export const SocketEmitEventType = {
   PlayersAct: 'playersAct',
   NotExistsPlayer: 'NotExistsPlayer',
   Disconnected: 'disconnected',
   NewPlayer: 'newPlayer',
   HandleKickRequest: 'handleKickRequest',
+  NewMap: 'newMap',
+  /* eslint-enable */
 } as const
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type SocketEmitEventType =
-  typeof SocketEmitEventType[keyof typeof SocketEmitEventType]
+export type SocketEmitEventType = typeof SocketEmitEventType[keyof typeof SocketEmitEventType]
 
 /**
  * Playerの情報
@@ -150,9 +150,11 @@ export interface ExistPlayersInfo {
 }
 
 /**
- * メガホン機能をONにしているプレイヤーの情報
+ * プレイヤー毎のメガホン機能の使用状況
  */
-export type MegaphoneUsersInfo = string[]
+export interface MegaphoneUsersInfo {
+  [id: string]: boolean
+}
 
 /**
  * PreloadedDataを作るために必要なデータ
@@ -160,6 +162,8 @@ export type MegaphoneUsersInfo = string[]
 export interface PreloadedDataIngredients {
   players: IPlayerRepository
   megaphoneUsers: IMegaphoneUserRepository
+  mapName: string
+  worldConfig: WorldConfig
 }
 
 /**
@@ -168,6 +172,8 @@ export interface PreloadedDataIngredients {
 export interface PreloadedData {
   existPlayers: ExistPlayersInfo
   megaphoneUsers: MegaphoneUsersInfo
+  mapName: string
+  invincibleWorldModeInfo: InvincibleWorldModeInfo
 }
 
 /**
@@ -185,6 +191,11 @@ export interface RequestKickPlayerInfo {
   kickerId: string
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface exitOwnPlayerInfo {
   playerId: string
+}
+
+export interface MapInfo {
+  mapName: string
 }

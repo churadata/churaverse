@@ -15,6 +15,17 @@ export class LocalDevice implements ILocalDevice {
     this.listenDeviceChange(() => {
       void this.interactor?.deviceChange()
     })
+
+    /**
+     * マイク・カメラの権限の変更を受け取り、デバイスの選択ができるように権限の状態を反映する。
+     */
+    this.listenDevicePermissionChange(() => {
+      void this.interactor?.deviceChange()
+    }, 'microphone')
+
+    this.listenDevicePermissionChange(() => {
+      void this.interactor?.deviceChange()
+    }, 'camera')
   }
 
   public setInteractor(interactor: Interactor): void {
@@ -24,6 +35,14 @@ export class LocalDevice implements ILocalDevice {
   public listenDeviceChange(onChange: () => void): void {
     navigator.mediaDevices.addEventListener('devicechange', () => {
       onChange()
+    })
+  }
+
+  public listenDevicePermissionChange(onChange: () => void, targetName: 'camera' | 'microphone'): void {
+    void navigator.permissions.query({ name: targetName as PermissionName }).then((deviceStatus) => {
+      deviceStatus.onchange = () => {
+        onChange()
+      }
     })
   }
 }

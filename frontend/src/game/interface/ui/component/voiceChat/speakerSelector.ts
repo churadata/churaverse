@@ -4,21 +4,13 @@ import { Speaker } from '../../../../domain/model/localDevice/speaker'
 import { Interactor } from '../../../../interactor/Interactor'
 import { ILocalSpeakerManager } from '../../../../interactor/ILocalDeviceManager/ILocalSpeakerManager'
 import { ISpeakerSelector } from '../../../../interactor/ILocalDeviceSelector/ISpeakerSelector'
+import { DomManager } from '../../util/domManager'
+import { SpeakerSelectorComponent } from './components/SpeakerSelectorComponent'
 
 /**
- * スピーカーセレクタのHTMLと紐付けるKey
+ * スピーカーセレクタのHTML内にあるselectタグのid
  */
-const SPEAKER_SELECTOR_KEY = 'speakerSelector'
-
-/**
- * スピーカーセレクタのHTMLのパス
- */
-const SPEAKER_SELECTOR_PATH = 'assets/deviceSelector.html'
-
-/**
- * スピーカーセレクタのHTML内にあるselectタグのname
- */
-const SPEAKER_SELECT_TAG_NAME = 'deviceSelector'
+export const SPEAKER_SELECT_TAG_ID = 'speakerSelector'
 
 export class SpeakerSelector implements ISpeakerSelector {
   private readonly selectTag: HTMLSelectElement
@@ -28,20 +20,13 @@ export class SpeakerSelector implements ISpeakerSelector {
     scene: Scene,
     private readonly speakerManager: ILocalSpeakerManager,
     settingDialog: SettingDialog,
-    speaker: Speaker[]
+    speakers: Speaker[]
   ) {
-    const selectorElement = scene.add
-      .dom(-300, 150)
-      .createFromCache(SPEAKER_SELECTOR_KEY)
-      .setOrigin(0)
-      .setScrollFactor(0)
+    const content = DomManager.jsxToDom(SpeakerSelectorComponent({ speakers }))
+    settingDialog.addContent('peripheralSetting', content)
 
-    this.selectTag = selectorElement.getChildByName(SPEAKER_SELECT_TAG_NAME) as HTMLSelectElement
+    this.selectTag = DomManager.getElementById<HTMLSelectElement>(SPEAKER_SELECT_TAG_ID)
     this.selectTag.addEventListener('change', () => this.onSelect())
-
-    this.setOptions(speaker)
-
-    settingDialog.add(selectorElement)
   }
 
   public static async build(
@@ -50,21 +35,7 @@ export class SpeakerSelector implements ISpeakerSelector {
     settingDialog: SettingDialog,
     speaker: Speaker[]
   ): Promise<SpeakerSelector> {
-    return await new Promise<void>((resolve) => {
-      if (scene.textures.exists(SPEAKER_SELECTOR_KEY)) {
-        resolve()
-      }
-
-      // スピーカーセレクタの読み込み
-      scene.load.html(SPEAKER_SELECTOR_KEY, SPEAKER_SELECTOR_PATH)
-
-      scene.load.once('complete', () => {
-        resolve()
-      })
-      scene.load.start()
-    }).then(() => {
-      return new SpeakerSelector(scene, speakerManager, settingDialog, speaker)
-    })
+    return new SpeakerSelector(scene, speakerManager, settingDialog, speaker)
   }
 
   public setInteractor(interactor: Interactor): void {
@@ -121,6 +92,11 @@ export class SpeakerSelector implements ISpeakerSelector {
     const option = document.createElement('option')
     option.value = speaker.id
     option.textContent = speaker.name
+
+    const noSpeakerDeviceMsg = '利用可能な出力デバイスを確認できません'
+    if (option.textContent === '') {
+      option.textContent = noSpeakerDeviceMsg
+    }
 
     this.selectTag.appendChild(option)
   }

@@ -1,5 +1,5 @@
 import { Scene, Tilemaps } from 'phaser'
-import { GRID_SIZE } from '../../../domain/worldConfig'
+import { GRID_SIZE } from '../../../domain/model/worldConfig'
 import { IMapRender } from '../../../domain/IRender/IMapRender'
 import { Position } from '../../../domain/model/core/position'
 
@@ -7,19 +7,16 @@ import { Position } from '../../../domain/model/core/position'
 const MAP_TEXTURE_NAME = 'mapTiles'
 
 // mapのtile画像のパス
-const MAP_TILE_IMAGE_PATH = 'assets/map_tile.png'
+const MAP_TILE_IMAGE_PATH = 'assets/maps/map_tile.png'
 
-// mapの設定jsonデータの識別名
-const MAP_JSON_NAME = 'mapJson'
+const COLLISION_LAYER_NAME = 'Collision'
 
-// mapの設定jsonのパス
-const MAP_TILE_JSON_PATH = 'assets/maps/Map.json'
-
-// jsonの中のtilesets > name
-const TILE_SET_NAME_IN_JSON = 'map_tile'
-
-// map のレイヤーID
-const MAP_LAYER_ID = 'Base'
+// マップの描画に必要なデータ
+interface MapJsonData {
+  path: string
+  tilesets: string
+  layerId: string
+}
 
 /**
  * Map作成クラス
@@ -29,12 +26,12 @@ export class MapRender implements IMapRender {
   public groundLayer: Tilemaps.TilemapLayer
   private readonly mapData: Tilemaps.Tilemap
 
-  private constructor(private readonly scene: Scene) {
-    this.mapData = this.scene.add.tilemap(MAP_JSON_NAME)
-    const tiles = this.mapData.addTilesetImage(TILE_SET_NAME_IN_JSON, MAP_TEXTURE_NAME)
+  private constructor(private readonly scene: Scene, mapName: string, tilesets: string, layerId: string) {
+    this.mapData = this.scene.add.tilemap(mapName)
+    const tiles = this.mapData.addTilesetImage(tilesets, MAP_TEXTURE_NAME)
 
     // レイヤー作成
-    this.groundLayer = this.mapData.createLayer(MAP_LAYER_ID, tiles, -GRID_SIZE / 2, -GRID_SIZE / 2) // (0, 0)がタイルの中心になるようにx, yを半グリッド分ずらす
+    this.groundLayer = this.mapData.createLayer(layerId, tiles, -GRID_SIZE / 2, -GRID_SIZE / 2) // (0, 0)がタイルの中心になるようにx, yを半グリッド分ずらす
 
     /**
      * カメラがワールドの外側を映すことのないように
@@ -47,14 +44,13 @@ export class MapRender implements IMapRender {
     )
   }
 
-  public static async build(scene: Scene): Promise<MapRender> {
+  public static async build(scene: Scene, mapName: string, mapData: MapJsonData): Promise<MapRender> {
     return await new Promise<void>((resolve, reject) => {
-      if (scene.textures.exists(MAP_TEXTURE_NAME)) {
+      if (scene.textures.exists(MAP_TEXTURE_NAME) && scene.cache.json.exists(mapName)) {
         resolve()
       }
-
       scene.load.image(MAP_TEXTURE_NAME, MAP_TILE_IMAGE_PATH)
-      scene.load.tilemapTiledJSON(MAP_JSON_NAME, MAP_TILE_JSON_PATH)
+      scene.load.tilemapTiledJSON(mapName, mapData.path)
       scene.load.once('complete', () => {
         resolve()
       })
@@ -63,17 +59,19 @@ export class MapRender implements IMapRender {
       })
       scene.load.start()
     }).then(() => {
-      return new MapRender(scene)
+      return new MapRender(scene, mapName, mapData.tilesets, mapData.layerId)
     })
   }
 
   public hasBlockingTile(pos: Position): boolean {
+    // マップの描画内かどうかを返す
     // nonNull = false なのでgetTileAtの戻り値はTilemaps.Tile | null
-    const tile = this.mapData.getTileAt(pos.gridX, pos.gridY, false) as Tilemaps.Tile | null
+    const inWorld = this.mapData.getTileAt(pos.gridX, pos.gridY, false) as Tilemaps.Tile | null
+    if (inWorld === null) return true
 
-    // タイルが存在しない場合は通行不可とみなす
-    if (tile === null) return true
+    // Collisionレイヤー内にtileがあればtrueを返す
+    const blockingTile = this.mapData.hasTileAt(pos.gridX, pos.gridY, COLLISION_LAYER_NAME)
 
-    return tile.properties.collision
+    return blockingTile
   }
 }

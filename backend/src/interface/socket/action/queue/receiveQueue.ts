@@ -5,7 +5,11 @@ import { IReceiveQueue } from './IReceiveQueue'
 const RECEIVE_QUEUE_ASYNC_LOCK_KEY = 'receiveQueue'
 
 export class ReceiveQueue implements IReceiveQueue {
-  private readonly lock = new AsyncLock({ timeout: 1000 * 30 })
+  private readonly lock = new AsyncLock({
+    timeout: 1000 * 30,
+    maxPending: Infinity,
+  })
+
   private readonly packets: ReceiveData[] = []
 
   /**

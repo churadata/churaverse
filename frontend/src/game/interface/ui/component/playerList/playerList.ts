@@ -16,13 +16,18 @@ const PLAYER_LIST_ID = 'player-list'
 // kickアイコンのimgまでのパス
 const KICK_ICON_IMAGE_PATH = 'assets/exit.png'
 
+// playerCountするためのID
+const PLAYER_COUNT_ID = 'player-count'
+
 export class PlayerList implements IPlayerListRender {
   private interactor?: Interactor
   private readonly playerListContainer: HTMLTableElement
+  private readonly playerCountContainer: HTMLElement
 
   private constructor(scene: Scene, playerListDialog: PlayerListDialog) {
     const playerList = scene.add.dom(-370, 0).createFromCache(PLAYER_LIST_KEY).setOrigin(0, 0).setScrollFactor(0)
     this.playerListContainer = document.getElementById(PLAYER_LIST_ID) as HTMLTableElement
+    this.playerCountContainer = document.getElementById(PLAYER_COUNT_ID) as HTMLElement
 
     if (this.playerListContainer == null) {
       throw new Error(`id:${PLAYER_LIST_ID}を持つelementが見つかりません。`)
@@ -55,6 +60,17 @@ export class PlayerList implements IPlayerListRender {
       const playerListElement = this.createPlayerListRow(player, id, ownPlayerId, players)
       this.playerListContainer.appendChild(playerListElement)
     })
+  }
+
+  /**
+   * プレイヤーの一覧用UIの人数部分の作成
+   */
+  private createPlayerCount(players: Map<string, Player>): HTMLElement {
+    const count = document.createElement('span')
+    const playerCount = players.size
+    count.textContent = `人数：${playerCount}`
+
+    return count
   }
 
   /**
@@ -149,6 +165,16 @@ export class PlayerList implements IPlayerListRender {
   public updatePlayerList(ownPlayerId: string, players: Map<string, Player>): void {
     this.playerListContainer.innerHTML = ''
     this.createPlayerList(ownPlayerId, players)
+    this.updatePlayerCount(players)
+  }
+
+  /**
+   * playerの人数が増減した時に実行
+   */
+  private updatePlayerCount(players: Map<string, Player>): void {
+    this.playerCountContainer.innerHTML = ''
+    const count = this.createPlayerCount(players)
+    this.playerCountContainer.appendChild(count)
   }
 
   public setInteractor(interactor: Interactor): void {

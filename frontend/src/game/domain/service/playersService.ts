@@ -73,7 +73,7 @@ export class PlayersService {
    * @param isDead
    */
   public isDead(id: string): boolean {
-    return this.players.get(id)?.isDead ?? true // 指定したidのPlayerがいない場合、trueを返す
+    return this.players.get(id)?.isDead ?? true
   }
 
   public respawn(id: string, position: Position, direction: Direction): void {

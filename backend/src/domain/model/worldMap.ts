@@ -1,62 +1,60 @@
 import { Position } from '../core/position'
 
 export class WorldMap {
+  private readonly spawnablePoint: number[][] = []
+
   public constructor(
+    public readonly mapName: string,
     public readonly height: number,
     public readonly width: number,
     public readonly heightTileNum: number,
     public readonly widthTileNum: number,
     public readonly gridSize: number,
-    public readonly collision: boolean[][] // trueの場合通行不可マス
-  ) {}
-
-  /**
-   * 侵入可能なマスならtrueを返す
-   */
-  public canEnter(low: number, col: number): boolean {
-    return !this.collision[low][col]
+    public readonly layerProperty: Map<string, boolean[][]>
+  ) {
+    this.spawnablePoint = this.getSpawnablePoint()
   }
 
   /**
-   * ワールド内のランダムなタイル番号を返す
-   * withoutCollisionTileがtrueなら侵入不可マスは返さない
+   * ランダムなスポーンポイントを取得するメソッド
    */
-  public getRandomTileNum(excludeCollisionTile = true): [number, number] {
-    const indices = this.shuffle([
-      ...Array(this.heightTileNum * this.widthTileNum).keys(),
-    ])
-    for (const index of indices) {
-      const i = Math.floor(index / this.widthTileNum)
-      const j = index % this.widthTileNum
-
-      // excludeCollisionTileがfalseの場合, canEnter()=falseでもreturn
-      if (this.canEnter(i, j) || !excludeCollisionTile) {
-        return [i, j]
-      }
+  public getRandomSpawnPoint(): Position {
+    // スポーン可能な座標の配列からランダムに座標を取得する
+    if (this.spawnablePoint.length === 0) {
+      // 配列が空の場合、エラーを表示する
+      throw new Error('spawn可能な座標が存在しません')
     }
-
-    console.log('すべてのタイルにcollisionが設定されている')
-    return [-1, -1]
-  }
-
-  /**
-   * ワールド内のランダムな座標を返す
-   * 必ずマス目の中心の座標を返す
-   * withoutCollisionTileがtrueなら侵入不可マスは返さない
-   */
-  public getRandomPos(excludeCollisionTile = true): Position {
-    const [i, j] = this.getRandomTileNum(excludeCollisionTile)
+    // スポーン可能なインデックスをランダムで取得する。
+    const [i, j] = this.spawnablePoint[Math.floor(Math.random() * this.spawnablePoint.length)]
     const spawnPos = new Position(0, 0)
     spawnPos.gridX = j
     spawnPos.gridY = i
+    // ランダムなスポーン座標を返す
     return spawnPos
   }
 
-  private shuffle(array: number[]): number[] {
-    for (let i = array.length - 1; i >= 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[array[i], array[j]] = [array[j], array[i]]
+  /**
+   * スポーン可能なポイントの座標情報を取得する
+   */
+  private getSpawnablePoint(): number[][] {
+    const spawnAvailabilityArray = this.layerProperty.get('Spawn')
+    // Spawn用のレイヤーが存在しない時、マップの中心座標を返す
+    if (spawnAvailabilityArray === undefined) {
+      const center = new Position(this.height / 2, this.width / 2)
+      return [[center.gridX, center.gridY]]
     }
-    return array
+    // mapが変更されるたびに書き換えが行われるため
+    const trueIndices: number[][] = []
+
+    // 2次元配列を走査して true の座標を収集
+    for (let i = 0; i < spawnAvailabilityArray.length; i++) {
+      for (let j = 0; j < spawnAvailabilityArray[i].length; j++) {
+        if (spawnAvailabilityArray[i][j]) {
+          trueIndices.push([i, j])
+        }
+      }
+    }
+    // スポーン可能な座標のインデックス情報を返す
+    return trueIndices
   }
 }

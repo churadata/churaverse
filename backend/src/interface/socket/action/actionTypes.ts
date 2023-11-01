@@ -11,6 +11,7 @@ export interface ActionEmitTypeTable {
   bomb: (data: BombInfo & EmitBaseInfo) => void
   chat: (data: ChatInfo & EmitBaseInfo) => void
   megaphone: (data: MegaphoneInfo & EmitBaseInfo) => void
+  invincibleWorldMode: (data: InvincibleWorldModeInfo & EmitBaseInfo) => void
   ownPlayerDie: (data: PlayerDieInfo) => void
   otherPlayerDie: (data: PlayerDieInfo) => void
   damage: (data: PlayerDamageInfo) => void
@@ -28,11 +29,13 @@ export interface ActionListenTypeTable {
   bomb: (data: BombInfo & ReceiveBaseInfo) => void
   chat: (data: ChatInfo & ReceiveBaseInfo) => void
   megaphone: (data: MegaphoneInfo & ReceiveBaseInfo) => void
+  invincibleWorldMode: (data: InvincibleWorldModeInfo & ReceiveBaseInfo) => void
 }
 
 /**
  * Server側からのみ送信するAction
  */
+/* eslint-disable */
 export const SocketEmitOnlyActionType = {
   OwnPlayerDie: 'ownPlayerDie',
   OtherPlayerDie: 'otherPlayerDie',
@@ -40,14 +43,15 @@ export const SocketEmitOnlyActionType = {
   HitShark: 'hitShark',
   OwnPlayerRespawn: 'ownPlayerRespawn',
   OtherPlayerRespawn: 'otherPlayerRespawn',
+  /* eslint-enable */
 } as const
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type SocketEmitOnlyActionType =
-  typeof SocketEmitOnlyActionType[keyof typeof SocketEmitOnlyActionType]
+export type SocketEmitOnlyActionType = typeof SocketEmitOnlyActionType[keyof typeof SocketEmitOnlyActionType]
 
 /**
  * 送信者を除いた全員に送るAction
  */
+/* eslint-disable */
 export const SocketNormalActionType = {
   Turn: 'turn',
   Walk: 'walk',
@@ -56,47 +60,46 @@ export const SocketNormalActionType = {
   Shark: 'shark',
   Bomb: 'bomb',
   Megaphone: 'megaphone',
+  InvincibleWorldMode: 'invincibleWorldMode',
+  /* eslint-enable */
 } as const
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type SocketNormalActionType =
-  typeof SocketNormalActionType[keyof typeof SocketNormalActionType]
+export type SocketNormalActionType = typeof SocketNormalActionType[keyof typeof SocketNormalActionType]
 
-export const SocketNormalActionNames = Object.values(
-  SocketNormalActionType
-) as SocketNormalActionType[]
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const SocketNormalActionNames = Object.values(SocketNormalActionType) as SocketNormalActionType[]
 
 /**
  * 送信者自身にも送り返すAction
  */
+/* eslint-disable */
 export const SocketChattableActionType = {
   Chat: 'chat',
 } as const
+/* eslint-enable */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type SocketChattableActionType =
-  typeof SocketChattableActionType[keyof typeof SocketChattableActionType]
+export type SocketChattableActionType = typeof SocketChattableActionType[keyof typeof SocketChattableActionType]
 
 // 要素がchatの1つのためtype assertionが不要だが, 書き方の統一のためにsuppress
+/* eslint-disable */
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-export const SocketChattableActionNames = Object.values(
-  SocketChattableActionType
-) as SocketChattableActionType[]
+export const SocketChattableActionNames = Object.values(SocketChattableActionType) as SocketChattableActionType[]
 
 export const SocketEmitActionType = {
   ...SocketEmitOnlyActionType,
   ...SocketNormalActionType,
   ...SocketChattableActionType,
 }
+/* eslint-enable */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type SocketEmitActionType =
-  typeof SocketEmitActionType[keyof typeof SocketEmitActionType]
-
+export type SocketEmitActionType = typeof SocketEmitActionType[keyof typeof SocketEmitActionType]
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SocketListenActionType = {
   ...SocketNormalActionType,
   ...SocketChattableActionType,
 }
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type SocketListenActionType =
-  typeof SocketListenActionType[keyof typeof SocketListenActionType]
+export type SocketListenActionType = typeof SocketListenActionType[keyof typeof SocketListenActionType]
 
 /**
  * Serverから送るactionEventのパケットの型
@@ -154,6 +157,7 @@ export interface EmitBaseInfo {
 
 /**
  * profile変更時に送信するための型
+ * TODO: heroの接頭辞を削る
  */
 export interface ProfileInfo {
   heroColor: string
@@ -163,6 +167,7 @@ export interface ProfileInfo {
 
 /**
  * playerが歩いてるときの状態を送信するための型
+ * TODO: walkSpeedが可変みたいなので,対応できるように見直しをする
  */
 export interface WalkInfo {
   startPos: Vector
@@ -247,5 +252,12 @@ export interface ChatInfo {
  * ボイスチャットのメガホン機能のON/OFF時に送信するための型
  */
 export interface MegaphoneInfo {
-  activate: boolean
+  active: boolean
+}
+
+/**
+ * 全プレイヤー無敵モードのON/OFF時に送信するための型
+ */
+export interface InvincibleWorldModeInfo {
+  active: boolean
 }

@@ -1,4 +1,4 @@
-import { GRID_SIZE } from '../../worldConfig'
+import { GRID_SIZE } from '../worldConfig'
 
 /** 位置型 */
 export class Position {

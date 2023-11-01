@@ -4,4 +4,5 @@ export interface ISocketEventEmitter {
   emitNewPlayer: (socketId: string, player: Player) => void
   emitLeavePlayer: (socketId: string) => void
   requestKickPlayer: (kickedId: string, kickerId: string) => void
+  newMap: (mapName: string) => void
 }

@@ -3,68 +3,45 @@ import { Interactor } from '../../../../interactor/Interactor'
 import { TextFieldObserver } from '../../util/textFieldObserver'
 import { TextChatDialog } from './textChatDialog'
 import { IChatInputRender } from '../../../../domain/IRender/IChatInputRender'
+import { DomManager } from '../../util/domManager'
 
 /**
- * チャット入力部分のHTMLのKey
+ * チャット送信ボタンのid
  */
-const CHAT_INPUT_TEXTURE_KEY = 'chatForm'
+export const TEXT_CHAT_SEND_BUTTON_ID = 'chat-send-button'
 
 /**
- * チャット送信ボタン
+ * テキスト入力部分のid
  */
-const CHAT_SEND_BUTTON = 'chat-send-button'
-
-/**
- * テキスト入力部分
- */
-const TEXT_FIELD = 'text-field'
-
-/**
- * チャット入力部分のHTMLのパス
- */
-const CHAT_INPUT_PATH = 'assets/chatinputform.html'
+export const TEXT_CHAT_INPUT_FIELD_ID = 'chat-text-field'
 
 /**
  * チャット入力部分
  */
 export class TextChatInput implements IChatInputRender {
-  public playerId: string
   public interactor?: Interactor
-  public scene: Scene
   private isFocused = false
-  private readonly inputChatArea: Phaser.GameObjects.DOMElement
-  private constructor(
-    scene: Scene,
-    playerId: string,
-    chatDialog: TextChatDialog,
-    textFieldObserver: TextFieldObserver
-  ) {
+  private readonly inputField: HTMLInputElement
+  public constructor(private readonly playerId: string, textFieldObserver: TextFieldObserver) {
     this.playerId = playerId
-    this.scene = scene
     // チャット入力部分の定義
-    this.inputChatArea = this.scene.add
-      .dom(-300, 505)
-      .createFromCache(CHAT_INPUT_TEXTURE_KEY)
-      .setOrigin(0, 0)
-      .setScrollFactor(0)
-    const textField = this.inputChatArea?.getChildByID(TEXT_FIELD) as HTMLInputElement
-    textField.addEventListener('click', (event) => {
+
+    this.inputField = DomManager.getElementById<HTMLInputElement>(TEXT_CHAT_INPUT_FIELD_ID)
+    this.inputField.addEventListener('click', (event) => {
       this.isFocused = true
       // このイベントが実行された際に親ノードのid=gameのonClick()が実行されないようにするため。
       event.stopPropagation()
     })
-    textFieldObserver.addTargetTextField(textField)
-
-    chatDialog.add(this.inputChatArea)
+    textFieldObserver.addTargetTextField(this.inputField)
 
     // 送信ボタンが押された時、playerIdとmessageを受け渡している
-    const sendButon = document.getElementById(CHAT_SEND_BUTTON)
+    const sendButon = DomManager.getElementById(TEXT_CHAT_SEND_BUTTON_ID)
     if (sendButon !== null) {
       sendButon.onclick = () => {
-        if (textField.value !== '') {
-          const message = textField.value
+        if (this.inputField.value !== '') {
+          const message = this.inputField.value
           this.interactor?.sendChat(this.playerId, message)
-          textField.value = ''
+          this.inputField.value = ''
         }
       }
     }
@@ -86,21 +63,7 @@ export class TextChatInput implements IChatInputRender {
     chatDialog: TextChatDialog,
     textFieldObserver: TextFieldObserver
   ): Promise<TextChatInput> {
-    return await new Promise<void>((resolve) => {
-      if (scene.textures.exists(CHAT_INPUT_TEXTURE_KEY)) {
-        resolve()
-      }
-      // チャット入力部分の読み込み
-      scene.load.html(CHAT_INPUT_TEXTURE_KEY, CHAT_INPUT_PATH)
-
-      // textureがロードされてないときに待つ
-      scene.load.once('complete', () => {
-        resolve()
-      })
-      scene.load.start()
-    }).then(() => {
-      return new TextChatInput(scene, playerId, chatDialog, textFieldObserver)
-    })
+    return new TextChatInput(playerId, textFieldObserver)
   }
 
   public setInteractor(interactor: Interactor): void {
@@ -109,17 +72,15 @@ export class TextChatInput implements IChatInputRender {
 
   // 入力フィールドのフォーカスを外す
   private blurInput(): void {
-    document.getElementById(TEXT_FIELD)?.blur()
+    this.inputField.blur()
     this.isFocused = false
   }
 
   public getMessage(): string {
-    const textField = this.inputChatArea?.getChildByID('text-field') as HTMLInputElement
-    return textField.value
+    return this.inputField.value
   }
 
   public clearMessage(): void {
-    const textField = this.inputChatArea?.getChildByID('text-field') as HTMLInputElement
-    textField.value = ''
+    this.inputField.value = ''
   }
 }

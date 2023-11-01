@@ -4,21 +4,13 @@ import { SettingDialog } from '../settingDialog/settingDialog'
 import { Microphone } from '../../../../domain/model/localDevice/microphone'
 import { Interactor } from '../../../../interactor/Interactor'
 import { IMicSelector } from '../../../../interactor/ILocalDeviceSelector/IMicSelector'
+import { DomManager } from '../../util/domManager'
+import { MicSelectorComponent } from './components/MicSelectorComponent'
 
 /**
- * マイクセレクタのHTMLと紐付けるKey
+ * マイクセレクタのHTML内にあるselectタグのid
  */
-const MIC_SELECTOR_KEY = 'micSelector'
-
-/**
- * マイクセレクタのHTMLのパス
- */
-const MIC_SELECTOR_PATH = 'assets/deviceSelector.html'
-
-/**
- * マイクセレクタのHTML内にあるselectタグのname
- */
-const MIC_SELECT_TAG_NAME = 'deviceSelector'
+export const MIC_SELECT_TAG_ID = 'micSelector'
 
 export class MicSelector implements IMicSelector {
   private readonly selectTag: HTMLSelectElement
@@ -30,14 +22,11 @@ export class MicSelector implements IMicSelector {
     settingDialog: SettingDialog,
     microphones: Microphone[]
   ) {
-    const selectorElement = scene.add.dom(-300, 120).createFromCache(MIC_SELECTOR_KEY).setOrigin(0).setScrollFactor(0)
+    const content = DomManager.jsxToDom(MicSelectorComponent({ microphones }))
+    settingDialog.addContent('peripheralSetting', content)
 
-    this.selectTag = selectorElement.getChildByName(MIC_SELECT_TAG_NAME) as HTMLSelectElement
+    this.selectTag = DomManager.getElementById<HTMLSelectElement>(MIC_SELECT_TAG_ID)
     this.selectTag.addEventListener('change', () => this.onSelect())
-
-    this.setOptions(microphones)
-
-    settingDialog.add(selectorElement)
   }
 
   public static async build(
@@ -46,21 +35,7 @@ export class MicSelector implements IMicSelector {
     settingDialog: SettingDialog,
     microphones: Microphone[]
   ): Promise<MicSelector> {
-    return await new Promise<void>((resolve) => {
-      if (scene.textures.exists(MIC_SELECTOR_KEY)) {
-        resolve()
-      }
-
-      // マイクセレクタの読み込み
-      scene.load.html(MIC_SELECTOR_KEY, MIC_SELECTOR_PATH)
-
-      scene.load.once('complete', () => {
-        resolve()
-      })
-      scene.load.start()
-    }).then(() => {
-      return new MicSelector(scene, micManager, settingDialog, microphones)
-    })
+    return new MicSelector(scene, micManager, settingDialog, microphones)
   }
 
   public setInteractor(interactor: Interactor): void {
@@ -117,6 +92,11 @@ export class MicSelector implements IMicSelector {
     const option = document.createElement('option')
     option.value = mic.id
     option.textContent = mic.name
+
+    const noMicrophoneDeviceMsg = '利用可能なマイクを取得できません'
+    if (option.textContent === '') {
+      option.textContent = noMicrophoneDeviceMsg
+    }
 
     this.selectTag.appendChild(option)
   }

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SceneName = ['Title', 'Main'] as const
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare

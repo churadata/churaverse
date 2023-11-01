@@ -21,13 +21,14 @@ export class Socket {
   private readonly actionHelper = new ActionHelper()
   private readonly eventListener: EventListener
 
-  private readonly io: socketio.Server<
-    SocketServerListenEventRecords,
-    SocketServerEmitEventRecords
-  >
+  private readonly io: socketio.Server<SocketServerListenEventRecords, SocketServerEmitEventRecords>
 
   public constructor(server: http.Server) {
-    this.io = new socketio.Server(server)
+    this.io = new socketio.Server(server, {
+      // cors: {
+      //   origin: process.env.BACKEND_CORS,
+      // },
+    })
     this.eventListener = new EventListener()
 
     this.actionHelper.listenActionEvent(this)
@@ -37,7 +38,14 @@ export class Socket {
 
       for (const eventName of SocketEventNames) {
         iosocket.on(eventName, (...data: any[]) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           this.eventListener.callbacks[eventName](...data.concat([iosocket.id]))
+
+          // 一つのオブジェクトにして渡す場合
+          // this.eventListener.callbacks[eventName]({
+          //   ...data,
+          //   socketId: iosocket.id,
+          // })
         })
       }
     })
@@ -124,13 +132,10 @@ export class Socket {
       this.actionHelper.storePacketsToTransmitQueue(receiveData)
     }
 
-    const receiveEmitAllPlayersActData =
-      this.actionHelper.getEmitAllPlayersActReceiveQueue()
+    const receiveEmitAllPlayersActData = this.actionHelper.getEmitAllPlayersActReceiveQueue()
     if (receiveEmitAllPlayersActData.length !== 0) {
       this.actionHelper.execActions(receiveEmitAllPlayersActData)
-      this.actionHelper.storeEmitAllPlayersActPacketsToTransmitQueue(
-        receiveEmitAllPlayersActData
-      )
+      this.actionHelper.storeEmitAllPlayersActPacketsToTransmitQueue(receiveEmitAllPlayersActData)
     }
 
     // receiveDataが空でもemitActionで直接送信キューに格納している場合がある
@@ -142,10 +147,7 @@ export class Socket {
    * @param eventName イベント名
    * @param callback イベント受信後のcallback
    */
-  public listenEvent<Ev extends SocketListenEventType>(
-    eventName: Ev,
-    callback: ListenEventCallbackTable[Ev]
-  ): void {
+  public listenEvent<Ev extends SocketListenEventType>(eventName: Ev, callback: ListenEventCallbackTable[Ev]): void {
     this.eventListener.listen(eventName, callback)
   }
 
@@ -154,10 +156,7 @@ export class Socket {
    * @param actionName アクション名
    * @param callback アクション受信後のcallback
    */
-  public listenAction<Ac extends SocketListenActionType>(
-    actionName: Ac,
-    callback: ActionListenTypeTable[Ac]
-  ): void {
+  public listenAction<Ac extends SocketListenActionType>(actionName: Ac, callback: ActionListenTypeTable[Ac]): void {
     this.actionHelper.listenAction(actionName, callback)
   }
 

@@ -1,10 +1,10 @@
 import { IMegaphoneUserRepository } from '../../domain/IRepository/IMegaphoneUserRepository'
 
 export class MegaphoneUserRepository implements IMegaphoneUserRepository {
-  private readonly users = new Set<string>()
+  private readonly users = new Map<string, boolean>()
 
-  public add(id: string): void {
-    this.users.add(id)
+  public set(id: string, active: boolean): void {
+    this.users.set(id, active)
   }
 
   public delete(id: string): void {
@@ -15,7 +15,7 @@ export class MegaphoneUserRepository implements IMegaphoneUserRepository {
     return this.users.has(id)
   }
 
-  public getIds(): string[] {
-    return Array.from(this.users.keys())
+  public toObject(): { [id: string]: boolean } {
+    return Object.fromEntries(this.users)
   }
 }

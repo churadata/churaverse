@@ -16,14 +16,28 @@ plugins:
   - filename-rules
 rules:
   filename-rules/match: ['error', { .ts: camelCase }]
-  "@typescript-eslint/naming-convention": [
-    'error',
-    {
-      "selector": ["method","function"],
-      "format": ["camelCase"]
-    }
-  ]
-  "@typescript-eslint/explicit-member-accessibility": 'warn'
+  '@typescript-eslint/naming-convention':
+    [
+      'error',
+      { 'selector': ['class', 'interface', 'typeAlias'], 'format': ['PascalCase'] },
+      { 'selector': ['property'], 'format': ['camelCase'], 'leadingUnderscore': 'allow' },
+      {
+        'selector': ['property'],
+        'modifiers': ['readonly'],
+        'format': ['camelCase', 'UPPER_CASE'],
+        'leadingUnderscore': 'allow',
+      },
+      { 'selector': ['parameterProperty'], 'format': ['camelCase'], 'leadingUnderscore': 'allow' },
+      { 'selector': 'variable', 'format': ['camelCase'], 'leadingUnderscore': 'allow' },
+      {
+        'selector': 'variable',
+        'modifiers': ['const'],
+        'format': ['camelCase', 'UPPER_CASE'],
+        'leadingUnderscore': 'allow',
+      },
+      { 'selector': ['method', 'function'], 'format': ['camelCase'] },
+    ]
+  '@typescript-eslint/explicit-member-accessibility': 'warn'
   import/no-restricted-paths:
     - error
     - zones:
@@ -48,3 +62,8 @@ overrides:
   - files: 'I*.ts'
     rules:
       filename-rules/match: ['error', 'PascalCase']
+  - files: '*.tsx'
+    rules:
+      '@typescript-eslint/naming-convention':
+        - 'error'
+        - { 'selector': 'variable', 'format': ['camelCase', 'UPPER_CASE', 'PascalCase'], 'leadingUnderscore': 'allow' }

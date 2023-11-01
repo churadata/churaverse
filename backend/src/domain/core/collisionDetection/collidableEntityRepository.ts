@@ -7,13 +7,12 @@ import { WorldMap } from '../../model/worldMap'
  * 当たり判定を取るオブジェクトのリポジトリはこのクラスを継承する
  * 四分木への追加・削除のため、子クラスのset()/delete()ではsuper.set()/super.delete()を呼ぶ必要がある
  */
-export abstract class CollidableEntityRepository<T extends ICollidableEntity>
-  implements EntityRepository<T>
-{
-  constructor(private readonly worldMap: WorldMap) {}
-  private readonly qtree: LinearQuadTreeSpace = new LinearQuadTreeSpace(
-    this.worldMap
-  )
+export abstract class CollidableEntityRepository<T extends ICollidableEntity> implements EntityRepository<T> {
+  private qtree: LinearQuadTreeSpace
+
+  public constructor(worldMap: WorldMap) {
+    this.qtree = new LinearQuadTreeSpace(worldMap)
+  }
 
   public set(id: string, entity: T): void {
     this.qtree.addActor(id, entity.getRect())
@@ -21,6 +20,10 @@ export abstract class CollidableEntityRepository<T extends ICollidableEntity>
 
   public delete(id: string): void {
     this.qtree.removeActor(id)
+  }
+
+  public updateMap(worldMap: WorldMap): void {
+    this.qtree = new LinearQuadTreeSpace(worldMap)
   }
 
   /**

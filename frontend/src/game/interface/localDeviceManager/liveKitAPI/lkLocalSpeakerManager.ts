@@ -1,6 +1,7 @@
 import { Room } from 'livekit-client'
 import { Speaker } from '../../../domain/model/localDevice/speaker'
 import { ILocalSpeakerManager } from '../../../interactor/ILocalDeviceManager/ILocalSpeakerManager'
+import { peripheralPermissionCheck } from './peripheralPermissionCheck'
 
 /**
  * 接続されているスピーカを操作する
@@ -36,7 +37,13 @@ export class LkLocalSpeakerManager implements ILocalSpeakerManager {
     // 最初の要素がデフォルトのキャプチャ機器
     // https://docs.livekit.io/client-sdk-js/index.html#device-management-apis
     // https://developer.mozilla.org/ja/docs/Web/API/MediaDevices/enumerateDevices#%E8%BF%94%E5%80%A4
-    const devices = await Room.getLocalDevices('audiooutput', true)
+
+    // スピーカーを利用する分には権限は不要ですが、webページがデバイスを確認する際には権限が必要になります
+    // 権限の取得について、スピーカーのみの権限の取得は存在せず、マイクの権限を必要とするためmicrophoneStatusという内容を利用します
+    // また、getLocalDevicesにmicrophoneStatusを渡す理由は、マイクの権限なしに動作するようにするためです
+
+    const microphoneStatus: boolean = await peripheralPermissionCheck('microphone')
+    const devices = await Room.getLocalDevices('audioinput', microphoneStatus)
     return devices.map((device) => new Speaker(device.label, device.deviceId))
   }
 

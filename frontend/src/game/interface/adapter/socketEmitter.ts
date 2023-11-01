@@ -10,6 +10,7 @@ import { PlayerRender } from '../ui/Render/entity/playerRender'
 import {
   BombInfo,
   ChatInfo,
+  InvincibleWorldModeInfo,
   MegaphoneInfo,
   ProfileInfo,
   SharkInfo,
@@ -18,7 +19,14 @@ import {
   TurnInfo,
   WalkInfo,
 } from '../socket/actionTypes'
-import { KickPlayerInfo, EmitJoinData, PlayerInfo, SocketEmitEventType, exitOwnPlayerInfo } from '../socket/eventTypes'
+import {
+  KickPlayerInfo,
+  EmitJoinData,
+  PlayerInfo,
+  SocketEmitEventType,
+  exitOwnPlayerInfo,
+  MapInfo,
+} from '../socket/eventTypes'
 import { Socket } from '../socket/socket'
 
 /**
@@ -71,6 +79,8 @@ export class SocketEmitter implements ISocketEmitter {
             const processedPreloadedData: ProcessedPreloadedData = {
               existPlayers: players,
               megaphoneUsers: data.megaphoneUsers,
+              mapName: data.mapName,
+              invincibleWorldModeInfo: data.invincibleWorldModeInfo,
             }
             return processedPreloadedData
           })
@@ -173,12 +183,20 @@ export class SocketEmitter implements ISocketEmitter {
     this.socket.emitAction(SocketEmitActionType.Chat, info)
   }
 
-  public toggleMegaphone(activate: boolean): void {
+  public toggleMegaphone(active: boolean): void {
     const info: MegaphoneInfo = {
-      activate,
+      active,
     }
 
     this.socket.emitAction(SocketEmitActionType.Megaphone, info)
+  }
+
+  public toggleInvincibleWorldMode(active: boolean): void {
+    const info: InvincibleWorldModeInfo = {
+      active,
+    }
+
+    this.socket.emitAction(SocketEmitActionType.InvincibleWorldMode, info)
   }
 
   public flushActions(): void {
@@ -198,5 +216,12 @@ export class SocketEmitter implements ISocketEmitter {
       playerId,
     }
     this.socket.emitEvent(SocketEmitEventType.ExitOwnPlayer, info)
+  }
+
+  public requestNewMap(mapName: string): void {
+    const info: MapInfo = {
+      mapName,
+    }
+    this.socket.emitEvent(SocketEmitEventType.RequestNewMap, info)
   }
 }

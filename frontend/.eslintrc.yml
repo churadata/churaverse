@@ -32,13 +32,34 @@ rules:
             - './src/game/interface'
             - './src/game/ui'
           target: './src/game/interactor'
+          except: ['./ui/util/domManager.ts'] # transition時にremoveAllするため
         - from:
             - './src/game/interface'
             - './src/game/ui'
           target: './src/game/adapter'
           except: ['./socket/eventTypes.ts', './socket/actionTypes.ts'] # 通信用の型は制限しない
   filename-rules/match: ['error', { .tsx: PascalCase, .ts: camelCase }]
-  '@typescript-eslint/naming-convention': ['error', { 'selector': ['method', 'function'], 'format': ['camelCase'] }]
+  '@typescript-eslint/naming-convention':
+    [
+      'error',
+      { 'selector': ['class', 'interface', 'typeAlias'], 'format': ['PascalCase'] },
+      { 'selector': ['property'], 'format': ['camelCase'], 'leadingUnderscore': 'allow' },
+      {
+        'selector': ['property'],
+        'modifiers': ['readonly'],
+        'format': ['camelCase', 'UPPER_CASE'],
+        'leadingUnderscore': 'allow',
+      },
+      { 'selector': ['parameterProperty'], 'format': ['camelCase'], 'leadingUnderscore': 'allow' },
+      { 'selector': 'variable', 'format': ['camelCase'], 'leadingUnderscore': 'allow' },
+      {
+        'selector': 'variable',
+        'modifiers': ['const'],
+        'format': ['camelCase', 'UPPER_CASE'],
+        'leadingUnderscore': 'allow',
+      },
+      { 'selector': ['method', 'function'], 'format': ['camelCase'] },
+    ]
   '@typescript-eslint/explicit-member-accessibility': 'warn'
 overrides:
   - files: '*.d.ts'
@@ -48,6 +69,11 @@ overrides:
   - files: 'I*.ts'
     rules:
       filename-rules/match: ['error', 'PascalCase']
+  - files: '*.tsx'
+    rules:
+      '@typescript-eslint/naming-convention':
+        - 'error'
+        - { 'selector': 'variable', 'format': ['camelCase', 'UPPER_CASE', 'PascalCase'], 'leadingUnderscore': 'allow' }
 settings:
   react:
     version: 'detect'

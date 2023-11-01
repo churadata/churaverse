@@ -6,6 +6,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    pointer-events: none;
+    z-index: 5000;
   }
 
   #videos {
@@ -13,11 +15,17 @@
     column-gap: 15px;
     justify-content: center;
     height: 18vh;
+    pointer-events: auto;
+  }
+
+  .higher {
+    z-index: 6000;
   }
 
   .pageButton {
     margin: 0 15px;
     height: 60px;
+    user-select: none;
   }
 
   .pageButton:hover {

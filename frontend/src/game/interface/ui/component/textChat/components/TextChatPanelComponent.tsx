@@ -1,4 +1,4 @@
-import dialogStyle from '../../settingDialog/style.module.scss'
+import dialogStyle from '../../dialog/style.module.scss'
 import { JSXFunc } from '../../../util/domManager'
 import { TextChatBoardComponent } from './TextChatBoardComponent'
 import { TextChatInputComponent } from './TextChatInputComponent'

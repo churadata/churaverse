@@ -1,8 +1,8 @@
 import { IDialog } from '../../../../domain/IRender/IDialog'
-import { PlayerRoleName } from '../../../../domain/model/types'
 import { DialogSwitcher } from '../../Render/dialogSwitcher'
 import { TopBarIconRender } from '../common/topBarIcon'
 import { TopBarIconContainer } from '../common/topBarIconContainer'
+import { PlayerRoleName } from '../../../../domain/model/types'
 
 const ADMIN_SETTING_ICON_PATH = 'assets/adminSetting.png'
 
@@ -25,7 +25,6 @@ export class AdminSettingIcon extends TopBarIconRender {
     if (playerRole !== 'admin') {
       return
     }
-
     iconContainer.addIcon(this)
     switcher.add('adminSetting', dialog, () => {
       super.deactivate()

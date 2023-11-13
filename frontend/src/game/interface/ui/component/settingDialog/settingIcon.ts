@@ -6,10 +6,15 @@ import { TopBarIconContainer } from '../common/topBarIconContainer'
 const SETTING_ICON_PATH = 'assets/gear.png'
 
 export class SettingIcon extends TopBarIconRender {
-  public constructor(private readonly switcher: DialogSwitcher, dialog: IDialog, iconContainer: TopBarIconContainer) {
+  public constructor(
+    private readonly switcher: DialogSwitcher,
+    dialog: IDialog,
+    iconContainer: TopBarIconContainer,
+    iconPath: string = SETTING_ICON_PATH
+  ) {
     super({
-      activeIconImgPath: SETTING_ICON_PATH,
-      inactiveIconImgPath: SETTING_ICON_PATH,
+      activeIconImgPath: iconPath,
+      inactiveIconImgPath: iconPath,
       onClick: (isActive) => {
         this.onClick(isActive)
       },

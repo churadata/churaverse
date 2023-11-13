@@ -6,6 +6,7 @@ import { ILocalSpeakerManager } from '../../../../interactor/ILocalDeviceManager
 import { ISpeakerSelector } from '../../../../interactor/ILocalDeviceSelector/ISpeakerSelector'
 import { DomManager } from '../../util/domManager'
 import { SpeakerSelectorComponent } from './components/SpeakerSelectorComponent'
+import { SettingSection } from '../settingDialog/settingSection'
 
 /**
  * スピーカーセレクタのHTML内にあるselectタグのid
@@ -99,5 +100,11 @@ export class SpeakerSelector implements ISpeakerSelector {
     }
 
     this.selectTag.appendChild(option)
+  }
+}
+
+declare module '../settingDialog/settingDialog' {
+  export interface SettingDialogSectionMap {
+    peripheralSetting: SettingSection
   }
 }

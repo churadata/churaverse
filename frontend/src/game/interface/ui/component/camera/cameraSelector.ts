@@ -6,6 +6,7 @@ import { ILocalCameraManager } from '../../../../interactor/ILocalDeviceManager/
 import { ICameraSelector } from '../../../../interactor/ILocalDeviceSelector/ICameraSelector'
 import { DomManager } from '../../util/domManager'
 import { CameraSelectorComponent } from './components/CameraSelectorComponent'
+import { SettingSection } from '../settingDialog/settingSection'
 
 /**
  * カメラセレクタのHTML内にあるselectタグのid
@@ -115,5 +116,11 @@ export class CameraSelector implements ICameraSelector {
     }
 
     this.selectTag.appendChild(option)
+  }
+}
+
+declare module '../settingDialog/settingDialog' {
+  export interface SettingDialogSectionMap {
+    peripheralSetting: SettingSection
   }
 }

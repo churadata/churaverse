@@ -6,6 +6,7 @@ import { Interactor } from '../../../../interactor/Interactor'
 import { IMicSelector } from '../../../../interactor/ILocalDeviceSelector/IMicSelector'
 import { DomManager } from '../../util/domManager'
 import { MicSelectorComponent } from './components/MicSelectorComponent'
+import { SettingSection } from '../settingDialog/settingSection'
 
 /**
  * マイクセレクタのHTML内にあるselectタグのid
@@ -99,5 +100,11 @@ export class MicSelector implements IMicSelector {
     }
 
     this.selectTag.appendChild(option)
+  }
+}
+
+declare module '../settingDialog/settingDialog' {
+  export interface SettingDialogSectionMap {
+    peripheralSetting: SettingSection
   }
 }

@@ -43,7 +43,7 @@ export class LkLocalSpeakerManager implements ILocalSpeakerManager {
     // また、getLocalDevicesにmicrophoneStatusを渡す理由は、マイクの権限なしに動作するようにするためです
 
     const microphoneStatus: boolean = await peripheralPermissionCheck('microphone')
-    const devices = await Room.getLocalDevices('audioinput', microphoneStatus)
+    const devices = await Room.getLocalDevices('audiooutput', microphoneStatus)
     return devices.map((device) => new Speaker(device.label, device.deviceId))
   }
 

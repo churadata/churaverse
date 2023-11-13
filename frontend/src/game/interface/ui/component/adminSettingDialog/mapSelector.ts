@@ -5,22 +5,22 @@ import { IMapSelector } from '../../../../domain/IRender/IMapSelector'
 import { WorldConfig } from '../../../../domain/model/worldConfig'
 import { AdminSettingDialog } from './adminSettingDialog'
 import { WorldMap } from '../../../../domain/model/worldMap'
-
-// mapChangeForm.htmlのキー
-const MAP_CHANGE_FORM_KEY = 'mapChangeForm'
-
-// mapChangeForm.htmlまでのパス
-const MAP_CHANGE_FORM_PATH = 'assets/mapChangeForm.html'
+import { DomManager } from '../../util/domManager'
+import { MapChangeFormComponent } from './components/MapChangeFormComponent'
+import { AdminSettingSection } from './adminSettingSection'
 
 // mapChangeFormのID
-const MAP_CHANGE_FORM_ID = 'mapSelector'
+export const MAP_CHANGE_FORM_ID = 'mapSelector'
+
+// MapSelectorComponentのID
+export const MAP_NAME_LIST_ID = 'mapNames'
 
 /**
  * マップの切り替え
  */
 export class MapSelector implements IMapSelector {
   private interactor?: Interactor
-  private readonly mapChangeFormContainer: HTMLElement
+  private readonly mapChangeFormContainer: HTMLElement | undefined
 
   private constructor(
     private readonly scene: Scene,
@@ -29,20 +29,17 @@ export class MapSelector implements IMapSelector {
     ownPlayer: Player,
     adminSettingDialog: AdminSettingDialog
   ) {
-    const mapChangeForm = this.scene.add
-      .dom(-305, 20)
-      .createFromCache(MAP_CHANGE_FORM_KEY)
-      .setOrigin(0, 0)
-      .setScrollFactor(0)
-    this.mapChangeFormContainer = document.getElementById(MAP_CHANGE_FORM_ID) as HTMLElement
-
-    if (this.mapChangeFormContainer == null) {
-      throw new Error(`id:${MAP_CHANGE_FORM_ID}を持つelementが見つかりません。`)
-    }
-
     // 管理者権限があるplayerにのみダイアログを表示
     if (this.hasPermission(ownPlayer)) {
-      adminSettingDialog.add(mapChangeForm)
+      const mapChangeForm = DomManager.addJsxDom(MapChangeFormComponent())
+      this.mapChangeFormContainer = document.getElementById(MAP_CHANGE_FORM_ID) as HTMLElement
+
+      if (this.mapChangeFormContainer == null) {
+        throw new Error(`id:${MAP_CHANGE_FORM_ID}を持つelementが見つかりません。`)
+      }
+
+      adminSettingDialog.addSection(new AdminSettingSection(MAP_CHANGE_FORM_ID, 'マップ切り替え'))
+      adminSettingDialog.addContent(MAP_CHANGE_FORM_ID, mapChangeForm)
       this.createMapSelector()
     }
   }
@@ -54,29 +51,16 @@ export class MapSelector implements IMapSelector {
     player: Player,
     adminSettingDialog: AdminSettingDialog
   ): Promise<MapSelector> {
-    return await new Promise<void>((resolve) => {
-      if (scene.textures.exists(MAP_CHANGE_FORM_KEY)) {
-        resolve()
-      }
-
-      scene.load.html(MAP_CHANGE_FORM_KEY, MAP_CHANGE_FORM_PATH)
-
-      scene.load.once('complete', () => {
-        resolve()
-      })
-      scene.load.start()
-    }).then(() => {
-      return new MapSelector(scene, worldConfig, maps, player, adminSettingDialog)
-    })
+    return new MapSelector(scene, worldConfig, maps, player, adminSettingDialog)
   }
 
   public initialMap(mapName: string): void {
-    const selectElement = document.getElementById('mapNames') as HTMLSelectElement
+    const selectElement = document.getElementById(MAP_NAME_LIST_ID) as HTMLSelectElement
     selectElement.value = mapName
   }
 
   private createMapSelector(): void {
-    const selectElement = document.getElementById('mapNames') as HTMLSelectElement
+    const selectElement = document.getElementById(MAP_NAME_LIST_ID) as HTMLSelectElement
     if (selectElement === null) return
     this.maps.forEach((map, mapName) => {
       const optionElement = document.createElement('option')
@@ -112,5 +96,11 @@ export class MapSelector implements IMapSelector {
 
   public setInteractor(interactor: Interactor): void {
     this.interactor = interactor
+  }
+}
+
+declare module './adminSettingDialog' {
+  export interface AdminSettingDialogSectionMap {
+    mapSelector: AdminSettingSection
   }
 }

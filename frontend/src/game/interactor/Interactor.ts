@@ -20,7 +20,7 @@ import { SharkService } from '../domain/service/sharkService'
 import { TextChatService } from '../domain/service/textChatService'
 import { IPlayerSetupInfoWriter } from './playerSetupInfo/IPlayerSetupInfoWriter'
 import { ISocketEmitter } from './ISocketEmitter'
-import { ITextFieldObserver } from './ITextFieldObserver'
+import { IDomInputObserver } from './IDomInputObserver'
 import { ILocalDevice } from './ILocalDeviceManager/ILocalDevice'
 import { Microphone } from '../domain/model/localDevice/microphone'
 import { Camera } from '../domain/model/localDevice/camera'
@@ -44,7 +44,7 @@ import { DeathLog } from '../domain/model/deathLog'
 import { DamageCause, IDeathLogRender } from '../domain/IRender/IDeathLogRender'
 import { DeathLogService } from '../domain/service/deathLogService'
 import { ICameraVideoListRender } from '../domain/IRender/ICameraVideoListRender'
-import { ICameraVideoSender } from './webCamera/ICameraVideoSender'
+import { CameraEffectId, ICameraVideoSender } from './webCamera/ICameraVideoSender'
 import { IWebRtc } from './webRtc/IWebRtc'
 import { IPlayerListRender } from '../domain/IRender/IPlayerListRender'
 import { IMapRenderFactory } from '../domain/IRenderFactory/IMapRenderFactory'
@@ -74,7 +74,7 @@ export class Interactor implements PlayerColorChangeUseCase {
     private readonly emitter: ISocketEmitter,
     private readonly mapSelector: IMapSelector,
     private readonly mapRenderFactory: IMapRenderFactory,
-    private readonly textFieldObserver: ITextFieldObserver,
+    private readonly domInputObserver: IDomInputObserver,
     private readonly chatBoardRender: IChatBoardRender,
     private readonly chatInputRender: IChatInputRender,
     private readonly chatBadge: IBadge,
@@ -136,10 +136,13 @@ export class Interactor implements PlayerColorChangeUseCase {
         this.toggleMegaphone(id, active)
       })
       this.toggleMegaphone(this.ownPlayerId, true)
-      this.mapSelector.initialMap(data.mapName)
-      worldConfig.setMap(data.mapName)
 
+      if (player.role === 'admin') {
+        this.mapSelector.initialMap(data.mapName)
+        worldConfig.setMap(data.mapName)
+      }
       this.invincibleWorldModeSwitch.initState(data.invincibleWorldModeInfo.active)
+
       // serverにjoinの通知
       emitter.join(this.player, this.ownPlayerId)
 
@@ -231,7 +234,7 @@ export class Interactor implements PlayerColorChangeUseCase {
 
   public walkPlayer(id: string, direction: Direction, speed?: number, source?: Position): void {
     if (this.isPlayerDead(id)) return
-    if (this.textFieldObserver.isTextInputting) return
+    if (this.domInputObserver.isInputting) return
 
     const player = this.players.getPlayer(id)
 
@@ -480,7 +483,7 @@ export class Interactor implements PlayerColorChangeUseCase {
   }
 
   public isTextInputting(): boolean {
-    return this.textFieldObserver.isTextInputting
+    return this.domInputObserver.isInputting
   }
 
   /**
@@ -668,6 +671,10 @@ export class Interactor implements PlayerColorChangeUseCase {
     return await this.cameraVideoSender.stopStream()
   }
 
+  public async setCameraEffect(mode: CameraEffectId): Promise<void> {
+    await this.cameraVideoSender.setEffect(mode)
+  }
+
   /**
    * プレイヤーが画面共有を開始した時に実行される
    *
@@ -721,6 +728,7 @@ export class Interactor implements PlayerColorChangeUseCase {
    * プレイヤー画面にフォーカスするか共有画面にフォーカスするかを切り替える
    */
   public toggleScreenFocus(): void {
+    if (this.isTextInputting()) return
     if (this.focusedRender !== this.playerRenders.get(this.ownPlayerId)) {
       this.playerRenders.get(this.ownPlayerId)?.focus()
       this.focusedRender = this.playerRenders.get(this.ownPlayerId)

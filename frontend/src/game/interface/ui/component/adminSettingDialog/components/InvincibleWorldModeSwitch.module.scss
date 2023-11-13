@@ -1,0 +1,54 @@
+.invincibleSwitch {
+  appearance: none;
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.invincibleSwitchInput[type='checkbox'] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+.invincibleSwitchLabel {
+  cursor: pointer;
+  text-indent: -9999px;
+  width: 60px;
+  height: 30px;
+  background: grey;
+  display: block;
+  border-radius: 100px;
+  position: relative;
+}
+
+.invincibleSwitchLabel:after {
+  content: '';
+  position: absolute;
+  top: 1.5px;
+  left: 1.5px;
+  width: 27px;
+  height: 27px;
+  background: #fff;
+  border-radius: 27px;
+  transition: 0.3s;
+}
+
+.invincibleSwitchInput:checked + .invincibleSwitchLabel {
+  background: #bada55;
+}
+
+.invincibleSwitchInput:checked + .invincibleSwitchLabel:after {
+  left: calc(100% - 5px);
+  transform: translateX(-100%);
+}
+
+.invincibleSwitchLabel:active:after {
+  width: 40px;
+}
+
+.invincibleSwitchBody {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}

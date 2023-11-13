@@ -2,7 +2,7 @@ import { Scene } from 'phaser'
 import { IKeyboardSettingPopUpWindow } from '../../../../domain/IRender/IKeySettingPopUpWindow'
 import { Interactor } from '../../../../interactor/Interactor'
 import { KeyboardHelper } from '../../../keyboard/keyboardHelper'
-import { TextFieldObserver } from '../../util/textFieldObserver'
+import { DomInputObserver } from '../../util/domInputObserver'
 import { KeyCode, KeyEvent } from '../../../../domain/model/core/types'
 import { DomManager } from '../../util/domManager'
 import { KeySettingPopupWindowComponent } from './components/KeySettingPopupWindowComponent'
@@ -44,7 +44,7 @@ export class KeyboardSettingPopUpWindow implements IKeyboardSettingPopUpWindow {
     private readonly scene: Scene,
     private readonly keyboardHelper: KeyboardHelper,
     initKeyPreference: Map<KeyEvent, KeyCode>,
-    textFieldObserver: TextFieldObserver
+    domInputObserver: DomInputObserver
   ) {
     // deep copy
     this.willBindingKeys = new Map(initKeyPreference)
@@ -60,7 +60,7 @@ export class KeyboardSettingPopUpWindow implements IKeyboardSettingPopUpWindow {
     this.popUpWindow.addEventListener('mousedown', () => {
       makeLayerHigherTemporary(this.popUpWindow, 'higher')
     })
-    this.setupAllKeyInput(textFieldObserver)
+    this.setupAllKeyInput(domInputObserver)
     this.setupCancelButton()
     this.setupSaveButton()
 
@@ -71,9 +71,9 @@ export class KeyboardSettingPopUpWindow implements IKeyboardSettingPopUpWindow {
     scene: Scene,
     keyboardHelper: KeyboardHelper,
     initKeyPreference: Map<KeyEvent, KeyCode>,
-    textFieldObserver: TextFieldObserver
+    domInputObserver: DomInputObserver
   ): Promise<KeyboardSettingPopUpWindow> {
-    return new KeyboardSettingPopUpWindow(scene, keyboardHelper, initKeyPreference, textFieldObserver)
+    return new KeyboardSettingPopUpWindow(scene, keyboardHelper, initKeyPreference, domInputObserver)
   }
 
   /**
@@ -86,23 +86,23 @@ export class KeyboardSettingPopUpWindow implements IKeyboardSettingPopUpWindow {
   /**
    * キー設定用のinputに入力した時の挙動を設定する
    */
-  private setupAllKeyInput(textFieldObserver: TextFieldObserver): void {
+  private setupAllKeyInput(domInputObserver: DomInputObserver): void {
     this.currentBindingKeys.forEach((keyCode, keyEvent) => {
-      this.setupInput(keyEvent, keyCode, textFieldObserver)
+      this.setupInput(keyEvent, keyCode, domInputObserver)
     })
   }
 
   /**
    * 引数で指定したキーイベント用のinputの初期設定を行う
    */
-  private setupInput(eventName: KeyEvent, key: KeyCode, textFieldObserver: TextFieldObserver): HTMLInputElement {
+  private setupInput(eventName: KeyEvent, key: KeyCode, domInputObserver: DomInputObserver): HTMLInputElement {
     const row = DomManager.getElementById<HTMLTableRowElement>(KEY_SETTING_TABLE_ROW_ID(eventName))
 
     const input = row.cells[1].children[0]
     if (!(input instanceof HTMLInputElement))
       throw Error(`id=${KEY_SETTING_TABLE_ROW_ID(eventName)}の要素はHTMLInputElementではない`)
 
-    textFieldObserver.addTargetTextField(input)
+    domInputObserver.addTargetDom(input)
     input.value = key
     // input欄にキー入力をそのまま表示させないように制御してます
     input.setAttribute('readonly', 'readonly')

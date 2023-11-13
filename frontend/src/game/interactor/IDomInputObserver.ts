@@ -1,6 +1,6 @@
-export interface ITextFieldObserver {
+export interface IDomInputObserver {
   /**
    * テキストフィールドに入力中の間はtrue
    */
-  isTextInputting: boolean
+  isInputting: boolean
 }

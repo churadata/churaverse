@@ -2,9 +2,10 @@ import { Scene } from 'phaser'
 import { IChatBoardRender } from '../../../../domain/IRender/IChatBoardRender'
 import { TextChat } from '../../../../domain/model/textChat'
 import { Interactor } from '../../../../interactor/Interactor'
-import { TextChatDialog } from './textChatDialog'
 import { DomManager } from '../../util/domManager'
 import { TextChatMessageBlockComponent } from './components/TextChatMessageBlockComponent'
+import { TextChatBoardComponent } from './components/TextChatBoardComponent'
+import { TextChatDialog } from './textChatDialog'
 
 export const TEXT_CHAT_BOARD_CONTAINER_ID = 'text-chat-board'
 
@@ -14,12 +15,13 @@ export const TEXT_CHAT_BOARD_CONTAINER_ID = 'text-chat-board'
 export class TextChatBoard implements IChatBoardRender {
   public interactor?: Interactor
   private readonly chatBoardElement: HTMLElement
-  public constructor(private readonly playerId: string) {
+  public constructor(private readonly playerId: string, textChatDialog: TextChatDialog) {
+    textChatDialog.directlyAddContent(DomManager.addJsxDom(TextChatBoardComponent()))
     this.chatBoardElement = DomManager.getElementById(TEXT_CHAT_BOARD_CONTAINER_ID)
   }
 
-  public static async build(scene: Scene, playerId: string, chatDialog: TextChatDialog): Promise<TextChatBoard> {
-    return new TextChatBoard(playerId)
+  public static async build(scene: Scene, playerId: string, textChatDialog: TextChatDialog): Promise<TextChatBoard> {
+    return new TextChatBoard(playerId, textChatDialog)
   }
 
   /**

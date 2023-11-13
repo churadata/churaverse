@@ -1,9 +1,10 @@
 import { Scene } from 'phaser'
 import { Interactor } from '../../../../interactor/Interactor'
-import { TextFieldObserver } from '../../util/textFieldObserver'
+import { DomInputObserver } from '../../util/domInputObserver'
 import { TextChatDialog } from './textChatDialog'
 import { IChatInputRender } from '../../../../domain/IRender/IChatInputRender'
 import { DomManager } from '../../util/domManager'
+import { TextChatInputComponent } from './components/TextChatInputComponent'
 
 /**
  * チャット送信ボタンのid
@@ -22,17 +23,21 @@ export class TextChatInput implements IChatInputRender {
   public interactor?: Interactor
   private isFocused = false
   private readonly inputField: HTMLInputElement
-  public constructor(private readonly playerId: string, textFieldObserver: TextFieldObserver) {
+  public constructor(
+    private readonly playerId: string,
+    domInputObserver: DomInputObserver,
+    textChatDialog: TextChatDialog
+  ) {
+    textChatDialog.directlyAddContent(DomManager.addJsxDom(TextChatInputComponent()))
     this.playerId = playerId
     // チャット入力部分の定義
-
     this.inputField = DomManager.getElementById<HTMLInputElement>(TEXT_CHAT_INPUT_FIELD_ID)
     this.inputField.addEventListener('click', (event) => {
       this.isFocused = true
       // このイベントが実行された際に親ノードのid=gameのonClick()が実行されないようにするため。
       event.stopPropagation()
     })
-    textFieldObserver.addTargetTextField(this.inputField)
+    domInputObserver.addTargetDom(this.inputField)
 
     // 送信ボタンが押された時、playerIdとmessageを受け渡している
     const sendButon = DomManager.getElementById(TEXT_CHAT_SEND_BUTTON_ID)
@@ -60,10 +65,10 @@ export class TextChatInput implements IChatInputRender {
   public static async build(
     scene: Scene,
     playerId: string,
-    chatDialog: TextChatDialog,
-    textFieldObserver: TextFieldObserver
+    domInputObserver: DomInputObserver,
+    textChatDialog: TextChatDialog
   ): Promise<TextChatInput> {
-    return new TextChatInput(playerId, textFieldObserver)
+    return new TextChatInput(playerId, domInputObserver, textChatDialog)
   }
 
   public setInteractor(interactor: Interactor): void {

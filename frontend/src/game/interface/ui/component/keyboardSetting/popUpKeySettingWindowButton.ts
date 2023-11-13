@@ -50,3 +50,9 @@ export class PopUpKeySettingWindowButton {
     }
   }
 }
+
+declare module '../settingDialog/settingDialog' {
+  export interface SettingDialogSectionMap {
+    keyboardSetting: SettingSection
+  }
+}

@@ -4,6 +4,8 @@ import { PlayerColorChangeUseCase } from '../../../../usecase/playerColorChangeU
 import { SettingDialog } from './settingDialog'
 import { DomManager } from '../../util/domManager'
 import { PlayerColorButtonsComponent } from './components/PlayerColorButtonsComponent'
+import { SettingSection } from './settingSection'
+import { DomInputObserver } from '../../util/domInputObserver'
 
 export const PLAYER_COLOR_BUTTON_ID: (colorName: PlayerColorName) => string = (colorName) => {
   return `playerColorButton-${colorName}`
@@ -17,27 +19,36 @@ export class PlayerColorButtons {
   protected readonly playerId: string
   protected colorButtons = new Map<PlayerColorName, HTMLInputElement>()
 
-  protected constructor(scene: Scene, playerId: string, selectedColor: PlayerColorName, settingDialog: SettingDialog) {
+  protected constructor(
+    scene: Scene,
+    playerId: string,
+    selectedColor: PlayerColorName,
+    settingDialog: SettingDialog,
+    domInputObserver: DomInputObserver
+  ) {
     this.playerId = playerId
 
     const buttons = DomManager.jsxToDom(PlayerColorButtonsComponent({ defaultColor: selectedColor }))
-    settingDialog.addContent('playerSetting', buttons)
+    settingDialog.addSection(new SettingSection('playerColorButtons', '色を変更'))
+    settingDialog.addContent('playerColorButtons', buttons)
 
-    this.setupButtons()
+    this.setupButtons(domInputObserver)
   }
 
   public static async build(
     scene: Scene,
     playerId: string,
     selectedColor: PlayerColorName,
-    settingDialog: SettingDialog
+    settingDialog: SettingDialog,
+    domInputObserver: DomInputObserver
   ): Promise<PlayerColorButtons> {
-    return new PlayerColorButtons(scene, playerId, selectedColor, settingDialog)
+    return new PlayerColorButtons(scene, playerId, selectedColor, settingDialog, domInputObserver)
   }
 
-  private setupButtons(): void {
+  private setupButtons(domInputObserver: DomInputObserver): void {
     PLAYER_COLOR_NAMES.forEach((color) => {
       const button = DomManager.getElementById<HTMLInputElement>(PLAYER_COLOR_BUTTON_ID(color))
+      domInputObserver.addTargetDom(button)
 
       this.colorButtons.set(color, button)
 
@@ -56,5 +67,11 @@ export class PlayerColorButtons {
 
   public setInteractor(interactor: PlayerColorChangeUseCase): void {
     this.interactor = interactor
+  }
+}
+
+declare module './settingDialog' {
+  export interface SettingDialogSectionMap {
+    playerColorButtons: SettingSection
   }
 }

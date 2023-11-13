@@ -1,17 +1,10 @@
 import { Scene } from 'phaser'
 import { Interactor } from '../../../../interactor/Interactor'
 import { AdminSettingDialog } from './adminSettingDialog'
+import { DomManager } from '../../util/domManager'
+import { InvincibleWorldModeSwitchComponent } from './components/InvincibleWorldModeSwitchComponent'
 import { IInvincibleWorldModeSwitch } from '../../../../interactor/adminSetting/IInvincibleWorldModeSwitch'
-
-/**
- * 無敵モード切り替えスイッチのHTMLのKey
- */
-const INVINCIBLE_SWITCH_KEY = 'invincibleSwitch'
-
-/**
- * 無敵モード切り替えスイッチのHTMLのパス
- */
-const INVINCIBLE_SWITCH_PATH = 'assets/invincibleWorldModeSwitch.html'
+import { AdminSettingSection } from './adminSettingSection'
 
 /**
  * HTML内のinput要素のid
@@ -22,15 +15,15 @@ const INPUT_ID = 'switchInvincibleWorldMode'
  * 無敵モードの切り替えスイッチ
  */
 export class InvincibleWorldModeSwitch implements IInvincibleWorldModeSwitch {
-  private interactor?: Interactor
-  private readonly switch: Phaser.GameObjects.DOMElement
-  private readonly switchInputElement: HTMLInputElement
+  protected interactor?: Interactor
+  protected switchInputElement: HTMLInputElement
 
   private constructor(scene: Scene, private readonly playerId: string, adminSettingDialog: AdminSettingDialog) {
-    this.switch = scene.add.dom(-300, 0).createFromCache(INVINCIBLE_SWITCH_KEY).setOrigin(0, 0).setScrollFactor(0)
-    this.switchInputElement = this.switch.getChildByID(INPUT_ID) as HTMLInputElement
+    const toggleSwitch = DomManager.addJsxDom(InvincibleWorldModeSwitchComponent({ checked: false }))
+    this.switchInputElement = this.setupSwitch()
 
-    adminSettingDialog.add(this.switch)
+    adminSettingDialog.addSection(new AdminSettingSection('invincibleWorldModeSwitch', '無敵モード切り替え'))
+    adminSettingDialog.addContent('invincibleWorldModeSwitch', toggleSwitch)
   }
 
   public static async build(
@@ -38,20 +31,17 @@ export class InvincibleWorldModeSwitch implements IInvincibleWorldModeSwitch {
     playerId: string,
     adminSettingDialog: AdminSettingDialog
   ): Promise<InvincibleWorldModeSwitch> {
-    return await new Promise<void>((resolve, reject) => {
-      if (scene.textures.exists(INVINCIBLE_SWITCH_KEY)) {
-        resolve()
-      }
-      // 名前入力欄の読み込み
-      scene.load.html(INVINCIBLE_SWITCH_KEY, INVINCIBLE_SWITCH_PATH)
+    return new InvincibleWorldModeSwitch(scene, playerId, adminSettingDialog)
+  }
 
-      scene.load.once('complete', () => {
-        resolve()
-      })
-      scene.load.start()
-    }).then(() => {
-      return new InvincibleWorldModeSwitch(scene, playerId, adminSettingDialog)
-    })
+  private setupSwitch(): HTMLInputElement {
+    const toggleSwitch = DomManager.getElementById<HTMLInputElement>(INPUT_ID)
+
+    toggleSwitch.onclick = () => {
+      this.toggled()
+    }
+
+    return toggleSwitch
   }
 
   public setInteractor(interactor: Interactor): void {
@@ -64,7 +54,6 @@ export class InvincibleWorldModeSwitch implements IInvincibleWorldModeSwitch {
 
   public initState(checked: boolean): void {
     this.switchInputElement.checked = checked
-
     this.interactor?.toggleInvincibleWorldMode(this.playerId, checked)
     // 初期状態のcheckedを設定した後にEventListen開始
     this.switchInputElement.addEventListener('change', () => {
@@ -78,5 +67,11 @@ export class InvincibleWorldModeSwitch implements IInvincibleWorldModeSwitch {
 
   public getChecked(): boolean {
     return this.switchInputElement.checked
+  }
+}
+
+declare module './adminSettingDialog' {
+  export interface AdminSettingDialogSectionMap {
+    invincibleWorldModeSwitch: AdminSettingSection
   }
 }

@@ -5,7 +5,7 @@ import { SocketEmitter } from '../interface/adapter/socketEmitter'
 import { Socket } from '../interface/socket/socket'
 import { PlayerRender } from '../interface/ui/Render/entity/playerRender'
 import { KeyboardHelper } from '../interface/keyboard/keyboardHelper'
-import { TextFieldObserver } from '../interface/ui/util/textFieldObserver'
+import { DomInputObserver } from '../interface/ui/util/domInputObserver'
 import { DialogSwitcher } from '../interface/ui/Render/dialogSwitcher'
 import { SettingDialog } from '../interface/ui/component/settingDialog/settingDialog'
 import { PlayerColorButtons } from '../interface/ui/component/settingDialog/playerColorButtons'
@@ -62,13 +62,14 @@ import { MicIcon } from '../interface/ui/component/voiceChat/micIcon'
 import { ScreenShareIcon } from '../interface/ui/component/screenShare/screenShareIcon'
 import { CameraIcon } from '../interface/ui/component/camera/cameraIcon'
 import { AdminSettingDialog } from '../interface/ui/component/adminSettingDialog/adminSettingDialog'
-import { InvincibleWorldModeSwitch } from '../interface/ui/component/adminSettingDialog/invincbleWorldModeSwitch'
+import { InvincibleWorldModeSwitch } from '../interface/ui/component/adminSettingDialog/invincibleWorldModeSwitch'
 import { AdminSettingIcon } from '../interface/ui/component/adminSettingDialog/adminSettingIcon'
 import { SettingSection } from '../interface/ui/component/settingDialog/settingSection'
 import { CallbackExecutionGuard } from '../adapter/controller/socket/callbackExecutionGuard'
 import { MapSelector } from '../interface/ui/component/adminSettingDialog/mapSelector'
 import { MapManager } from '../domain/service/mapManager'
 import { SharedScreenRenderFactory } from '../interface/ui/RenderFactory/sharedScreenRenderFactory'
+import { CameraEffectForm } from '../interface/ui/component/camera/cameraSetting/effectSelector'
 import { InvincibleIndicator } from '../interface/ui/component/invincibleMode/InvincibleIndicator'
 
 /**
@@ -115,12 +116,12 @@ export class MainScene extends Scene {
     const keyboardSettingSetupInfoReader = new KeyboardSetupInfoReader(cookieRepository)
     const keyConfiguration = new KeyConfiguration(keyboardSettingSetupInfoReader)
     const keyboardHelper = new KeyboardHelper(this, keyConfiguration)
+    const domInputObserver = new DomInputObserver()
+    const settingDialog = await SettingDialog.build()
+    const adminSettingDialog = await AdminSettingDialog.build()
+    const textChatDialog = await TextChatDialog.build()
 
-    const textFieldObserver = new TextFieldObserver()
-    const chatDialog = await TextChatDialog.build(this, socket.socketId, textFieldObserver)
-    const playerListDialog = await PlayerListDialog.build(this)
-    const settingDialog = await SettingDialog.build(this)
-    const adminSettingDialog = await AdminSettingDialog.build(this)
+    const playerListDialog = await PlayerListDialog.build()
     const switcher = new DialogSwitcher()
     const playerRender = await PlayerRender.build(
       this,
@@ -144,17 +145,24 @@ export class MainScene extends Scene {
     const screenShareSender = new ScreenShareSender(this, webRtc.room, sharedScreenRenderFactory)
     const cameraVideoSender = new CameraVideoSender(this, webRtc.room)
 
-    const texChatInput = await TextChatInput.build(this, socket.socketId, chatDialog, textFieldObserver)
-    const textChatBoard = await TextChatBoard.build(this, socket.socketId, chatDialog)
+    const textChatBoard = await TextChatBoard.build(this, socket.socketId, textChatDialog)
+    const texChatInput = await TextChatInput.build(this, socket.socketId, domInputObserver, textChatDialog)
     const keySettingPopUPWindow = await KeyboardSettingPopUpWindow.build(
       this,
       keyboardHelper,
       keyConfiguration.getKeyPreference(),
-      textFieldObserver
+      domInputObserver
     )
-    const playerList = await PlayerList.build(this, playerListDialog)
-    const renameForm = await RenameForm.build(this, socket.socketId, player.name, settingDialog, textFieldObserver)
-    const playerColorButtons = await PlayerColorButtons.build(this, socket.socketId, player.color, settingDialog)
+    const playerList = await PlayerList.build(playerListDialog)
+    const renameForm = await RenameForm.build(this, socket.socketId, player.name, settingDialog, domInputObserver)
+    const playerColorButtons = await PlayerColorButtons.build(
+      this,
+      socket.socketId,
+      player.color,
+      settingDialog,
+      domInputObserver
+    )
+    const cameraEffectForm = await CameraEffectForm.build(this, socket.socketId, settingDialog)
     const openKeySettingFormButton = await PopUpKeySettingWindowButton.build(this, settingDialog)
     const invincibleSwitch = await InvincibleWorldModeSwitch.build(this, socket.socketId, adminSettingDialog)
     settingDialog.addSection(new SettingSection('peripheralSetting', '接続機器設定'))
@@ -192,7 +200,7 @@ export class MainScene extends Scene {
     const settingIcon = new SettingIcon(switcher, settingDialog, dialogIconContainer)
     const chatBadge = new Badge()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const chatIcon = new TextChatIcon(switcher, chatDialog, dialogIconContainer, chatBadge)
+    const chatIcon = new TextChatIcon(switcher, textChatDialog, dialogIconContainer, chatBadge)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const playerListIcon = new PlayerListIcon(switcher, playerListDialog, dialogIconContainer)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -214,11 +222,11 @@ export class MainScene extends Scene {
       emitter,
       mapSwitch,
       mapRenderFactory,
-      textFieldObserver,
+      domInputObserver,
       textChatBoard,
       texChatInput,
       chatBadge,
-      chatDialog,
+      textChatDialog,
       invincibleSwitch,
       localDevice,
       micSelector,
@@ -275,6 +283,7 @@ export class MainScene extends Scene {
     textChatBoard.setInteractor(interactor)
     playerColorButtons.setInteractor(interactor)
     renameForm.setInteractor(interactor)
+    cameraEffectForm.setInteractor(interactor)
     keySettingPopUPWindow.setInteractor(interactor)
     playerList.setInteractor(interactor)
     openKeySettingFormButton.setInteractor(interactor)

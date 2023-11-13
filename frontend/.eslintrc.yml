@@ -50,10 +50,11 @@ rules:
         'format': ['camelCase', 'UPPER_CASE'],
         'leadingUnderscore': 'allow',
       },
+      { 'selector': ['objectLiteralProperty'], 'format': ['UPPER_CASE', 'camelCase'], 'leadingUnderscore': 'allow' },
       { 'selector': ['parameterProperty'], 'format': ['camelCase'], 'leadingUnderscore': 'allow' },
       { 'selector': 'variable', 'format': ['camelCase'], 'leadingUnderscore': 'allow' },
       {
-        'selector': 'variable',
+        'selector': ['variable'],
         'modifiers': ['const'],
         'format': ['camelCase', 'UPPER_CASE'],
         'leadingUnderscore': 'allow',

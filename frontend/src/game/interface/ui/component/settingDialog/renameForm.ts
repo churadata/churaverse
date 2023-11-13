@@ -1,9 +1,10 @@
 import { Scene } from 'phaser'
 import { Interactor } from '../../../../interactor/Interactor'
-import { TextFieldObserver } from '../../util/textFieldObserver'
+import { DomInputObserver } from '../../util/domInputObserver'
 import { SettingDialog } from './settingDialog'
 import { RenameFormComponent } from './components/RenameComponent'
 import { DomManager } from '../../util/domManager'
+import { SettingSection } from './settingSection'
 
 /**
  * 名前入力フォーム内にあるテキストフィールド要素のname
@@ -27,14 +28,15 @@ export class RenameForm {
     playerId: string,
     name: string,
     settingDialog: SettingDialog,
-    textFieldObserver: TextFieldObserver
+    domInputObserver: DomInputObserver
   ) {
     this.playerId = playerId
 
     const content = DomManager.jsxToDom(RenameFormComponent({ defaultName: name }))
-    settingDialog.addContent('playerSetting', content)
+    settingDialog.addSection(new SettingSection('renameForm', 'プレイヤー名'))
+    settingDialog.addContent('renameForm', content)
 
-    const textField = this.setupTextField(textFieldObserver)
+    const textField = this.setupTextField(domInputObserver)
     this.setupSendButton(textField)
   }
 
@@ -43,16 +45,16 @@ export class RenameForm {
     playerId: string,
     defaultName: string,
     settingDialog: SettingDialog,
-    textFieldObserver: TextFieldObserver
+    domInputObserver: DomInputObserver
   ): Promise<RenameForm> {
-    return new RenameForm(scene, playerId, defaultName, settingDialog, textFieldObserver)
+    return new RenameForm(scene, playerId, defaultName, settingDialog, domInputObserver)
   }
 
-  private setupTextField(textFieldObserver: TextFieldObserver): HTMLInputElement {
+  private setupTextField(domInputObserver: DomInputObserver): HTMLInputElement {
     const textField = DomManager.getElementById<HTMLInputElement>(TEXT_FIELD_ID)
 
     // 名前入力欄を監視対象に追加
-    textFieldObserver.addTargetTextField(textField)
+    domInputObserver.addTargetDom(textField)
 
     return textField
   }
@@ -75,5 +77,11 @@ export class RenameForm {
 
   public setInteractor(interactor: Interactor): void {
     this.interactor = interactor
+  }
+}
+
+declare module './settingDialog' {
+  export interface SettingDialogSectionMap {
+    renameForm: SettingSection
   }
 }

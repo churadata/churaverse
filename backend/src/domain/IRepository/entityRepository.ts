@@ -1,4 +1,4 @@
-import { WorldMap } from '../model/worldMap'
+import { WorldMap } from '../../plugins/mapPlugin/domain/worldMap'
 
 export interface EntityRepository<T> {
   set: (id: string, entity: T) => void

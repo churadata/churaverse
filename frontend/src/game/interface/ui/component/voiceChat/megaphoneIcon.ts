@@ -1,10 +1,10 @@
 import { Interactor } from '../../../../interactor/Interactor'
-import { TopBarIconRender } from '../common/topBarIcon'
-import { TopBarIconContainer } from '../common/topBarIconContainer'
+import { TopBarIconRenderer } from '../../../../plugins/coreUiPlugin/topBarIcon'
+import { TopBarIconContainer } from '../../../../plugins/coreUiPlugin/topBarIconContainer'
 
 export const MEGAPHONE_ICON_PATH = 'assets/megaphone.png'
 
-export class MegaphoneIcon extends TopBarIconRender {
+export class MegaphoneIcon extends TopBarIconRenderer {
   private interactor?: Interactor
 
   public constructor(private readonly playerId: string, iconContainer: TopBarIconContainer) {

@@ -1,16 +1,17 @@
-import { PlayerColorName, PlayerRoleName } from '../../domain/model/types'
 import { IPersistStore } from '../../interactor/IPersistStore'
-import { IPlayerSetupInfoReader } from '../../interactor/playerSetupInfo/IPlayerSetupInfoReader'
-import { PlayerSetupInfo, PLAYER_SETUP_PROPERTY } from '../../interactor/playerSetupInfo/playerSetupInfo'
+
+import { PlayerColor } from '../../plugins/playerPlugin/types/playerColor'
+import { PlayerRole } from '../../plugins/playerPlugin/types/playerRole'
+import { PLAYER_SETUP_PROPERTY, PlayerSetupInfo } from './playerSetupInfo'
 // プレイヤーの初期情報を取得するクラス
-export class PlayerSetupInfoReader implements IPlayerSetupInfoReader {
+export class PlayerSetupInfoReader {
   public constructor(private readonly cookieRepository: IPersistStore) {}
 
   public read(): PlayerSetupInfo {
     const info: PlayerSetupInfo = {
       name: this.cookieRepository.read(PLAYER_SETUP_PROPERTY.name),
-      color: this.cookieRepository.read(PLAYER_SETUP_PROPERTY.color) as PlayerColorName,
-      role: this.cookieRepository.read(PLAYER_SETUP_PROPERTY.role) as PlayerRoleName,
+      color: this.cookieRepository.read(PLAYER_SETUP_PROPERTY.color) as PlayerColor,
+      role: this.cookieRepository.read(PLAYER_SETUP_PROPERTY.role) as PlayerRole,
     }
     return info
   }

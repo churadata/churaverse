@@ -7,15 +7,11 @@ import { Position } from './core/position'
 export abstract class Entity {
   public position: Position
   public direction: Direction
-  public hp: number
 
-  public constructor(position: Position, direction: Direction, hp = 100) {
+  public constructor(position: Position, direction: Direction) {
     this.position = position
     this.direction = direction
-    this.hp = hp
   }
-
-  public damage(amount: number): void {}
 
   public die(): void {}
 }

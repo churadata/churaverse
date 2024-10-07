@@ -1,4 +1,4 @@
-import { detectEntityOverlap } from '../domain/core/collisionDetection/collistionDetection'
+// import { detectEntityOverlap } from '../plugins/collisionDetectionPlugin/domain/collisionDetection/collistionDetection'
 import { Direction } from '../domain/core/direction'
 import { Bomb } from '../domain/model/bomb'
 import { Player, PlayerColorName, PLAYER_RESPAWN_WAITING_TIME_MS } from '../domain/model/player'
@@ -10,7 +10,6 @@ import { ISharkRepository } from '../domain/IRepository/ISharkRepository'
 import { checkExplode, removeExplodedBomb } from '../domain/service/bombService'
 import { movePlayers } from '../domain/service/playerService'
 import { moveSharks, removeDieShark } from '../domain/service/sharkService'
-import { IMapManager } from './IMapManager'
 import { ISocketEmitter } from './IEmitter/ISocketEmitter'
 import { DamageCause } from '../domain/model/deathLog'
 import { IMegaphoneUserRepository } from '../domain/IRepository/IMegaphoneUserRepository'
@@ -19,13 +18,14 @@ import { IMegaphoneUserRepository } from '../domain/IRepository/IMegaphoneUserRe
 // eslint-disable-next-line import/no-restricted-paths
 import { PreloadedDataIngredients } from '../interface/socket/eventTypes'
 import { WorldConfig } from '../domain/model/worldConfig'
+import { MapManager } from '../plugins/mapPlugin/mapManager'
 
 export class Interactor {
   private readonly sessionId = Math.random().toString(36).slice(-8)
 
   public constructor(
     private readonly worldConfig: WorldConfig,
-    private readonly mapManager: IMapManager,
+    private readonly mapManager: MapManager,
     private readonly players: IPlayerRepository,
     private readonly sharks: ISharkRepository,
     private readonly bombs: IBombRepository,
@@ -160,7 +160,7 @@ export class Interactor {
     const ingredients = {
       players: this.players,
       megaphoneUsers: this.megaphoneUsers,
-      mapName: this.mapManager.currentMap.mapName,
+      mapName: 'foo',
       worldConfig: this.worldConfig,
     }
     return ingredients
@@ -185,7 +185,7 @@ export class Interactor {
     // サメを微小時間分移動
     moveSharks(dt, this.sharks, this.mapManager.currentMap)
     // サメとプレイヤーの衝突判定
-    detectEntityOverlap(this.sharks, this.players, this.sharkHitPlayer.bind(this))
+    // detectEntityOverlap(this.sharks, this.players, this.sharkHitPlayer.bind(this))
     // プレイヤーと衝突した or 消滅時間に達した or ワールド外に出た サメを削除
     removeDieShark(this.sharks, (sharkId: string) => {
       this.emitter.emitHitShark(sharkId)
@@ -195,7 +195,7 @@ export class Interactor {
     // 爆発時間に達しているかチェック、爆発している爆弾は当たり判定をOnに
     checkExplode(this.bombs)
     // 爆弾とプレイヤーの衝突判定
-    detectEntityOverlap(this.bombs, this.players, this.bombHitPlayer.bind(this))
+    // detectEntityOverlap(this.bombs, this.players, this.bombHitPlayer.bind(this))
     // 爆発時間に達している爆弾を削除
     removeExplodedBomb(this.bombs)
   }

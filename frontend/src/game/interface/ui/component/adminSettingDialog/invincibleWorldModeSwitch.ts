@@ -1,7 +1,7 @@
 import { Scene } from 'phaser'
 import { Interactor } from '../../../../interactor/Interactor'
 import { AdminSettingDialog } from './adminSettingDialog'
-import { DomManager } from '../../util/domManager'
+import { DomManager } from '../../domManager'
 import { InvincibleWorldModeSwitchComponent } from './components/InvincibleWorldModeSwitchComponent'
 import { IInvincibleWorldModeSwitch } from '../../../../interactor/adminSetting/IInvincibleWorldModeSwitch'
 import { AdminSettingSection } from './adminSettingSection'

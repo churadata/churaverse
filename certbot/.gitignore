@@ -1,4 +1,5 @@
 *
+!cert-update.sh
 !.gitignore
 !README.md
 !churaverse-cert-renew.service

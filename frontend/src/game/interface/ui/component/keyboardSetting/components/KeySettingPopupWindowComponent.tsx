@@ -1,5 +1,5 @@
 import { KeyCode, KeyEvent } from '../../../../../domain/model/core/types'
-import { JSXFunc } from '../../../util/domManager'
+import { JSXFunc } from 'churaverse-engine-client'
 import {
   KEY_SETTING_CANCEL_BUTTON_ID,
   KEY_SETTING_SAVE_BUTTON_ID,
@@ -19,6 +19,7 @@ const KEY_EVENT_DESCRIPTION: KeyEventDescription = {
   WalkRight: '右に移動',
   EnterText: 'チャットを送信',
   FocusShareScreen: 'カメラフォーカス対象の切り替え',
+  OpenDebugScreen: 'デバック画面を開く',
 }
 
 type EventAndKeyCode = Map<KeyEvent, KeyCode>

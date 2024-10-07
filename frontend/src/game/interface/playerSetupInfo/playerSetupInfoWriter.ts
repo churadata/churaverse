@@ -1,12 +1,12 @@
-import { PlayerColorName, PlayerRoleName } from '../../domain/model/types'
 import { IPersistStore } from '../../interactor/IPersistStore'
-import { IPlayerSetupInfoWriter } from '../../interactor/playerSetupInfo/IPlayerSetupInfoWriter'
-import { PLAYER_SETUP_PROPERTY } from '../../interactor/playerSetupInfo/playerSetupInfo'
+import { PlayerColor } from '../../plugins/playerPlugin/types/playerColor'
+import { PlayerRole } from '../../plugins/playerPlugin/types/playerRole'
+import { PLAYER_SETUP_PROPERTY } from './playerSetupInfo'
 // クッキーにプレイヤー情報を保存するクラス
-export class PlayerSetupInfoWriter implements IPlayerSetupInfoWriter {
+export class PlayerSetupInfoWriter {
   public constructor(private readonly cookieRepository: IPersistStore) {}
 
-  public save(name: string, color: PlayerColorName, role: PlayerRoleName): void {
+  public save(name: string, color: PlayerColor, role: PlayerRole): void {
     this.cookieRepository.save(PLAYER_SETUP_PROPERTY.name, name)
     this.cookieRepository.save(PLAYER_SETUP_PROPERTY.color, color)
     this.cookieRepository.save(PLAYER_SETUP_PROPERTY.role, role)

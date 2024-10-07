@@ -1,5 +1,5 @@
-import { JSXFunc } from '../../../util/domManager'
-import dialogStyle from '../../dialog/style.module.scss'
+import { JSXFunc } from 'churaverse-engine-client'
+import dialogStyle from '../../../../../plugins/coreUiPlugin/dialog/style.module.scss'
 import style from './InvincibleWorldModeSwitch.module.scss'
 
 interface SwitchProps {

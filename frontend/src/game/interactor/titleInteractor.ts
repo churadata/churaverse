@@ -1,19 +1,19 @@
 import { ITitleNameFieldRender } from '../domain/IRender/ITitlenamefieldRender'
 import { Direction } from '../domain/model/core/direction'
 import { Position } from '../domain/model/core/position'
-import { DEFAULT_HP, Player } from '../domain/model/player'
+import { DEFAULT_HP, Player } from '../plugins/playerPlugin/domain/player'
 import { ITransitionManager } from './ITransitionManager'
 import { IPlayerSetupInfoReader } from './playerSetupInfo/IPlayerSetupInfoReader'
+import { ITitleScene } from '../scene/IScene/ITitleScene'
+import { IMainScene } from '../scene/IScene/IMainScene'
 import { PlayerColorName, PLAYER_COLOR_NAMES } from '../domain/model/types'
 import { PlayerColorChangeUseCase } from '../usecase/playerColorChangeUseCase'
-import { TitleToMainData } from './sceneTransitionData/titleToMain'
 import { IJoinButtonRender } from '../domain/IRender/IJoinButtonRender'
 import { IPlayerRoleRender } from '../domain/IRender/IPlayerRoleRender'
-
-import { IPlayerRender } from '../domain/IRender/IPlayerRender'
 import { ITitlePlayerBackgroundContainerRender } from '../domain/IRender/ITitlePlayerBackgroundContainerRender'
 import { ITitleArrowButtonRender } from '../domain/IRender/ITitleArrowButtonRender'
 import { DomManager } from '../interface/ui/util/domManager'
+import { IPlayerRenderer } from '../plugins/playerPlugin/domain/IPlayerRenderer'
 
 /**
  * TitleSceneのInteractor
@@ -29,24 +29,25 @@ export class TitleInteractor implements PlayerColorChangeUseCase {
 
   // prettier-ignore
   public constructor(
-    private readonly transitionManager: ITransitionManager<undefined, TitleToMainData>,
+    private readonly transitionManager: ITransitionManager<ITitleScene>,
     public readonly titleNamaFieldRender: ITitleNameFieldRender,
     private readonly playerSetupInfoReader: IPlayerSetupInfoReader,
-    private readonly previewPlayer: IPlayerRender,
+    private readonly previewPlayer: IPlayerRenderer,
     private readonly playerBackgroundContainer: ITitlePlayerBackgroundContainerRender,
     private readonly arrowButtons: ITitleArrowButtonRender,
     private readonly playerRoleRender: IPlayerRoleRender,
     private readonly joinButtonRender: IJoinButtonRender,
+    private readonly ownPlayerId: string
     ){
     this.player = this.createOwnPlayer()
     this.currentPlayerColor = this.player.color ?? PLAYER_COLOR_NAMES[4]
-    this.previewPlayer.addToContainer(this.playerBackgroundContainer.container)
+    this.previewPlayer.setParentContainer(this.playerBackgroundContainer.container)
 
 
     // コンテナ内にプレイヤーを描画
-    previewPlayer.addToContainer(playerBackgroundContainer.container)
+    previewPlayer.setParentContainer(playerBackgroundContainer.container)
 
-    this.previewPlayer.addToContainer(this.playerBackgroundContainer.container)
+    this.previewPlayer.setParentContainer(this.playerBackgroundContainer.container)
     this.arrowButtons.addToContainer(this.playerBackgroundContainer.container)
   }
 
@@ -55,7 +56,7 @@ export class TitleInteractor implements PlayerColorChangeUseCase {
    */
   public transitionToMain(): void {
     DomManager.removeAll()
-    this.transitionManager.transitionTo('Main', {
+    this.transitionManager.transitionTo<IMainScene>('MainScene', {
       ownPlayer: this.player,
     })
   }
@@ -64,6 +65,7 @@ export class TitleInteractor implements PlayerColorChangeUseCase {
     const pos = new Position(800, 440)
     const direction = Direction.down
     const ownPlayer = new Player(
+      this.ownPlayerId,
       pos,
       direction,
       this.playerSetupInfoReader.read().name ?? '',
@@ -98,3 +100,4 @@ export class TitleInteractor implements PlayerColorChangeUseCase {
     this.previewPlayer.applyPlayerName(name)
   }
 }
+

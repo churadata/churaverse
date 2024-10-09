@@ -1,11 +1,11 @@
 import { Interactor } from '../../../../interactor/Interactor'
-import { TopBarIconRender } from '../common/topBarIcon'
-import { TopBarIconContainer } from '../common/topBarIconContainer'
+import { TopBarIconRenderer } from '../../../../plugins/coreUiPlugin/topBarIcon'
+import { TopBarIconContainer } from '../../../../plugins/coreUiPlugin/topBarIconContainer'
 
 const CAMERA_ACTIVE_ICON_PATH = 'assets/video.png'
 const CAMERA_INACTIVE_ICON_PATH = 'assets/video_off.png'
 
-export class CameraIcon extends TopBarIconRender {
+export class CameraIcon extends TopBarIconRenderer {
   private interactor?: Interactor
 
   public constructor(iconContainer: TopBarIconContainer) {

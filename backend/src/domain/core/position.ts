@@ -1,3 +1,5 @@
+import { Vector } from './vector'
+
 export class Position {
   private _x: number
   private _y: number
@@ -70,5 +72,9 @@ export class Position {
    */
   public distanceTo(oppositePos: Position): number {
     return Math.sqrt(Math.pow(this._x - oppositePos.x, 2) + Math.pow(this._y - oppositePos.y, 2))
+  }
+
+  public toVector(): Vector {
+    return { x: this.x, y: this.y }
   }
 }

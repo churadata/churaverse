@@ -1,11 +1,11 @@
 import { Interactor } from '../../../../interactor/Interactor'
-import { TopBarIconRender } from '../common/topBarIcon'
-import { TopBarIconContainer } from '../common/topBarIconContainer'
+import { TopBarIconRenderer } from '../../../../plugins/coreUiPlugin/topBarIcon'
+import { TopBarIconContainer } from '../../../../plugins/coreUiPlugin/topBarIconContainer'
 
 export const MIC_ACTIVE_ICON_PATH = 'assets/microphone.png'
 export const MIC_INACTIVE_ICON_PATH = 'assets/microphone_off.png'
 
-export class MicIcon extends TopBarIconRender {
+export class MicIcon extends TopBarIconRenderer {
   private interactor?: Interactor
 
   public constructor(iconContainer: TopBarIconContainer) {

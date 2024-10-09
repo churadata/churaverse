@@ -1,7 +1,12 @@
 import { GRID_SIZE } from '../worldConfig'
+import { Vector } from './vector'
 
 /** 位置型 */
 export class Position {
+  public static from(vec: Vector): Position {
+    return new Position(vec.x, vec.y)
+  }
+
   private _x: number
   private _y: number
   private _gridX: number
@@ -83,5 +88,9 @@ export class Position {
    */
   public distanceTo(oppositePos: Position): number {
     return Math.sqrt(Math.pow(this._x - oppositePos.x, 2) + Math.pow(this._y - oppositePos.y, 2))
+  }
+
+  public toVector(): Vector {
+    return { x: this.x, y: this.y }
   }
 }

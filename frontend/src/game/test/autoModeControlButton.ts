@@ -1,5 +1,5 @@
 import { GameObjects, Scene } from 'phaser'
-import { layerSetting } from '../interface/ui/util/canvasLayer'
+import { layerSetting } from 'churaverse-engine-client'
 
 const BUTTON_COLOR = '#008080'
 

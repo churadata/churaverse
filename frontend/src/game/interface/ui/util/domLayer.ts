@@ -1,4 +1,4 @@
-import { getLayerPosition, getAbstractZIndex } from './layer'
+import { getAbstractZIndex, getLayerPosition } from '../layer'
 
 // 各抽象レイヤーの基準値からの範囲
 const layerInterval: number = 1000

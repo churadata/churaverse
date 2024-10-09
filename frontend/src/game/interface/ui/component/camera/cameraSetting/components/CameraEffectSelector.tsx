@@ -1,5 +1,5 @@
 import style from './CameraEffectSelector.module.scss'
-import { JSXFunc } from '../../../../util/domManager'
+import { JSXFunc } from 'churaverse-engine-client'
 import {
   CAMERA_EFFECT_NAME_MAPPER,
   imageSelectorID,

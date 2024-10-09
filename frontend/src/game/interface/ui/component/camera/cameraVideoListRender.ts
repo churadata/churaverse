@@ -1,8 +1,8 @@
 import { Scene } from 'phaser'
 import { CameraVideoRender } from './cameraVideoRender'
-import { createUIContainer } from '../../util/container'
+import { createUIContainer } from '../../container'
 import { ICameraVideoListRender } from '../../../../domain/IRender/ICameraVideoListRender'
-import { makeLayerHigherTemporary } from '../../util/makeLayerHigherTemporary'
+import { makeLayerHigherTemporary } from '../../makeLayerHigherTemporary'
 
 // const RIGHT_ARROW_BUTTON_PATH = 'assets/rightArrowButton.png'
 

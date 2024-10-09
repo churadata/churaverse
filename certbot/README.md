@@ -6,6 +6,7 @@
   - 月1回のTLS証明書の更新のタスクの実行内容部分
   - `/etc/systemd/system/multi-user.target.wants/` に置く
   - 置いた後に `# systemctl daemon-reload` でファイルを読み込ませる
+  - `# sudo systemctl start churaverse-cert-renew`でデーモンを起動する
   - 実行ログは `$ systemctl status churaverse-cert-renew.serivce` で確認可能
 - churaverse-cert-renew.timer
   - 月1回のTLS証明書の更新のタスクのタイマー部分

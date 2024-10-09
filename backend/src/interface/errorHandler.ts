@@ -1,13 +1,4 @@
-import { Socket } from './socket/socket'
 import { IPlayerRepository } from '../domain/IRepository/IPlayerRepository'
-import { SocketEmitEventType } from './socket/eventTypes'
-
-/**
- * プレイヤーに画面のリロードを要求する
- */
-export function inviteReload(socket: Socket, id: string): void {
-  socket.emitEventTo(SocketEmitEventType.NotExistsPlayer, id)
-}
 
 export function error(err: Error): void {
   if (err instanceof TypeError) {

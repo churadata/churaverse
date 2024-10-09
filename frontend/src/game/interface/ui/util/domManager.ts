@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class */
 import ReactDOMServer from 'react-dom/server'
-import { UINotFoundError } from '../errors/uiNotFoundError'
-import { UIContainerNotFoundError } from '../errors/uiContainerNotFoundError'
-
+import { UIContainerNotFoundError } from '../../../plugins/coreUiPlugin/error/uiContainerNotFoundError'
+import { UINotFoundError } from '../../../plugins/coreUiPlugin/error/uiNotFoundError'
 export type JSXFunc<Props = undefined> = Props extends undefined ? JSXNoArgFunc : (props: Props) => JSX.Element
 
 type JSXNoArgFunc = () => JSX.Element
@@ -51,10 +50,10 @@ export class DomManager {
       throw new UIContainerNotFoundError()
     }
 
-    const div = document.createElement('div')
+    const template = document.createElement('template')
     const htmlStr = ReactDOMServer.renderToString(jsxElement)
-    div.innerHTML = htmlStr
-    const element = div.firstElementChild
+    template.innerHTML = htmlStr
+    const element = template.content.firstElementChild
 
     if (element === null) throw Error('element is null')
     if (!(element instanceof HTMLElement)) throw Error('HTMLElementではない要素')

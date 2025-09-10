@@ -13,7 +13,6 @@ import { moveSharks, removeDieShark } from '../domain/service/sharkService'
 import { ISocketEmitter } from './IEmitter/ISocketEmitter'
 import { DamageCause } from '../domain/model/deathLog'
 import { IMegaphoneUserRepository } from '../domain/IRepository/IMegaphoneUserRepository'
-import { validatePlayerName, normalizePlayerName } from '../domain/model/playerNameValidator'
 
 // acknowledgements対応のためimportを許可
 // eslint-disable-next-line import/no-restricted-paths
@@ -114,13 +113,7 @@ export class Interactor {
   }
 
   public changePlayerName(id: string, name: string): void {
-    if (!validatePlayerName(name)) {
-      console.warn(`Invalid player name length for player ${id}: "${name}" (length: ${name.length})`)
-      return
-    }
-    
-    const normalizedName = normalizePlayerName(name)
-    this.players.get(id)?.setPlayerName(normalizedName)
+    this.players.get(id)?.setPlayerName(name)
   }
 
   public changePlayerColor(id: string, color: PlayerColorName): void {

@@ -14,7 +14,6 @@ import { ITitlePlayerBackgroundContainerRender } from '../domain/IRender/ITitleP
 import { ITitleArrowButtonRender } from '../domain/IRender/ITitleArrowButtonRender'
 import { DomManager } from '../interface/ui/util/domManager'
 import { IPlayerRenderer } from '../plugins/playerPlugin/domain/IPlayerRenderer'
-import { validatePlayerName, normalizePlayerName } from '../domain/model/playerNameValidator'
 
 /**
  * TitleSceneのInteractor
@@ -97,14 +96,8 @@ export class TitleInteractor implements PlayerColorChangeUseCase {
   }
 
   public changePlayerName(name: string): void {
-    if (!validatePlayerName(name)) {
-      console.warn('Player name must be 1-20 characters')
-      return
-    }
-    
-    const normalizedName = normalizePlayerName(name)
-    this.player.setName(normalizedName)
-    this.previewPlayer.applyPlayerName(normalizedName)
+    this.player.setName(name)
+    this.previewPlayer.applyPlayerName(name)
   }
 }
 

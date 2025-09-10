@@ -343,23 +343,16 @@ export class Interactor implements PlayerColorChangeUseCase {
   }
 
   public changePlayerName(id: string, name: string): void {
-    // 名前の長さ制限（1-20文字）
-    const trimmedName = name.trim()
-    if (trimmedName.length === 0 || trimmedName.length > 20) {
-      console.warn(`Invalid player name length: "${name}" (length: ${name.length})`)
-      return
-    }
-
-    this.players.changePlayerName(id, trimmedName)
-    this.playerRenders.get(id)?.applyPlayerName(trimmedName)
+    this.players.changePlayerName(id, name)
+    this.playerRenders.get(id)?.applyPlayerName(name)
 
     if (this.ownPlayerId === id && !this.isReceivedError) {
       const player = this.players.getPlayer(id)
       if (player === undefined) {
         return
       }
-      this.debugScreenRender.playerName.update(trimmedName)
-      this.emitter.updatePlayerProfile(trimmedName, player.color)
+      this.debugScreenRender.playerName.update(name)
+      this.emitter.updatePlayerProfile(name, player.color)
     }
     this.updatePlayerList()
   }

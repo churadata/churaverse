@@ -1,0 +1,1 @@
+export { CameraVideoChatPlugin } from './cameraVideoChatPlugin'

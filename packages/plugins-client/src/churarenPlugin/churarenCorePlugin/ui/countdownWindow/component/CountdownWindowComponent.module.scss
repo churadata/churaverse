@@ -1,0 +1,33 @@
+.container {
+  position: fixed;
+  top: 49%; /* 画面の上部から中央に配置 */
+  left: 50%; /* 画面の左側から中央に配置 */
+  transform: translate(-50%, -50%); /* 中央揃え */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent; /* 背景色を透明にする */
+  padding: 0; /* パディングを0にする */
+  width: 500px;
+  height: 200px;
+  font-family: 'Hannotate SC';
+}
+
+.timer {
+  font-size: 50px;
+  font-family: 'Hannotate SC';
+  color: black; /* 文字色を黒にする */
+  background-color: white;
+  border-radius: 50%;
+  width: 400px;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0; /* パディングを0にする */
+  box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.2);
+  opacity: 0.7;
+  .timeDisplay {
+    font-size: 100px; /* カウントされる数字のフォントサイズを30pxに設定 */
+  }
+}

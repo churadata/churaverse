@@ -1,0 +1,62 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  row-gap: 4px;
+  width: 100%;
+}
+
+.container {
+  position: relative;
+  display: flex;
+  column-gap: 8px;
+  width: 100%;
+  align-items: flex-end;
+}
+
+.chatInput {
+  flex: auto;
+  min-height: 35px;
+  max-height: 106px;
+  padding: 8px 10px;
+  line-height: 1.4;
+  resize: none;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.sendButton {
+  width: 65px;
+  height: 35px;
+  box-sizing: border-box;
+
+  &:disabled {
+    background-color: #cccccc;
+    color: #888888;
+    cursor: default;
+  }
+
+  &:disabled:hover {
+    filter: none;
+    transform: none;
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 2px;
+  box-sizing: border-box;
+}
+
+.charCount {
+  font-size: 11px;
+  color: #ff5252;
+  font-weight: bold;
+}
+
+.note {
+  font-size: 11px;
+  color: #888888;
+}

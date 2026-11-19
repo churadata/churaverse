@@ -1,0 +1,1 @@
+export { ScreenSharePlugin } from './screenSharePlugin'

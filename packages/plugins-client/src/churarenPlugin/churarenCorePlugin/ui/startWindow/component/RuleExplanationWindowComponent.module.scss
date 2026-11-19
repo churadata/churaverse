@@ -1,0 +1,145 @@
+.title {
+  font-size: 30px;
+}
+
+.ul {
+  list-style-position: inside;
+  padding-left: 0.5em;
+  text-underline-position: below;
+}
+
+.popupButton {
+  padding: 0 25px;
+  height: 35px;
+}
+
+.container {
+  width: 100%;
+  --rule-image-width: 520px;
+}
+
+.textField {
+  padding: 0 15px;
+  margin-right: 5px;
+  width: 70%;
+  height: 35px;
+}
+
+.sendButton {
+  width: 20%;
+  height: 35px;
+}
+
+.image {
+  width: var(--rule-image-width);
+  max-width: 300px;
+  height: auto;
+  display: block;
+  margin: 8px auto;
+  object-fit: contain;
+}
+
+.headerImage {
+  width: var(--rule-image-width);
+  max-width: 90%;
+  height: auto;
+  display: block;
+  margin: 8px auto;
+  object-fit: contain;
+}
+
+.section {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.section h5 {
+  margin-bottom: 0.25rem;
+}
+
+.sectionList {
+  list-style: decimal inside;
+  margin-top: 1rem;
+  padding-left: 0;
+}
+
+.supplementList {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.resultList {
+  list-style-type: disc;
+  list-style-position: inside;
+  padding-left: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.stepItem {
+  margin-bottom: 1.5rem;
+}
+
+.stepTitle {
+  display: inline;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+.churarenRule {
+  font-size: 25px;
+  font-family: 'Cinzel', system-ui, sans-serif;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  display: inline-block;
+}
+
+.churarenJudgeHeader {
+  font-size: 25px;
+  font-family: 'Cinzel', system-ui, sans-serif;
+  background: rgba(255, 255, 27, 0.52);
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  display: inline-block;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.churarenJudge {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 6px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: currentColor;
+    border-radius: 2px;
+  }
+}
+.lose::after {
+  background: #2563eb;
+}
+.win::after {
+  background: #ef4444;
+}
+
+.churarenMode {
+  font-size: 15px;
+  font-family: 'Cinzel', system-ui, sans-serif;
+  background: rgb(35, 194, 246);
+  border-radius: 0.5rem;
+  display: inline-block;
+}
+
+.divider {
+  border: none;
+  height: 2px;
+  margin: 1.25rem 0 1rem;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.25), transparent);
+}

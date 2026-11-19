@@ -1,0 +1,5 @@
+@churaverse/core-ui-plugin-client
+@churaverse/debug-screen-plugin
+@churaverse/player-plugin-client
+@churaverse/popup-screen-list-client
+@churaverse/web-rtc-plugin-client

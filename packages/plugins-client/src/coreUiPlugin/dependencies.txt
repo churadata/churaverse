@@ -1,0 +1,5 @@
+@churaverse/keyboard-plugin-client
+@churaverse/text-chat-plugin-client
+@churaverse/transition-plugin-client
+@churaverse/player-plugin-client
+@churaverse/title-plugin-client

@@ -1,0 +1,50 @@
+.container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  padding: 0;
+  width: 90%; /* Set initial width */
+  max-width: 600px; /* Set a max width for larger screens */
+  height: auto;
+  font-family: 'Hannotate SC';
+}
+
+.textContainer {
+  font-size: 1.2rem; /* Use relative units for font size */
+  font-family: 'Hannotate SC';
+  color: black;
+  background-color: white;
+  width: 90%; /* Set width to fit within the container */
+  max-width: 500px; /* Limit maximum width */
+  padding: 20px;
+  box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+  margin-bottom: 20px;
+  text-align: center;
+  border-radius: 8px; /* Add slight rounding for a modern look */
+  h3 {
+    font-size: 1.5rem;
+    color: #000;
+    margin-bottom: 20px;
+    text-align: center; /* 中央揃え */
+  }
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.button {
+  padding: 0 25px;
+  height: 40px;
+  margin-top: 20px;
+  font-size: 1rem; /* Relative font size */
+}

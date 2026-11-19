@@ -1,0 +1,46 @@
+{
+  "name": "@churaverse/churaren-alchemy-item-plugins-server",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/churadata/churaverse.git",
+    "directory": "packages/plugins-server/src/churarenPlugin/churarenAlchemyItems/alchemyItemPlugins"
+  },
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@churaverse/churaren-black-hole-plugin-server": "workspace:*",
+    "@churaverse/churaren-tornado-plugin-server": "workspace:*",
+    "@churaverse/churaren-flame-pillar-plugin-server": "workspace:*",
+    "@churaverse/churaren-healing-potion-plugin-server": "workspace:*",
+    "@churaverse/churaren-revival-item-plugin-server": "workspace:*",
+    "@churaverse/churaren-explosion-plugin-server": "workspace:*",
+    "@churaverse/churaren-water-ring-plugin-server": "workspace:*",
+    "@churaverse/churaren-trap-plugin-server": "workspace:*",
+    "@churaverse/churaren-ice-arrow-plugin-server": "workspace:*",
+    "@churaverse/churaren-alchemy-plugin-server": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": false
+  }
+}

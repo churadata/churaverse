@@ -1,0 +1,114 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.8/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/lib",
+      "!**/*.tsbuildinfo",
+      "!**/.turbo",
+      "!**/node_modules",
+      "!apps/frontend/src/game/**",
+      "!apps/frontend/public/**",
+      "!.vscode/**",
+      "!container_definitions_*.json"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded",
+      "trailingCommas": "es5"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noUnusedPrivateClassMembers": "off"
+      },
+      "style": {
+        "useNamingConvention": "off",
+        "noNonNullAssertion": "off",
+        "useNodejsImportProtocol": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "useIterableCallbackReturn": "off",
+        "noEmptyInterface": "off",
+        "noDocumentCookie": "off",
+        "noUndeclaredEnvVars": "off",
+        "useBiomeIgnoreFolder": "off"
+      },
+      "complexity": {
+        "noStaticOnlyClass": "off",
+        "noUselessConstructor": "off",
+        "useOptionalChain": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.d.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": { "filenameCases": ["kebab-case"] }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/I*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": { "filenameCases": ["PascalCase"], "strictCase": false }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.tsx"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useHookAtTopLevel": "error",
+            "useExhaustiveDependencies": "error"
+          },
+          "a11y": {
+            "preset": "recommended",
+            "useAltText": "off",
+            "useButtonType": "off",
+            "noSvgWithoutTitle": "off",
+            "noLabelWithoutControl": "off"
+          }
+        }
+      }
+    }
+  ]
+}

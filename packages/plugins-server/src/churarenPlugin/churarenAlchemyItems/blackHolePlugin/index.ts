@@ -1,0 +1,1 @@
+export { BlackHolePlugin } from './blackHolePlugin'

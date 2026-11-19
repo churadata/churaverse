@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+**/dist
+**/lib
+**/.turbo
+out
+.dev-state
+.git
+**/*.tsbuildinfo
+
+# .deploy/ はCIランナー上で事前ビルドした成果物を格納するディレクトリ。
+# 上記の dist/lib/node_modules 除外の対象から外し、Dockerに正しく渡す
+!.deploy
+!.deploy/**

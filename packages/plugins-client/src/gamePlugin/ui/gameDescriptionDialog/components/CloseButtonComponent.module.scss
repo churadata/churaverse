@@ -1,0 +1,18 @@
+.buttonsContainer {
+  justify-items: center;
+  margin-top: 10px;
+
+  button {
+    margin: 0 10px;
+    width: 90px;
+    height: 35px;
+    padding: 0;
+  }
+
+  .closeButton {
+    color: var(--c-primary-deep);
+
+    background-color: white;
+    border: 2px solid var(--c-primary-deep);
+  }
+}

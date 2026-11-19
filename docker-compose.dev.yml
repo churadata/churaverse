@@ -1,0 +1,13 @@
+# External services for local development.
+# Node.js services are NOT here — start them with: pnpm dev
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: churaverse-livekit-dev
+    ports:
+      - 7880:7880
+      - 7881:7881
+      - 7882:7882/udp
+    volumes:
+      - ./apps/livekit/livekit.local.yaml:/etc/livekit.local.yaml:ro
+    command: --config /etc/livekit.local.yaml --node-ip ${LIVEKIT_NODE_IP:-127.0.0.1}

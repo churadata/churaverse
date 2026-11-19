@@ -1,0 +1,39 @@
+{
+  "name": "@churaverse/voicechat-plugin-server",
+  "version": "0.1.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/churadata/churaverse.git",
+    "directory": "packages/plugins-server/src/voiceChatPlugin"
+  },
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@churaverse/network-plugin-server": "workspace:*",
+    "@churaverse/player-plugin-server": "workspace:*",
+    "churaverse-engine-server": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

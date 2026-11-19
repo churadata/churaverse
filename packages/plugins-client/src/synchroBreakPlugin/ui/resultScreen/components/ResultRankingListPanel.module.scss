@@ -1,0 +1,15 @@
+.playerList {
+  position: absolute;
+  top: 10%;
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-top: 15%;
+  width: 95%;
+  height: 60%;
+  font-size: 25px;
+  overflow: hidden;
+}
+
+.playerList::-webkit-scrollbar {
+  display: none;
+}

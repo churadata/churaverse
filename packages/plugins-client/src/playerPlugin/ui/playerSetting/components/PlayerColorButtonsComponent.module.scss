@@ -1,0 +1,111 @@
+.allButtonsContainer {
+  display: flex;
+  column-gap: 20px;
+
+  margin-top: 10px;
+  margin-left: 8px;
+}
+
+.colorButton {
+  appearance: none;
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.buttonLabel {
+  position: relative;
+  cursor: pointer;
+  padding-left: 30px;
+  box-sizing: border-box;
+
+  --c-basic: #98590b;
+  --c-red: #cd1616;
+  --c-black: #1d1d1d;
+  --c-blue: #424bcd;
+  --c-gray: #8b8b8b;
+
+  &[for='playerColorButton-basic'] {
+    &::before {
+      border-color: var(--c-basic);
+    }
+    &::after {
+      background-color: var(--c-basic);
+    }
+  }
+
+  &[for='playerColorButton-red'] {
+    &::before {
+      border-color: var(--c-red);
+    }
+    &::after {
+      background-color: var(--c-red);
+    }
+  }
+
+  &[for='playerColorButton-black'] {
+    &::before {
+      border-color: var(--c-black);
+    }
+    &::after {
+      background-color: var(--c-black);
+    }
+  }
+
+  &[for='playerColorButton-blue'] {
+    &::before {
+      border-color: var(--c-blue);
+    }
+    &::after {
+      background-color: var(--c-blue);
+    }
+  }
+
+  &[for='playerColorButton-gray'] {
+    &::before {
+      border-color: var(--c-gray);
+    }
+    &::after {
+      background-color: var(--c-gray);
+    }
+  }
+
+  &:hover::before,
+  &:hover::after {
+    transform: translateY(-50%) scale(1.05);
+  }
+}
+
+.buttonLabel::before,
+.buttonLabel::after {
+  content: '';
+  display: block;
+  border-radius: 50%;
+  position: absolute;
+  transform: translateY(-50%);
+  top: 50%;
+  box-sizing: border-box;
+
+  transition: transform 0.3s;
+}
+
+.buttonLabel::before {
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  left: 3px;
+}
+
+.buttonLabel::after {
+  background-color: #ddd;
+  border-radius: 50%;
+  opacity: 0;
+  width: 16px;
+  height: 16px;
+  left: 7px;
+}
+
+.colorButton:checked + .buttonLabel::after {
+  opacity: 1;
+}

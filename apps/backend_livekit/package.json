@@ -1,0 +1,28 @@
+{
+  "name": "backend_livekit",
+  "version": "1.0.0",
+  "description": "",
+  "private": "true",
+  "scripts": {
+    "start": "pnpm run build && node lib/server.js",
+    "build": "tsc",
+    "dev": "tsx watch --inspect=0.0.0.0:9230 src/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.3.0",
+    "livekit-server-sdk": "^2.19.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.12",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.7.0"
+  }
+}

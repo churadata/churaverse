@@ -1,5 +1,20 @@
 node_modules/
 
+dist/
+
 .DS_Store
 
-frontend/deploy_version.txt
+apps/frontend/deploy_version.txt
+.dev-state/
+.turbo/
+
+*.tsbuildinfo
+# Python
+__pycache__/
+*.pyc
+# turbo prune 出力
+out/
+.deploy/
+.pnpm-store/
+# build_images.sh が出力するイメージタグ
+image_tags.env

@@ -1,0 +1,4 @@
+@churaverse/debug-screen-plugin-client
+@churaverse/keyboard-plugin-client
+@churaverse/network-plugin-client
+@churaverse/player-plugin-client

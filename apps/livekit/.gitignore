@@ -1,0 +1,8 @@
+*
+!.gitignore
+
+!livekit.local.yaml
+!livekit.*.example.yaml
+!Dockerfile
+!livekit.ecs.yaml
+!entrypoint.sh

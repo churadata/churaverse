@@ -1,0 +1,34 @@
+// ちゅられんの霊界パネル・アイテム枠で共通利用する配色・形状ヘルパー。
+// 配色を変える場合はこのファイルを直せば、@useしている全パネルに反映される。
+
+// 基準色: #72248a (紫)
+@function accent($alpha: 1) {
+  @return rgba(114, 36, 138, $alpha);
+}
+
+// ヘッダーの発光テキストなど、accentよりワントーン明るいアクセント
+@function accent-light($alpha: 1) {
+  @return rgba(114, 36, 138, $alpha);
+}
+
+// パネル/アイテム枠の最も暗い背景(ベース部分)
+@function bg-dark($alpha: 1) {
+  @return rgba(114, 36, 138, $alpha);
+}
+
+// ヘッダーや行などの中間トーン背景(上部)
+@function bg-mid($alpha: 1) {
+  @return rgba(114, 36, 138, $alpha);
+}
+
+$text-bright: #f3e8fb;
+$text: #e9d5f5;
+$text-dim: #e6d2f0;
+$text-row: #ede0f7;
+
+// パネル/スロットの外観(枠線・背景色)。
+@mixin panel-shell($radius: 4px, $border-width: 3px, $bg-alpha: 0.5) {
+  border-radius: $radius;
+  border: $border-width solid accent(0.75);
+  background-color: bg-dark($bg-alpha);
+}

@@ -1,0 +1,10 @@
+{
+  "name": "churaverse-plugins-client",
+  "private": true,
+  "description": "Lint/format root for client plugins",
+  "type": "module",
+  "scripts": {
+    "lint": "biome lint src",
+    "format": "biome format --write src"
+  }
+}

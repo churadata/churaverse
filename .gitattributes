@@ -1,0 +1,18 @@
+# デフォルトではGitに改行コードを自動判定させ、リポジトリ内はLFに統一する
+* text=auto eol=lf
+
+# シェルスクリプトはLF必須(CRLFだとWindows上でbash実行時に壊れるため)
+*.sh text eol=lf
+
+# バイナリファイルは改行変換の対象外
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.mp3 binary
+*.mp4 binary

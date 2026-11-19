@@ -1,0 +1,3 @@
+@churaverse/core-ui-plugin-client
+@churaverse/data-persistence-plugin-client
+@churaverse/transition-plugin-client

@@ -1,0 +1,64 @@
+# miseは、このプロジェクトで使用するNode.jsのバージョンを統一し、
+# 開発者ごとの環境差を減らすためのツールです。
+# pnpmのバージョンは、package.jsonのpackageManagerを基にCorepackが管理します。
+#
+# 初回セットアップ:
+#   mise trust
+#   mise install
+#
+# 開発環境の起動:
+#   mise run dev
+#
+# 利用可能なコマンドの確認:
+#   mise tasks
+#
+# 各タスクの内部では、package.jsonに定義されたpnpm scriptsを実行しています。
+
+
+
+[tools]
+node = "22.23.4"
+
+[tasks.versions]
+description = "Show the active Node.js and pnpm versions"
+run = "node --version && pnpm --version"
+
+[tasks.install]
+description = "Install workspace dependencies with the Corepack-managed pnpm"
+run = "pnpm install"
+
+[tasks.dev]
+description = "Start the local development environment"
+run = "pnpm dev"
+
+[tasks.build]
+description = "Build packages and applications"
+run = "pnpm build"
+
+[tasks.build-packages]
+description = "Build workspace packages"
+run = "pnpm build:packages"
+
+[tasks.lint]
+description = "Run package lint checks"
+run = "pnpm lint"
+
+[tasks.format]
+description = "Format package sources"
+run = "pnpm format"
+
+[tasks.typecheck]
+description = "Run TypeScript typecheck across the workspace"
+run = "pnpm exec turbo run typecheck --concurrency=100%"
+
+[tasks.check-arch]
+description = "Run architecture boundary checks (dependency-cruiser)"
+run = "pnpm check-arch"
+
+[tasks.clean]
+description = "Remove generated build outputs"
+run = "pnpm clean"
+
+[tasks.watch-assets]
+description = "Watch and rebuild assets"
+run = "pnpm watch:assets"

@@ -1,0 +1,56 @@
+@use '../../churarenPanelTheme' as theme;
+
+.container {
+  position: fixed;
+  top: 10%; /* 画面の上部から中央に配置 */
+  left: 30%; /* 画面の左側から中央に配置 */
+  transform: translate(-50%, -50%); /* 中央揃え */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0; /* パディングを0にする */
+  font-family: 'Hannotate SC';
+}
+
+.itemBoxContainer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.itemBox {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  @include theme.panel-shell($bg-alpha: 0.55);
+}
+
+.itemImage {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.noImage {
+  max-width: 100%;
+  max-height: 100%;
+  background-color: transparent;
+}
+
+.keyIndicator {
+  width: 50px;
+  height: 20px;
+  color: theme.$text;
+  font-size: 12px;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.itemAndKeyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50px;
+}

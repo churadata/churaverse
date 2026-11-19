@@ -1,0 +1,41 @@
+{
+  "name": "@churaverse/churaren-revival-item-plugin-server",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/churadata/churaverse.git",
+    "directory": "packages/plugins-server/src/churarenPlugin/churarenAlchemyItems/revivalItemPlugin"
+  },
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@churaverse/churaren-alchemy-plugin-server": "workspace:*",
+    "@churaverse/churaren-core-plugin-server": "workspace:*",
+    "@churaverse/game-plugin-server": "workspace:*",
+    "@churaverse/network-plugin-server": "workspace:*",
+    "churaverse-engine-server": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": false
+  }
+}

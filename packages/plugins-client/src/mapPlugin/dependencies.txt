@@ -1,0 +1,6 @@
+@churaverse/core-ui-plugin-client
+@churaverse/debug-screen-plugin-client
+@churaverse/ground-screen-plugin-client
+@churaverse/network-plugin-client
+@churaverse/player-plugin-client
+@churaverse/transition-plugin-client

@@ -1,0 +1,55 @@
+.tableRowContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.entryRow {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  padding: 4px;
+  gap: 8px;
+  min-width: 0;
+}
+
+.gameName {
+  font-size: 16px;
+  color: black;
+  flex: 1;
+  font-weight: bold;
+  text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+
+  .startButton,
+  .detailButton {
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 32px;
+    white-space: nowrap;
+    min-width: 48px;
+    text-align: center;
+  }
+
+  .startButton {
+    font-weight: bold;
+  }
+
+  .detailButton {
+    color: var(--c-primary-deep);
+    background-color: white;
+    border: 2px solid var(--c-primary-deep);
+  }
+}

@@ -1,0 +1,9 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'packages/plugins-client/src/*'
+  - 'packages/plugins-client/src/churarenPlugin/*'
+  - 'packages/plugins-client/src/churarenPlugin/churarenAlchemyItems/*'
+  - 'packages/plugins-server/src/*'
+  - 'packages/plugins-server/src/churarenPlugin/*'
+  - 'packages/plugins-server/src/churarenPlugin/churarenAlchemyItems/*'

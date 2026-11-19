@@ -1,0 +1,100 @@
+.allBackGroundContainer {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
+.allButtonsContainer {
+  display: flex;
+  flex-direction: column;
+  column-gap: 20px;
+  row-gap: 10px;
+}
+
+.radioButton {
+  appearance: none;
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.buttonLabel {
+  position: relative;
+  cursor: pointer;
+  padding-left: 30px;
+  box-sizing: border-box;
+
+  &:hover::before,
+  &:hover::after {
+    transform: translateY(-50%) scale(1.05);
+  }
+}
+
+input[type='file'] {
+  color: rgb(31, 41, 55);
+  cursor: pointer;
+  border: 1px solid var(--c-primary);
+  border-radius: 5px;
+  padding-right: 0.5rem;
+  width: 18rem;
+  height: 2rem;
+}
+
+::file-selector-button,
+::-webkit-file-upload-button {
+  background-color: var(--c-primary-deep);
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-right: 1px solid rgb(191, 194, 199);
+  padding: 0.25rem 1rem;
+  margin-right: 1rem;
+  height: 2rem;
+}
+
+.buttonLabel::before,
+.buttonLabel::after {
+  content: '';
+  display: block;
+  border-radius: 50%;
+  position: absolute;
+  transform: translateY(-50%);
+  top: 50%;
+  box-sizing: border-box;
+  transition: transform 0.3s;
+}
+
+.buttonLabel::before {
+  background-color: #fff;
+  border: 2px solid #8b8b8b;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  left: 3px;
+}
+
+.buttonLabel::after {
+  background-color: #8b8b8b;
+  border-radius: 50%;
+  opacity: 0;
+  width: 16px;
+  height: 16px;
+  left: 7px;
+}
+
+.radioButton:checked + .buttonLabel::after {
+  opacity: 1;
+}
+
+.removeBackgroundImageButton {
+  margin: 5% 0;
+  width: 90px;
+  height: 35px;
+  padding: 0;
+}
+
+.fileUploadButton {
+  margin: 5% 0;
+  width: 110px;
+  height: 35px;
+  padding: 0;
+}

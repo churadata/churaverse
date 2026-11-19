@@ -10,8 +10,7 @@
       "request": "attach",
       "port": 9229,
       "restart": true,
-      "localRoot": "${workspaceFolder}/project/apple1/backend",
-      "remoteRoot": "/usr/src/app/backend"
+      "localRoot": "${workspaceFolder}/apps/backend"
     }
   ]
 }

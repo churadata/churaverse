@@ -1,0 +1,4 @@
+@churaverse/churaren-core-plugin-client
+@churaverse/churaren-player-plugin-client
+@churaverse/churaren-alchemy-plugin-client
+@churaverse/churaren-boss-plugin-client

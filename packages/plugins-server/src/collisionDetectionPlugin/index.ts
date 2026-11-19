@@ -1,0 +1,5 @@
+export { CollisionDetectionPlugin } from './collisionDetectionPlugin'
+export type { ICollidableEntity } from './domain/collisionDetection/collidableEntity/ICollidableEntity'
+export type { IRectangle } from './domain/collisionDetection/collidableEntity/IRectangle'
+export { CollidableEntityRepository } from './domain/collisionDetection/collidableEntityRepository'
+export { RegisterOnOverlapEvent } from './event/registerOnOverlap'

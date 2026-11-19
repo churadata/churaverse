@@ -1,0 +1,33 @@
+{
+  "name": "churaverse-monorepo",
+  "private": true,
+  "packageManager": "pnpm@10.28.1",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm clean:ports && node ./scripts/dev.mjs",
+    "clean:ports": "kill-port 12100 12150 3000 9229 9230",
+    "build": "turbo run build --concurrency=100%",
+    "build:packages": "turbo run build --concurrency=100% --filter='./packages/**'",
+    "watch:assets": "node ./scripts/watch-assets.mjs",
+    "clean": "pnpm -r exec rimraf --glob dist lib .turbo \"*.tsbuildinfo\" && rimraf .turbo .dev-state",
+    "clean:all": "pnpm clean && pnpm -r exec rimraf node_modules && rimraf node_modules",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "typecheck": "turbo run typecheck --concurrency=100%",
+    "check-arch": "turbo run check-arch --concurrency=100% && pnpm check-arch:plugins",
+    "check-arch:plugins": "depcruise --config .dependency-cruiser.cjs --output-type err-long packages/plugins-client/src packages/plugins-server/src"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@changesets/cli": "^3.0.3",
+    "chokidar": "^5.0.0",
+    "dependency-cruiser": "^18.6.0",
+    "execa": "^10.1.1",
+    "kill-port": "^2.0.1",
+    "rimraf": "^6.1.3",
+    "tree-kill": "^1.2.2",
+    "turbo": "^2.11.9",
+    "typescript": "^5.9.3"
+  }
+}

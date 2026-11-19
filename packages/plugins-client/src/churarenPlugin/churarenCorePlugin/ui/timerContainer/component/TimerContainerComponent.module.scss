@@ -1,0 +1,25 @@
+.container {
+  position: fixed;
+  top: 40px; /* 画面の上部に配置 */
+  left: 100px; /* 画面の左側に配置 */
+  background-color: transparent; /* 背景色を透明にする */
+  padding: 10px; /* 少しの余白を追加 */
+  width: auto;
+  height: auto;
+  display: flex;
+}
+
+.timer {
+  font-size: 30px;
+  font-family: 'Hannotate SC';
+  color: white; /* 文字色を黒にする */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0; /* パディングを0にする */
+  opacity: 0.7;
+
+  .timeDisplay {
+    font-size: 50px; /* カウントされる数字のフォントサイズを調整 */
+  }
+}

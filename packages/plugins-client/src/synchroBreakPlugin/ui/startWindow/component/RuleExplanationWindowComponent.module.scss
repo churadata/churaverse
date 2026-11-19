@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Monomaniac+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&display=swap');
+
+.popupButton {
+  padding: 0 25px;
+  height: 35px;
+}
+
+.container {
+  width: 100%;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+.textField {
+  padding: 0 15px;
+  margin-right: 5px;
+  width: 70%;
+  height: 35px;
+}
+
+.sendButton {
+  width: 20%;
+  height: 35px;
+}
+
+.nyokkigameCaption {
+  font-size: 18px;
+  font-family: 'Mochiy Pop One';
+  background-color: khaki;
+  text-align: center;
+  border-radius: 10px 10px 10px 10px;
+}
+
+.nyokkigameIntro {
+  font-size: 40px;
+  font-family: 'Monomaniac One';
+}
+
+.ruleDescription {
+  background-repeat: no-repeat;
+  background-size: auto;
+  display: inline-block;
+}

@@ -1,0 +1,12 @@
+import './store/defGamePluginStore'
+
+export { BaseGamePlugin } from './domain/baseGamePlugin'
+export { CoreGamePlugin } from './domain/coreGamePlugin'
+export { GamePluginError } from './errors/gamePluginError'
+export { GameEndEvent } from './event/gameEndEvent'
+export { GamePlayerQuitEvent } from './event/gamePlayerQuitEvent'
+export { GamePlugin } from './gamePlugin'
+export type { GameIds, GameIdsMap } from './interface/gameIds'
+export type { GamePolicy } from './interface/gamePolicy'
+export type { IGameInfo } from './interface/IGameInfo'
+export type { GamePluginStore } from './store/defGamePluginStore'

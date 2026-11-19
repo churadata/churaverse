@@ -1,0 +1,26 @@
+.buttonsContainer {
+  justify-content: center;
+  margin-top: 10px;
+  flex-direction: row;
+
+  button {
+    margin: 0 10px;
+    width: 90px;
+    height: 35px;
+    padding: 0;
+  }
+
+  .joinButton {
+    color: white;
+
+    background-color: var(--c-primary-deep);
+    border: none;
+  }
+
+  .leaveButton {
+    color: red;
+
+    background-color: white;
+    border: 2px solid red;
+  }
+}

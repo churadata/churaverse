@@ -1,0 +1,4 @@
+@churaverse/core-ui-plugin-client
+@churaverse/network-plugin-client
+@churaverse/player-list-plugin-client
+@churaverse/player-plugin-client

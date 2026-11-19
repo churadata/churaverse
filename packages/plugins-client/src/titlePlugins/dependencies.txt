@@ -1,0 +1,5 @@
+@churaverse/data-persistence-plugin-client
+@churaverse/keyboard-plugin-client
+@churaverse/network-plugin-client
+@churaverse/player-plugin-client
+@churaverse/transition-plugin-client

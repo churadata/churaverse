@@ -1,0 +1,47 @@
+.container {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.textField {
+  font-size: 15px;
+  position: static;
+}
+
+.tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 12px;
+  border-radius: 4px;
+  padding: 6px 10px;
+  white-space: nowrap;
+  text-align: left;
+
+  ul {
+    margin: 0;
+    padding-left: 16px;
+  }
+}
+
+.inputWrapper:hover .tooltip {
+  display: block;
+}
+
+.count {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  white-space: nowrap;
+}

@@ -1,0 +1,143 @@
+@use '../../churarenPanelTheme' as theme;
+
+.container {
+  position: fixed;
+  // アイテム欄のitemBox下端(Keyラベルの文字部分は含めない)と上端を揃える
+  top: calc(10% + 15px);
+  left: 50px;
+  width: clamp(150px, 12%, 230px);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(90% - 65px);
+  overflow: hidden;
+  @include theme.panel-shell($bg-alpha: 0.32);
+}
+
+.header {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 10px;
+  font: inherit;
+  color: inherit;
+  background-color: theme.bg-mid(0.5);
+  border: none;
+  border-bottom: 1px solid theme.accent(0.4);
+  outline: none;
+  cursor: pointer;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.3;
+}
+
+.headerTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: theme.$text-bright;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 6px theme.accent-light(0.9), 0 0 12px theme.accent(0.6);
+}
+
+.headerSubtitle {
+  font-size: 10px;
+  color: theme.$text-dim;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.iconButton {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid theme.accent-light(0.5);
+  background: theme.bg-mid(0.35);
+  padding: 0;
+  cursor: pointer;
+}
+
+.chevron {
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid theme.$text;
+  border-bottom: 2px solid theme.$text;
+  transform-origin: 65% 65%;
+  transition: transform 0.15s ease;
+}
+
+// 以下のtranslateは視覚的なズレを微調整した値
+.iconButton .chevron {
+  transform: translate(-1px, -1px) rotate(-135deg);
+}
+
+.iconButton.panelCollapsed .chevron {
+  transform: translate(-1px, -1px) rotate(45deg);
+}
+
+.expandButton.listCollapsed .chevron {
+  transform: translate(-1px, 0) rotate(45deg);
+}
+
+.expandButton .chevron {
+  transform: translate(-1px, 1px) rotate(-135deg);
+}
+
+.nameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.ghostPlayerNameBlock {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  font-size: 14px;
+  padding: 8px 20px;
+  background-color: theme.bg-mid(0.12);
+  border: none;
+  border-bottom: 1px solid theme.accent-light(0.28);
+  color: theme.$text-row;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  word-break: break-word;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.expandButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 8px 0;
+  background-color: theme.bg-mid(0.5);
+  border: none;
+  outline: none;
+  color: theme.$text;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: theme.accent(0.65);
+  }
+}

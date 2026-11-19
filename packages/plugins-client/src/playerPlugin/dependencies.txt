@@ -1,0 +1,9 @@
+@churaverse/core-ui-plugin-client
+@churaverse/data-persistence-plugin-client
+@churaverse/debug-screen-plugin-client
+@churaverse/keyboard-plugin-client
+@churaverse/map-plugin-client
+@churaverse/network-plugin-client
+@churaverse/title-plugin-client
+@churaverse/transition-plugin-client
+@churaverse/voice-chat-plugin-client

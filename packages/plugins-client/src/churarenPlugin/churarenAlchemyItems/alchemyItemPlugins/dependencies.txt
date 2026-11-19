@@ -1,0 +1,4 @@
+@churaverse/churaren-healing-potion-plugin-client
+@churaverse/churaren-revival-item-plugin-client
+@churaverse/churaren-alchemy-plugin-client
+@churaverse/churaren-explosion-plugin-client

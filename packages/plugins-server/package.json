@@ -1,0 +1,9 @@
+{
+  "name": "churaverse-plugins-server",
+  "private": true,
+  "description": "Lint/format root for client plugins",
+  "scripts": {
+    "lint": "biome lint src",
+    "format": "biome format --write src"
+  }
+}

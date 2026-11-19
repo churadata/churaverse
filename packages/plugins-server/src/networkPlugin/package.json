@@ -1,0 +1,38 @@
+{
+  "name": "@churaverse/network-plugin-server",
+  "version": "0.1.5",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/churadata/churaverse.git",
+    "directory": "packages/plugins-server/src/networkPlugin"
+  },
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "churaverse-engine-server": "workspace:*",
+    "socket.io": "^4.8.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

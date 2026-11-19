@@ -1,0 +1,73 @@
+.toastListContainer {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toastContainer {
+  pointer-events: auto;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-left: 5px solid #ff5252;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition:
+    opacity 0.5s ease,
+    transform 0.3s ease;
+  max-width: 250px;
+  width: 200px;
+  height: auto;
+
+  &:hover {
+    background-color: rgba(240, 240, 240, 0.9);
+    transform: scale(1.02);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #333;
+  }
+}
+
+.senderName {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #555;
+  margin-bottom: 2px;
+}
+
+.message {
+  font-size: 14px;
+  color: #333;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fadeOut {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+  pointer-events: none;
+}

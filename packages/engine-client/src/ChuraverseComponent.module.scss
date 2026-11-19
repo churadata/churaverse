@@ -1,0 +1,15 @@
+.uiContainer {
+  height: '100vh';
+  width: '100vw';
+  inset: 0;
+  position: 'fixed';
+  pointer-events: 'none';
+}
+
+.uiContainer > * {
+  pointer-events: auto;
+}
+
+#uiContainer + div {
+  z-index: 10000;
+}

@@ -1,0 +1,50 @@
+{
+  "name": "churaverse-engine-client",
+  "version": "0.1.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/churadata/churaverse.git",
+    "directory": "packages/engine-client"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc && node ../../scripts/build-assets.mjs --src src",
+    "preview": "vite preview",
+    "lint": "biome lint src",
+    "format": "biome format --write src",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "sass": "^1.105.2",
+    "tiled-types": "^1.3.0",
+    "tsc-alias": "^1.9.8",
+    "vite": "^8.3.4",
+    "vite-plugin-dts": "^5.1.2"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "phaser": "^4.2.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    // server は CommonJS。node16 は package.json の exports を解決に使い、
+    // type 指定のないパッケージは CommonJS として拡張子なしの相対 import も許可する
+    "module": "node16",
+    "moduleResolution": "node16"
+  }
+}

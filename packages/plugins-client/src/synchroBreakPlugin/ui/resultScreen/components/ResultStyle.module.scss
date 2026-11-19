@@ -1,0 +1,29 @@
+.container {
+  position: absolute;
+  row-gap: 10px;
+  padding: 10px;
+  background-image: url('../../../assets//final_rankingBoard.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 14px;
+  box-shadow: 50px;
+
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  width: 69vh;
+  height: 82vh;
+  overflow: hidden;
+  font-size: 40px;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+.dialogLabel {
+  border-left: solid var(--c-primary) 5px;
+  padding-left: 12px;
+  font-size: 1.2em;
+}

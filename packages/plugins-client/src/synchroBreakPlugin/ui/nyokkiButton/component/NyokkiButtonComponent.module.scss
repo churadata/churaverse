@@ -1,0 +1,35 @@
+.container {
+  position: fixed;
+  top: 40%; /* 画面の上部から中央に移動 */
+  right: 6%; /* 画面の左側から中央に移動 */
+  transform: translate(-50%, -50%); /* 中央揃え */
+
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  row-gap: 20px;
+  padding: 30px;
+  background-color: white;
+  border-radius: 50px;
+  box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.2);
+  width: 150px;
+  max-height: calc(85vh - 130px);
+  padding: 0px;
+
+  .nyokkiButton {
+    padding: 0 25px;
+    height: 60px;
+    background-color: white;
+    font-family: 'Hannotate SC';
+    font-size: 20px;
+    color: black;
+    border: 0px solid black;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+
+    &:hover {
+      background-color: rgb(223, 223, 223);
+    }
+  }
+}

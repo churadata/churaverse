@@ -1,0 +1,1 @@
+export { KickPlugin } from './kickPlugin'

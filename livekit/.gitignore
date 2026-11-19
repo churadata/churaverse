@@ -1,5 +1,0 @@
-*
-!.gitignore
-
-!livekit.local.yaml
-!livekit.*.example.yaml
